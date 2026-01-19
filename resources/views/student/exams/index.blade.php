@@ -84,14 +84,14 @@
                                     <div class="text-center p-2 bg-light rounded-3">
                                         <i class="ph ph-calendar f-20 text-muted mb-1 d-block"></i>
                                         <small class="text-muted d-block">Mulai</small>
-                                        <span class="f-14 f-w-600">{{ $exam->start_time->format('d M') }}</span>
+                                        <span class="f-14 f-w-600">{{ $exam->start_time?->format('d M') ?? 'Fleksibel' }}</span>
                                     </div>
                                 </div>
                                 <div class="col-4">
                                     <div class="text-center p-2 bg-light rounded-3">
                                         <i class="ph ph-clock f-20 text-muted mb-1 d-block"></i>
                                         <small class="text-muted d-block">Durasi</small>
-                                        <span class="f-14 f-w-600">{{ $exam->duration_minutes }} min</span>
+                                        <span class="f-14 f-w-600">{{ $exam->duration }} min</span>
                                     </div>
                                 </div>
                                 <div class="col-4">
@@ -107,7 +107,11 @@
                             <div class="d-flex align-items-center gap-2 p-3 bg-primary bg-opacity-10 rounded-3 mb-4">
                                 <i class="ph ph-calendar-blank text-primary f-20"></i>
                                 <span class="text-primary f-14">
-                                    {{ $exam->start_time->format('d M Y, H:i') }} - {{ $exam->end_time->format('d M Y, H:i') }}
+                                    @if($exam->type === 'scheduled' && $exam->start_time && $exam->end_time)
+                                        {{ $exam->start_time->format('d M Y, H:i') }} - {{ $exam->end_time->format('d M Y, H:i') }}
+                                    @else
+                                        <i class="ph ph-infinity me-1"></i>Ujian Fleksibel - Dapat dikerjakan kapan saja
+                                    @endif
                                 </span>
                             </div>
 

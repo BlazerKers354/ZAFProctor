@@ -9,6 +9,8 @@ use App\Models\QuestionOption;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class QuestionController extends Controller
@@ -43,19 +45,19 @@ class QuestionController extends Controller
         $this->authorize('manageQuestions', $exam);
 
         $validated = $request->validate([
-            'type' => ['required', 'in:multiple_choice,essay'],
+            'question_type' => ['required', 'in:multiple_choice,essay'],
             'question' => ['required', 'string'],
             'points' => ['required', 'integer', 'min:1'],
             'explanation' => ['nullable', 'string'],
-            'options' => ['required_if:type,multiple_choice', 'array', 'min:2'],
-            'options.*.text' => ['required_if:type,multiple_choice', 'string'],
-            'correct_option' => ['required_if:type,multiple_choice', 'integer'],
+            'options' => ['required_if:question_type,multiple_choice', 'array', 'min:2'],
+            'options.*.text' => ['required_if:question_type,multiple_choice', 'string'],
+            'correct_option' => ['required_if:question_type,multiple_choice', 'integer'],
         ]);
 
         DB::transaction(function () use ($validated, $exam) {
             $question = Question::create([
                 'exam_id' => $exam->id,
-                'type' => $validated['type'],
+                'type' => $validated['question_type'],
                 'question' => $validated['question'],
                 'points' => $validated['points'],
                 'explanation' => $validated['explanation'] ?? null,
@@ -63,7 +65,7 @@ class QuestionController extends Controller
             ]);
 
             // Create options for multiple choice
-            if ($validated['type'] === Question::TYPE_MULTIPLE_CHOICE && isset($validated['options'])) {
+            if ($validated['question_type'] === Question::TYPE_MULTIPLE_CHOICE && isset($validated['options'])) {
                 $labels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
                 
                 foreach ($validated['options'] as $index => $option) {
@@ -78,7 +80,7 @@ class QuestionController extends Controller
             }
         });
 
-        return redirect()->route('teacher.exams.questions.index', $exam)
+        return redirect()->route('teacher.questions.index', $exam)
             ->with('success', 'Soal berhasil ditambahkan.');
     }
 
@@ -101,13 +103,15 @@ class QuestionController extends Controller
     {
         $this->authorize('manageQuestions', $exam);
 
+        $isMultipleChoice = $question->type === Question::TYPE_MULTIPLE_CHOICE;
+        
         $validated = $request->validate([
             'question' => ['required', 'string'],
             'points' => ['required', 'integer', 'min:1'],
             'explanation' => ['nullable', 'string'],
-            'options' => ['required_if:type,multiple_choice', 'array', 'min:2'],
-            'options.*.text' => ['required_if:type,multiple_choice', 'string'],
-            'correct_option' => ['required_if:type,multiple_choice', 'integer'],
+            'options' => [$isMultipleChoice ? 'required' : 'nullable', 'array', 'min:2'],
+            'options.*.text' => [$isMultipleChoice ? 'required' : 'nullable', 'string'],
+            'correct_option' => [$isMultipleChoice ? 'required' : 'nullable', 'integer'],
         ]);
 
         DB::transaction(function () use ($validated, $question) {
@@ -135,7 +139,7 @@ class QuestionController extends Controller
             }
         });
 
-        return redirect()->route('teacher.exams.questions.index', $exam)
+        return redirect()->route('teacher.questions.index', $exam)
             ->with('success', 'Soal berhasil diperbarui.');
     }
 
@@ -153,7 +157,7 @@ class QuestionController extends Controller
             $q->update(['order' => $index + 1]);
         });
 
-        return redirect()->route('teacher.exams.questions.index', $exam)
+        return redirect()->route('teacher.questions.index', $exam)
             ->with('success', 'Soal berhasil dihapus.');
     }
 
@@ -174,5 +178,359 @@ class QuestionController extends Controller
         }
 
         return back()->with('success', 'Urutan soal berhasil diperbarui.');
+    }
+
+    /**
+     * Get question detail for modal view.
+     */
+    public function detail(Exam $exam, Question $question): JsonResponse
+    {
+        $this->authorize('manageQuestions', $exam);
+
+        $question->load('options');
+
+        return response()->json([
+            'id' => $question->id,
+            'type' => $question->type,
+            'question' => $question->question,
+            'points' => $question->points,
+            'explanation' => $question->explanation,
+            'options' => $question->options->map(function ($option) {
+                return [
+                    'option_label' => $option->option_label,
+                    'option_text' => $option->option_text,
+                    'is_correct' => $option->is_correct,
+                ];
+            }),
+        ]);
+    }
+
+    /**
+     * Duplicate a question.
+     */
+    public function duplicate(Request $request, Exam $exam): JsonResponse
+    {
+        $this->authorize('manageQuestions', $exam);
+
+        $validated = $request->validate([
+            'question_id' => ['required', 'integer', 'exists:questions,id'],
+        ]);
+
+        $originalQuestion = Question::with('options')->findOrFail($validated['question_id']);
+
+        DB::transaction(function () use ($originalQuestion, $exam) {
+            $newQuestion = Question::create([
+                'exam_id' => $exam->id,
+                'type' => $originalQuestion->type,
+                'question' => $originalQuestion->question . ' (Copy)',
+                'points' => $originalQuestion->points,
+                'explanation' => $originalQuestion->explanation,
+                'order' => $exam->questions()->max('order') + 1,
+            ]);
+
+            if ($originalQuestion->type === Question::TYPE_MULTIPLE_CHOICE) {
+                foreach ($originalQuestion->options as $option) {
+                    QuestionOption::create([
+                        'question_id' => $newQuestion->id,
+                        'option_label' => $option->option_label,
+                        'option_text' => $option->option_text,
+                        'is_correct' => $option->is_correct,
+                        'order' => $option->order,
+                    ]);
+                }
+            }
+        });
+
+        return response()->json(['success' => true, 'message' => 'Soal berhasil diduplikat.']);
+    }
+
+    /**
+     * Delete multiple questions.
+     */
+    public function deleteMultiple(Request $request, Exam $exam): JsonResponse
+    {
+        $this->authorize('manageQuestions', $exam);
+
+        $validated = $request->validate([
+            'question_ids' => ['required', 'array'],
+            'question_ids.*' => ['integer', 'exists:questions,id'],
+        ]);
+
+        Question::whereIn('id', $validated['question_ids'])->delete();
+
+        // Reorder remaining questions
+        $exam->questions()->orderBy('order')->get()->each(function ($q, $index) {
+            $q->update(['order' => $index + 1]);
+        });
+
+        return response()->json(['success' => true, 'message' => 'Soal berhasil dihapus.']);
+    }
+
+    /**
+     * Download CSV template.
+     */
+    public function downloadTemplate(Exam $exam)
+    {
+        $this->authorize('manageQuestions', $exam);
+
+        $headers = [
+            'type',
+            'question',
+            'points',
+            'option_a',
+            'option_b',
+            'option_c',
+            'option_d',
+            'option_e',
+            'correct_answer',
+            'explanation'
+        ];
+
+        $examples = [
+            [
+                'multiple_choice',
+                'Apa ibukota Indonesia?',
+                '10',
+                'Jakarta',
+                'Bandung',
+                'Surabaya',
+                'Medan',
+                '',
+                'A',
+                'Jakarta adalah ibukota Indonesia sejak tahun 1945'
+            ],
+            [
+                'multiple_choice',
+                'Berapa hasil dari 2 + 2?',
+                '5',
+                '3',
+                '4',
+                '5',
+                '6',
+                '',
+                'B',
+                ''
+            ],
+            [
+                'essay',
+                'Jelaskan pengertian Pancasila!',
+                '20',
+                '-',
+                '-',
+                '-',
+                '-',
+                '-',
+                '-',
+                'Pancasila adalah dasar negara Indonesia yang terdiri dari lima sila'
+            ],
+        ];
+
+        $filename = 'template_import_soal_' . $exam->id . '.csv';
+        $handle = fopen('php://temp', 'r+');
+        
+        // Add BOM for UTF-8
+        fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+        
+        // Write headers
+        fputcsv($handle, $headers);
+        
+        // Write examples
+        foreach ($examples as $example) {
+            fputcsv($handle, $example);
+        }
+        
+        rewind($handle);
+        $csv = stream_get_contents($handle);
+        fclose($handle);
+
+        return response($csv, 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
+    }
+
+    /**
+     * Export questions to CSV.
+     */
+    public function export(Exam $exam)
+    {
+        $this->authorize('manageQuestions', $exam);
+
+        $questions = $exam->questions()->with('options')->orderBy('order')->get();
+
+        $headers = [
+            'type',
+            'question',
+            'points',
+            'option_a',
+            'option_b',
+            'option_c',
+            'option_d',
+            'option_e',
+            'correct_answer',
+            'explanation'
+        ];
+
+        $filename = 'soal_' . str_replace(' ', '_', $exam->title) . '_' . date('Y-m-d') . '.csv';
+        $handle = fopen('php://temp', 'r+');
+        
+        // Add BOM for UTF-8
+        fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+        
+        // Write headers
+        fputcsv($handle, $headers);
+        
+        // Write questions
+        foreach ($questions as $question) {
+            $row = [
+                $question->type,
+                $question->question,
+                $question->points,
+            ];
+
+            if ($question->type === Question::TYPE_MULTIPLE_CHOICE) {
+                $options = $question->options->sortBy('order');
+                $correctAnswer = '';
+                
+                for ($i = 0; $i < 5; $i++) {
+                    if (isset($options[$i])) {
+                        $row[] = $options[$i]->option_text;
+                        if ($options[$i]->is_correct) {
+                            $correctAnswer = $options[$i]->option_label;
+                        }
+                    } else {
+                        $row[] = '';
+                    }
+                }
+                
+                $row[] = $correctAnswer;
+            } else {
+                $row = array_merge($row, ['-', '-', '-', '-', '-', '-']);
+            }
+
+            $row[] = $question->explanation ?? '';
+            
+            fputcsv($handle, $row);
+        }
+        
+        rewind($handle);
+        $csv = stream_get_contents($handle);
+        fclose($handle);
+
+        return response($csv, 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
+    }
+
+    /**
+     * Import questions from CSV.
+     */
+    public function import(Request $request, Exam $exam): RedirectResponse
+    {
+        $this->authorize('manageQuestions', $exam);
+
+        $request->validate([
+            'csv_file' => ['required', 'file', 'mimes:csv,txt', 'max:5120'],
+        ]);
+
+        try {
+            $file = $request->file('csv_file');
+            $handle = fopen($file->getRealPath(), 'r');
+            
+            // Skip BOM if present
+            $bom = fread($handle, 3);
+            if ($bom !== chr(0xEF).chr(0xBB).chr(0xBF)) {
+                rewind($handle);
+            }
+            
+            // Read header
+            $header = fgetcsv($handle);
+            
+            $imported = 0;
+            $errors = [];
+            $lineNumber = 1;
+
+            DB::beginTransaction();
+
+            while (($row = fgetcsv($handle)) !== false) {
+                $lineNumber++;
+                
+                if (empty(array_filter($row))) {
+                    continue; // Skip empty rows
+                }
+
+                try {
+                    $data = array_combine($header, $row);
+                    
+                    if (!isset($data['type']) || !isset($data['question']) || !isset($data['points'])) {
+                        $errors[] = "Baris $lineNumber: Data tidak lengkap";
+                        continue;
+                    }
+
+                    $type = strtolower(trim($data['type']));
+                    if (!in_array($type, ['multiple_choice', 'essay'])) {
+                        $errors[] = "Baris $lineNumber: Tipe soal tidak valid ($type)";
+                        continue;
+                    }
+
+                    $question = Question::create([
+                        'exam_id' => $exam->id,
+                        'type' => $type,
+                        'question' => trim($data['question']),
+                        'points' => (int)$data['points'],
+                        'explanation' => !empty($data['explanation']) && $data['explanation'] !== '-' ? trim($data['explanation']) : null,
+                        'order' => $exam->questions()->max('order') + 1 + $imported,
+                    ]);
+
+                    if ($type === 'multiple_choice') {
+                        $options = [];
+                        $labels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+                        $correctAnswer = strtoupper(trim($data['correct_answer'] ?? ''));
+
+                        foreach (['option_a', 'option_b', 'option_c', 'option_d', 'option_e'] as $index => $optionKey) {
+                            if (isset($data[$optionKey]) && !empty(trim($data[$optionKey])) && trim($data[$optionKey]) !== '-') {
+                                QuestionOption::create([
+                                    'question_id' => $question->id,
+                                    'option_label' => $labels[$index],
+                                    'option_text' => trim($data[$optionKey]),
+                                    'is_correct' => $labels[$index] === $correctAnswer,
+                                    'order' => $index,
+                                ]);
+                            }
+                        }
+                    }
+
+                    $imported++;
+
+                } catch (\Exception $e) {
+                    $errors[] = "Baris $lineNumber: " . $e->getMessage();
+                }
+            }
+
+            fclose($handle);
+
+            DB::commit();
+
+            if ($imported > 0) {
+                $message = "$imported soal berhasil diimport.";
+                if (count($errors) > 0) {
+                    $message .= " " . count($errors) . " baris gagal diimport.";
+                }
+                return redirect()->route('teacher.questions.index', $exam)
+                    ->with('success', $message)
+                    ->with('import_errors', $errors);
+            } else {
+                DB::rollBack();
+                return redirect()->route('teacher.questions.index', $exam)
+                    ->with('error', 'Tidak ada soal yang berhasil diimport.')
+                    ->with('import_errors', $errors);
+            }
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('teacher.questions.index', $exam)
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
     }
 }

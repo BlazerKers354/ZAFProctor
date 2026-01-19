@@ -12,7 +12,24 @@ class ExamSetting extends Model
 
     protected $fillable = [
         'exam_id',
+        // Proctoring
+        'webcam_enabled',
+        'screen_capture_enabled',
+        'browser_lock_enabled',
+        'tab_switch_detection',
+        'max_tab_switches',
         'snapshot_interval',
+        // Display
+        'shuffle_questions',
+        'shuffle_options',
+        'show_correct_answers',
+        'show_score',
+        // Attempts
+        'max_attempts',
+        'grade_method',
+        // Additional
+        'passing_score',
+        // Legacy fields (for backward compatibility)
         'detect_face',
         'detect_multiple_faces',
         'detect_tab_switch',
@@ -25,6 +42,15 @@ class ExamSetting extends Model
     ];
 
     protected $casts = [
+        'webcam_enabled' => 'boolean',
+        'screen_capture_enabled' => 'boolean',
+        'browser_lock_enabled' => 'boolean',
+        'tab_switch_detection' => 'boolean',
+        'shuffle_questions' => 'boolean',
+        'shuffle_options' => 'boolean',
+        'show_correct_answers' => 'boolean',
+        'show_score' => 'boolean',
+        // Legacy
         'detect_face' => 'boolean',
         'detect_multiple_faces' => 'boolean',
         'detect_tab_switch' => 'boolean',

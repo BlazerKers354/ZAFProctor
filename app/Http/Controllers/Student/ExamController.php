@@ -161,9 +161,9 @@ class ExamController extends Controller
     {
         $this->authorize('view', $attempt);
 
-        $attempt->load(['exam.course', 'answers.question.options', 'answers.selectedOption']);
+        $attempt->load(['exam.course', 'exam.settings', 'answers.question.options', 'answers.selectedOption']);
 
-        $showAnswers = $attempt->exam->show_result;
+        $showAnswers = $attempt->exam->settings?->show_correct_answers ?? false;
 
         return view('student.exams.result', compact('attempt', 'showAnswers'));
     }

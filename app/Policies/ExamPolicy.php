@@ -77,10 +77,8 @@ class ExamPolicy
             return true;
         }
 
-        // Teacher can delete their own draft exams
-        return $user->isTeacher() 
-            && $exam->created_by === $user->id 
-            && $exam->status === Exam::STATUS_DRAFT;
+        // Teacher can delete their own exams (any status)
+        return $user->isTeacher() && $exam->created_by === $user->id;
     }
 
     /**
@@ -135,8 +133,8 @@ class ExamPolicy
             return true;
         }
 
-        // Student can view their own result if show_result is enabled
-        if ($user->isStudent() && $exam->show_result) {
+        // Student can view their own result if show_score is enabled
+        if ($user->isStudent() && ($exam->settings?->show_score ?? true)) {
             return $exam->attempts()->where('user_id', $user->id)->submitted()->exists();
         }
 

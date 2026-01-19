@@ -19,29 +19,17 @@ class Exam extends Model
         'created_by',
         'title',
         'description',
-        'instructions',
+        'type',
         'start_time',
         'end_time',
-        'duration_minutes',
+        'duration',
         'access_token',
-        'shuffle_questions',
-        'shuffle_answers',
-        'show_result',
-        'require_camera',
-        'require_fullscreen',
-        'max_violations',
-        'passing_score',
         'status',
     ];
 
     protected $casts = [
         'start_time' => 'datetime',
         'end_time' => 'datetime',
-        'shuffle_questions' => 'boolean',
-        'shuffle_answers' => 'boolean',
-        'show_result' => 'boolean',
-        'require_camera' => 'boolean',
-        'require_fullscreen' => 'boolean',
     ];
 
     /**
@@ -112,9 +100,17 @@ class Exam extends Model
      */
     public function isActive(): bool
     {
+        if ($this->status !== self::STATUS_PUBLISHED) {
+            return false;
+        }
+        
+        // For flexible exams (no start/end time), always active when published
+        if ($this->type === 'flexible' || !$this->start_time || !$this->end_time) {
+            return true;
+        }
+        
         $now = now();
-        return $this->status === self::STATUS_PUBLISHED 
-            && $now->between($this->start_time, $this->end_time);
+        return $now->between($this->start_time, $this->end_time);
     }
 
     /**
@@ -122,6 +118,11 @@ class Exam extends Model
      */
     public function hasStarted(): bool
     {
+        // For flexible exams, always started when published
+        if ($this->type === 'flexible' || !$this->start_time) {
+            return $this->status === self::STATUS_PUBLISHED;
+        }
+        
         return now()->gte($this->start_time);
     }
 
@@ -130,6 +131,11 @@ class Exam extends Model
      */
     public function hasEnded(): bool
     {
+        // For flexible exams, never ended (always available)
+        if ($this->type === 'flexible' || !$this->end_time) {
+            return false;
+        }
+        
         return now()->gte($this->end_time);
     }
 
@@ -164,8 +170,16 @@ class Exam extends Model
     {
         $now = now();
         return $query->where('status', self::STATUS_PUBLISHED)
-            ->where('start_time', '<=', $now)
-            ->where('end_time', '>=', $now);
+            ->where(function($q) use ($now) {
+                // Flexible exams (always active when published)
+                $q->where('type', 'flexible')
+                  ->orWhere(function($q2) use ($now) {
+                      // Scheduled exams (within time range)
+                      $q2->where('type', 'scheduled')
+                         ->where('start_time', '<=', $now)
+                         ->where('end_time', '>=', $now);
+                  });
+            });
     }
 
     /**

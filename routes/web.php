@@ -105,6 +105,7 @@ Route::middleware(['auth', 'check.active'])->group(function () {
         Route::resource('exams', TeacherExamController::class);
         Route::post('exams/{exam}/publish', [TeacherExamController::class, 'publish'])->name('exams.publish');
         Route::post('exams/{exam}/duplicate', [TeacherExamController::class, 'duplicate'])->name('exams.duplicate');
+        Route::post('exams/{exam}/regenerate-token', [TeacherExamController::class, 'regenerateToken'])->name('exams.regenerate-token');
         
         // Question Management
         Route::prefix('exams/{exam}')->name('questions.')->group(function () {
@@ -115,6 +116,14 @@ Route::middleware(['auth', 'check.active'])->group(function () {
             Route::put('questions/{question}', [QuestionController::class, 'update'])->name('update');
             Route::delete('questions/{question}', [QuestionController::class, 'destroy'])->name('destroy');
             Route::post('questions/reorder', [QuestionController::class, 'reorder'])->name('reorder');
+            
+            // New question features
+            Route::get('questions/{question}/detail', [QuestionController::class, 'detail'])->name('detail');
+            Route::post('questions/duplicate', [QuestionController::class, 'duplicate'])->name('duplicate');
+            Route::post('questions/delete-multiple', [QuestionController::class, 'deleteMultiple'])->name('delete-multiple');
+            Route::get('questions/download-template', [QuestionController::class, 'downloadTemplate'])->name('download-template');
+            Route::get('questions/export', [QuestionController::class, 'export'])->name('export');
+            Route::post('questions/import', [QuestionController::class, 'import'])->name('import');
         });
         
         // Monitoring

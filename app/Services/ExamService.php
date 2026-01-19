@@ -39,7 +39,7 @@ class ExamService
                 'status' => ExamAttempt::STATUS_IN_PROGRESS,
                 'ip_address' => $ipAddress,
                 'user_agent' => $userAgent,
-                'camera_enabled' => $exam->require_camera,
+                'camera_enabled' => $exam->settings?->webcam_enabled ?? true,
             ]);
 
             // Log the action
@@ -61,11 +61,11 @@ class ExamService
     {
         $questions = $exam->questions()->with('options')->get();
 
-        if ($exam->shuffle_questions) {
+        if ($exam->settings?->shuffle_questions) {
             $questions = $questions->shuffle();
         }
 
-        if ($exam->shuffle_answers) {
+        if ($exam->settings?->shuffle_options) {
             $questions = $questions->map(function ($question) {
                 if ($question->isMultipleChoice()) {
                     $question->setRelation('options', $question->options->shuffle());

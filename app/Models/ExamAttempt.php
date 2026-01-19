@@ -106,7 +106,7 @@ class ExamAttempt extends Model
             return 0;
         }
 
-        $endTime = $this->started_at->addMinutes($this->exam->duration_minutes);
+        $endTime = $this->started_at->addMinutes($this->exam->duration);
         $remaining = now()->diffInSeconds($endTime, false);
 
         return max(0, $remaining);
@@ -121,7 +121,7 @@ class ExamAttempt extends Model
             return false;
         }
 
-        $endTime = $this->started_at->addMinutes($this->exam->duration_minutes);
+        $endTime = $this->started_at->addMinutes($this->exam->duration);
         return now()->gte($endTime);
     }
 
@@ -151,7 +151,7 @@ class ExamAttempt extends Model
 
         $this->score = $earnedPoints;
         $this->percentage = $totalPoints > 0 ? ($earnedPoints / $totalPoints) * 100 : 0;
-        $this->is_passed = $this->percentage >= $this->exam->passing_score;
+        $this->is_passed = $this->percentage >= ($this->exam->settings->passing_score ?? 60);
         $this->save();
     }
 

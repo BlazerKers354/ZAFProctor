@@ -141,6 +141,7 @@ class DashboardController extends Controller
             ->get();
 
         $recentResults = ExamAttempt::where('user_id', $user->id)
+            ->whereHas('exam') // Only include attempts where exam still exists
             ->with(['exam.course'])
             ->latest('submitted_at')
             ->take(5)

@@ -1,101 +1,143 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('title', 'Kelola Mata Pelajaran')
-
-@section('header')
-    <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-bold text-gray-900">Kelola Mata Pelajaran</h1>
-        <a href="{{ route('admin.courses.create') }}" 
-           class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-            </svg>
-            Tambah Mata Pelajaran
-        </a>
-    </div>
-@endsection
+@section('page-title', 'Mata Pelajaran')
 
 @section('content')
-    <!-- Filters -->
-    <div class="bg-white shadow rounded-lg p-4 mb-6">
-        <form action="{{ route('admin.courses.index') }}" method="GET" class="flex flex-wrap items-center gap-4">
-            <div class="flex-1 min-w-[200px]">
-                <input type="text" name="search" value="{{ request('search') }}" 
-                       placeholder="Cari kode atau nama mata pelajaran..."
-                       class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="page-block">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="page-header-title">
+                        <h5 class="m-b-10">Kelola Mata Pelajaran</h5>
+                    </div>
+                    <ul class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="ph-duotone ph-house"></i></a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Mata Pelajaran</li>
+                    </ul>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="{{ route('admin.courses.create') }}" class="btn btn-primary">
+                        <i class="ph-duotone ph-plus me-2"></i>Tambah Mata Pelajaran
+                    </a>
+                </div>
             </div>
-            <button type="submit" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">
-                Cari
-            </button>
-        </form>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card">
+        <div class="card-body">
+            <form action="{{ route('admin.courses.index') }}" method="GET">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-8">
+                        <label class="form-label">Cari Mata Pelajaran</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent"><i class="ph-duotone ph-magnifying-glass"></i></span>
+                            <input type="text" name="search" value="{{ request('search') }}" 
+                                   placeholder="Kode atau nama mata pelajaran..."
+                                   class="form-control">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-primary me-2">
+                            <i class="ph-duotone ph-magnifying-glass me-1"></i>Cari
+                        </button>
+                        @if(request('search'))
+                            <a href="{{ route('admin.courses.index') }}" class="btn btn-outline-secondary">
+                                <i class="ph-duotone ph-x me-1"></i>Reset
+                            </a>
+                        @endif
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
 
     <!-- Courses Table -->
-    <div class="bg-white shadow rounded-lg overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kode</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Guru</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Siswa</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ujian</th>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
-                </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-                @forelse($courses as $course)
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4">
-                            <span class="inline-flex px-2 py-1 text-xs font-mono font-semibold bg-gray-100 text-gray-800 rounded">
-                                {{ $course->code }}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="text-sm font-medium text-gray-900">{{ $course->name }}</div>
-                            @if($course->description)
-                                <div class="text-sm text-gray-500">{{ Str::limit($course->description, 50) }}</div>
-                            @endif
-                        </td>
-                        <td class="px-6 py-4">
-                            @if($course->teacher)
-                                <div class="text-sm text-gray-900">{{ $course->teacher->name }}</div>
-                            @else
-                                <span class="text-sm text-gray-400">Belum ditentukan</span>
-                            @endif
-                        </td>
-                        <td class="px-6 py-4 text-sm text-gray-900">
-                            {{ $course->students_count }} siswa
-                        </td>
-                        <td class="px-6 py-4 text-sm text-gray-900">
-                            {{ $course->exams_count }} ujian
-                        </td>
-                        <td class="px-6 py-4 text-right text-sm font-medium space-x-2">
-                            <a href="{{ route('admin.courses.show', $course) }}" 
-                               class="text-indigo-600 hover:text-indigo-900">Detail</a>
-                            <a href="{{ route('admin.courses.edit', $course) }}" 
-                               class="text-gray-600 hover:text-gray-900">Edit</a>
-                            <form action="{{ route('admin.courses.destroy', $course) }}" 
-                                  method="POST" class="inline"
-                                  onsubmit="return confirm('Apakah Anda yakin ingin menghapus mata pelajaran ini?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="text-red-600 hover:text-red-900">Hapus</button>
-                            </form>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="6" class="px-6 py-12 text-center text-gray-500">
-                            Belum ada mata pelajaran. <a href="{{ route('admin.courses.create') }}" class="text-indigo-600 hover:underline">Tambah mata pelajaran baru</a>
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-        
+    <div class="card table-card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Kode</th>
+                            <th>Nama</th>
+                            <th>Guru</th>
+                            <th>Siswa</th>
+                            <th>Ujian</th>
+                            <th class="text-end">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($courses as $course)
+                            <tr>
+                                <td>
+                                    <span class="badge bg-light text-dark fw-medium font-monospace">{{ $course->code }}</span>
+                                </td>
+                                <td>
+                                    <div>
+                                        <h6 class="mb-0 f-14">{{ $course->name }}</h6>
+                                        @if($course->description)
+                                            <small class="text-muted">{{ Str::limit($course->description, 50) }}</small>
+                                        @endif
+                                    </div>
+                                </td>
+                                <td>
+                                    @if($course->teacher)
+                                        <div class="d-flex align-items-center">
+                                            <img src="{{ $course->teacher->avatar_url }}" alt="" class="avatar avatar-sm avatar-circle me-2">
+                                            <small>{{ $course->teacher->name }}</small>
+                                        </div>
+                                    @else
+                                        <span class="text-muted f-12">Belum ditentukan</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <span class="badge badge-soft-primary">{{ $course->students_count }} siswa</span>
+                                </td>
+                                <td>
+                                    <span class="badge badge-soft-info">{{ $course->exams_count }} ujian</span>
+                                </td>
+                                <td class="text-end">
+                                    <a href="{{ route('admin.courses.show', $course) }}" class="btn btn-sm btn-light-primary" title="Detail">
+                                        <i class="ph-duotone ph-eye"></i>
+                                    </a>
+                                    <a href="{{ route('admin.courses.edit', $course) }}" class="btn btn-sm btn-light-warning" title="Edit">
+                                        <i class="ph-duotone ph-pencil-simple"></i>
+                                    </a>
+                                    <form action="{{ route('admin.courses.destroy', $course) }}" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus mata pelajaran ini?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-light-danger" title="Hapus">
+                                            <i class="ph-duotone ph-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6">
+                                    <div class="empty-state">
+                                        <div class="empty-state-icon">
+                                            <i class="ph-duotone ph-books"></i>
+                                        </div>
+                                        <h6>Belum ada mata pelajaran</h6>
+                                        <p class="text-muted mb-3">Mulai dengan menambahkan mata pelajaran baru</p>
+                                        <a href="{{ route('admin.courses.create') }}" class="btn btn-primary btn-sm">
+                                            <i class="ph-duotone ph-plus me-1"></i>Tambah Mata Pelajaran
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
         @if($courses->hasPages())
-            <div class="px-6 py-4 border-t border-gray-200">
+            <div class="card-footer">
                 {{ $courses->links() }}
             </div>
         @endif

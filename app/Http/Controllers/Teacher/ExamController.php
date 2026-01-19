@@ -65,38 +65,57 @@ class ExamController extends Controller
         $validated = $request->validate([
             'course_id' => ['required', 'exists:courses,id'],
             'title' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
             'instructions' => ['nullable', 'string'],
             'start_time' => ['required', 'date', 'after:now'],
             'end_time' => ['required', 'date', 'after:start_time'],
-            'duration_minutes' => ['required', 'integer', 'min:5', 'max:480'],
-            'shuffle_questions' => ['boolean'],
-            'shuffle_answers' => ['boolean'],
-            'show_result' => ['boolean'],
-            'require_camera' => ['boolean'],
-            'require_fullscreen' => ['boolean'],
-            'max_violations' => ['integer', 'min:1', 'max:20'],
-            'passing_score' => ['integer', 'min:0', 'max:100'],
+            'duration' => ['required', 'integer', 'min:5', 'max:480'],
+            'access_token' => ['nullable', 'string', 'max:50'],
+            'status' => ['nullable', 'in:draft,published'],
         ]);
 
-        $validated['created_by'] = auth()->id();
-        $validated['access_token'] = Str::random(32);
-        $validated['status'] = Exam::STATUS_DRAFT;
-        $validated['shuffle_questions'] = $request->boolean('shuffle_questions', true);
-        $validated['shuffle_answers'] = $request->boolean('shuffle_answers', true);
-        $validated['show_result'] = $request->boolean('show_result', false);
-        $validated['require_camera'] = $request->boolean('require_camera', true);
-        $validated['require_fullscreen'] = $request->boolean('require_fullscreen', true);
+        $exam = null;
+        
+        DB::transaction(function () use ($validated, $request, &$exam) {
+            // Create exam
+            $exam = Exam::create([
+                'course_id' => $validated['course_id'],
+                'title' => $validated['title'],
+                'description' => $validated['instructions'],
+                'type' => 'scheduled', // Default to scheduled
+                'start_time' => $validated['start_time'],
+                'end_time' => $validated['end_time'],
+                'duration' => $validated['duration'],
+                'status' => $validated['status'] ?? 'draft',
+                'created_by' => auth()->id(),
+                'access_token' => $validated['access_token'] ?? strtoupper(Str::random(8)),
+            ]);
 
-        $exam = Exam::create($validated);
+            // Create exam settings
+            ExamSetting::create([
+                'exam_id' => $exam->id,
+                // Proctoring settings
+                'webcam_enabled' => $request->boolean('require_camera', true),
+                'screen_capture_enabled' => true,
+                'browser_lock_enabled' => $request->boolean('require_fullscreen', true),
+                'tab_switch_detection' => true,
+                'max_tab_switches' => $request->input('max_violations', 5),
+                
+                // Display settings
+                'shuffle_questions' => $request->boolean('shuffle_questions', false),
+                'shuffle_options' => false,
+                'show_correct_answers' => false,
+                'show_score' => true,
+                
+                // Attempt settings
+                'max_attempts' => null,
+                'grade_method' => 'highest',
+                
+                // Passing score
+                'passing_score' => $request->input('passing_score', 60),
+            ]);
+        });
 
-        // Create default settings
-        ExamSetting::create(array_merge(
-            ['exam_id' => $exam->id],
-            ExamSetting::getDefaults()
-        ));
-
-        return redirect()->route('teacher.exams.questions.index', $exam)
+        return redirect()->route('teacher.questions.index', $exam)
             ->with('success', 'Ujian berhasil dibuat. Silakan tambahkan soal.');
     }
 
@@ -137,26 +156,49 @@ class ExamController extends Controller
             'course_id' => ['required', 'exists:courses,id'],
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
-            'instructions' => ['nullable', 'string'],
-            'start_time' => ['required', 'date'],
-            'end_time' => ['required', 'date', 'after:start_time'],
-            'duration_minutes' => ['required', 'integer', 'min:5', 'max:480'],
-            'shuffle_questions' => ['boolean'],
-            'shuffle_answers' => ['boolean'],
-            'show_result' => ['boolean'],
-            'require_camera' => ['boolean'],
-            'require_fullscreen' => ['boolean'],
-            'max_violations' => ['integer', 'min:1', 'max:20'],
-            'passing_score' => ['integer', 'min:0', 'max:100'],
+            'type' => ['required', 'in:scheduled,flexible'],
+            'start_time' => ['nullable', 'date'],
+            'end_time' => ['nullable', 'date', 'after:start_time'],
+            'duration' => ['required', 'integer', 'min:5', 'max:480'],
+            'status' => ['required', 'in:draft,published,ongoing,completed'],
         ]);
 
-        $validated['shuffle_questions'] = $request->boolean('shuffle_questions', true);
-        $validated['shuffle_answers'] = $request->boolean('shuffle_answers', true);
-        $validated['show_result'] = $request->boolean('show_result', false);
-        $validated['require_camera'] = $request->boolean('require_camera', true);
-        $validated['require_fullscreen'] = $request->boolean('require_fullscreen', true);
+        DB::transaction(function () use ($validated, $request, $exam) {
+            // Update exam basic info
+            $exam->update([
+                'course_id' => $validated['course_id'],
+                'title' => $validated['title'],
+                'description' => $validated['description'],
+                'type' => $validated['type'],
+                'start_time' => $validated['type'] === 'scheduled' ? $validated['start_time'] : null,
+                'end_time' => $validated['type'] === 'scheduled' ? $validated['end_time'] : null,
+                'duration' => $validated['duration'],
+                'status' => $validated['status'],
+            ]);
 
-        $exam->update($validated);
+            // Update or create exam settings
+            $exam->settings()->updateOrCreate(
+                ['exam_id' => $exam->id],
+                [
+                    // Proctoring settings
+                    'webcam_enabled' => $request->boolean('webcam_enabled'),
+                    'screen_capture_enabled' => $request->boolean('screen_capture_enabled'),
+                    'browser_lock_enabled' => $request->boolean('browser_lock_enabled'),
+                    'tab_switch_detection' => $request->boolean('tab_switch_detection'),
+                    'max_tab_switches' => $request->input('max_tab_switches', 3),
+                    
+                    // Display settings
+                    'shuffle_questions' => $request->boolean('shuffle_questions'),
+                    'shuffle_options' => $request->boolean('shuffle_options'),
+                    'show_correct_answers' => $request->boolean('show_correct_answers'),
+                    'show_score' => $request->boolean('show_score'),
+                    
+                    // Attempt settings
+                    'max_attempts' => $request->input('max_attempts') ?: null,
+                    'grade_method' => $request->input('grade_method', 'highest'),
+                ]
+            );
+        });
 
         return redirect()->route('teacher.exams.show', $exam)
             ->with('success', 'Ujian berhasil diperbarui.');

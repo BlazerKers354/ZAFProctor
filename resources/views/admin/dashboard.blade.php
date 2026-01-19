@@ -1,189 +1,360 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('title', 'Admin Dashboard')
-
-@section('header')
-    <h1 class="text-2xl font-bold text-gray-900">Dashboard Administrator</h1>
-@endsection
+@section('page-title', 'Dashboard')
 
 @section('content')
-    <!-- Stats -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white overflow-hidden shadow rounded-lg">
-            <div class="p-5">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <div class="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center">
-                            <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
-                            </svg>
-                        </div>
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="page-block">
+            <div class="row align-items-center">
+                <div class="col-md-12">
+                    <div class="page-header-title">
+                        <h5 class="m-b-10">Dashboard Administrator</h5>
                     </div>
-                    <div class="ml-5">
-                        <p class="text-sm font-medium text-gray-500">Total Users</p>
-                        <p class="text-2xl font-semibold text-gray-900">{{ $stats['total_users'] }}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white overflow-hidden shadow rounded-lg">
-            <div class="p-5">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="ml-5">
-                        <p class="text-sm font-medium text-gray-500">Total Courses</p>
-                        <p class="text-2xl font-semibold text-gray-900">{{ $stats['total_courses'] }}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white overflow-hidden shadow rounded-lg">
-            <div class="p-5">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
-                            <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="ml-5">
-                        <p class="text-sm font-medium text-gray-500">Total Exams</p>
-                        <p class="text-2xl font-semibold text-gray-900">{{ $stats['total_exams'] }}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white overflow-hidden shadow rounded-lg">
-            <div class="p-5">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="ml-5">
-                        <p class="text-sm font-medium text-gray-500">Completed Attempts</p>
-                        <p class="text-2xl font-semibold text-gray-900">{{ $stats['completed_attempts'] }}</p>
-                    </div>
+                    <ul class="breadcrumb">
+                        <li class="breadcrumb-item"><i class="ph-duotone ph-house"></i></li>
+                        <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+                    </ul>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- User Stats -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div class="bg-blue-50 rounded-lg p-6">
-            <div class="flex items-center">
-                <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                    </svg>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm text-blue-600">Siswa</p>
-                    <p class="text-2xl font-bold text-blue-900">{{ $stats['total_students'] }}</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-green-50 rounded-lg p-6">
-            <div class="flex items-center">
-                <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                    </svg>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm text-green-600">Guru</p>
-                    <p class="text-2xl font-bold text-green-900">{{ $stats['total_teachers'] }}</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-yellow-50 rounded-lg p-6">
-            <div class="flex items-center">
-                <div class="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                    </svg>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm text-yellow-600">Ujian Aktif</p>
-                    <p class="text-2xl font-bold text-yellow-900">{{ $stats['active_exams'] }}</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <!-- Recent Users -->
-        <div class="bg-white shadow rounded-lg">
-            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                <h2 class="text-lg font-medium text-gray-900">User Terbaru</h2>
-                <a href="{{ route('admin.users.index') }}" class="text-sm text-indigo-600 hover:text-indigo-900">
-                    Lihat Semua
-                </a>
-            </div>
-            <div class="divide-y divide-gray-200">
-                @foreach($recentUsers as $user)
-                    <div class="p-4 flex items-center">
-                        <img class="h-10 w-10 rounded-full" src="{{ $user->avatar_url }}" alt="">
-                        <div class="ml-4 flex-1">
-                            <p class="text-sm font-medium text-gray-900">{{ $user->name }}</p>
-                            <p class="text-sm text-gray-500">{{ $user->email }}</p>
+    <!-- Main Stats -->
+    <div class="row">
+        <div class="col-md-6 col-xl-3">
+            <div class="card stats-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div>
+                            <p class="stats-label mb-2">Total Pengguna</p>
+                            <h3 class="stats-value">{{ number_format($stats['total_users']) }}</h3>
                         </div>
-                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full 
-                            {{ $user->role->name === 'admin' ? 'bg-red-100 text-red-800' : '' }}
-                            {{ $user->role->name === 'teacher' ? 'bg-green-100 text-green-800' : '' }}
-                            {{ $user->role->name === 'student' ? 'bg-blue-100 text-blue-800' : '' }}">
-                            {{ $user->role->display_name }}
+                        <div class="stats-icon bg-primary bg-opacity-10">
+                            <i class="ph-duotone ph-users text-primary"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3 pt-3 border-top">
+                        <span class="badge badge-soft-success me-2">
+                            <i class="ph ph-trend-up me-1"></i>Aktif
                         </span>
+                        <span class="text-muted f-12">{{ $stats['total_users'] }} terdaftar</span>
                     </div>
-                @endforeach
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card stats-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div>
+                            <p class="stats-label mb-2">Total Mata Pelajaran</p>
+                            <h3 class="stats-value">{{ number_format($stats['total_courses']) }}</h3>
+                        </div>
+                        <div class="stats-icon bg-success bg-opacity-10">
+                            <i class="ph-duotone ph-books text-success"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3 pt-3 border-top">
+                        <span class="badge badge-soft-primary me-2">
+                            <i class="ph ph-book-open me-1"></i>Tersedia
+                        </span>
+                        <span class="text-muted f-12">untuk semua kelas</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card stats-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div>
+                            <p class="stats-label mb-2">Total Ujian</p>
+                            <h3 class="stats-value">{{ number_format($stats['total_exams']) }}</h3>
+                        </div>
+                        <div class="stats-icon bg-warning bg-opacity-10">
+                            <i class="ph-duotone ph-exam text-warning"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3 pt-3 border-top">
+                        <span class="badge badge-soft-warning me-2">
+                            <i class="ph ph-clock me-1"></i>{{ $stats['active_exams'] ?? 0 }}
+                        </span>
+                        <span class="text-muted f-12">ujian aktif</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card stats-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div>
+                            <p class="stats-label mb-2">Ujian Selesai</p>
+                            <h3 class="stats-value">{{ number_format($stats['completed_attempts']) }}</h3>
+                        </div>
+                        <div class="stats-icon bg-info bg-opacity-10">
+                            <i class="ph-duotone ph-check-circle text-info"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3 pt-3 border-top">
+                        <span class="badge badge-soft-info me-2">
+                            <i class="ph ph-chart-line-up me-1"></i>Selesai
+                        </span>
+                        <span class="text-muted f-12">total percobaan</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Stats Cards -->
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="avatar avatar-lg rounded" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); display: flex; align-items: center; justify-content: center;">
+                                <i class="ph-duotone ph-student text-white f-24"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="mb-1 text-muted f-12">Total Siswa</h6>
+                            <h4 class="mb-0 f-w-700">{{ number_format($stats['total_students']) }}</h4>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge badge-soft-primary">Siswa</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="avatar avatar-lg rounded" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); display: flex; align-items: center; justify-content: center;">
+                                <i class="ph-duotone ph-chalkboard-teacher text-white f-24"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="mb-1 text-muted f-12">Total Guru</h6>
+                            <h4 class="mb-0 f-w-700">{{ number_format($stats['total_teachers']) }}</h4>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge badge-soft-success">Guru</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="avatar avatar-lg rounded" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); display: flex; align-items: center; justify-content: center;">
+                                <i class="ph-duotone ph-clock-countdown text-white f-24"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="mb-1 text-muted f-12">Ujian Aktif</h6>
+                            <h4 class="mb-0 f-w-700">{{ number_format($stats['active_exams'] ?? 0) }}</h4>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge badge-soft-warning">Berlangsung</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Recent Users -->
+        <div class="col-xl-6">
+            <div class="card table-card">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <h5 class="card-title mb-0">
+                        <i class="ph-duotone ph-users me-2"></i>User Terbaru
+                    </h5>
+                    <a href="{{ route('admin.users.index') }}" class="btn btn-light-primary btn-sm">
+                        Lihat Semua <i class="ph ph-arrow-right ms-1"></i>
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Pengguna</th>
+                                    <th>Role</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($recentUsers as $user)
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="{{ $user->avatar_url }}" alt="{{ $user->name }}" class="avatar avatar-sm avatar-circle me-3">
+                                                <div>
+                                                    <h6 class="mb-0 f-14">{{ $user->name }}</h6>
+                                                    <small class="text-muted">{{ $user->email }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @if($user->role->name === 'admin')
+                                                <span class="badge badge-soft-danger">Admin</span>
+                                            @elseif($user->role->name === 'teacher')
+                                                <span class="badge badge-soft-success">Guru</span>
+                                            @else
+                                                <span class="badge badge-soft-primary">Siswa</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if($user->is_active)
+                                                <span class="badge badge-soft-success">
+                                                    <i class="ph ph-check-circle me-1"></i>Aktif
+                                                </span>
+                                            @else
+                                                <span class="badge badge-soft-secondary">
+                                                    <i class="ph ph-minus-circle me-1"></i>Nonaktif
+                                                </span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="3" class="text-center py-4 text-muted">
+                                            Belum ada pengguna terdaftar
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
 
         <!-- Recent Exams -->
-        <div class="bg-white shadow rounded-lg">
-            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                <h2 class="text-lg font-medium text-gray-900">Ujian Terbaru</h2>
-                <a href="#" class="text-sm text-indigo-600 hover:text-indigo-900">
-                    Lihat Semua
-                </a>
-            </div>
-            <div class="divide-y divide-gray-200">
-                @foreach($recentExams as $exam)
-                    <div class="p-4">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-900">{{ $exam->title }}</p>
-                                <p class="text-sm text-gray-500">{{ $exam->course->name }}</p>
-                                <p class="text-xs text-gray-400">oleh {{ $exam->creator->name }}</p>
-                            </div>
-                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full 
-                                {{ $exam->status === 'draft' ? 'bg-gray-100 text-gray-800' : '' }}
-                                {{ $exam->status === 'published' ? 'bg-green-100 text-green-800' : '' }}
-                                {{ $exam->status === 'ongoing' ? 'bg-yellow-100 text-yellow-800' : '' }}
-                                {{ $exam->status === 'completed' ? 'bg-blue-100 text-blue-800' : '' }}">
-                                {{ ucfirst($exam->status) }}
-                            </span>
-                        </div>
+        <div class="col-xl-6">
+            <div class="card table-card">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <h5 class="card-title mb-0">
+                        <i class="ph-duotone ph-exam me-2"></i>Ujian Terbaru
+                    </h5>
+                    <a href="{{ route('teacher.exams.index') }}" class="btn btn-light-primary btn-sm">
+                        Lihat Semua <i class="ph ph-arrow-right ms-1"></i>
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Ujian</th>
+                                    <th>Pembuat</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($recentExams as $exam)
+                                    <tr>
+                                        <td>
+                                            <div>
+                                                <h6 class="mb-0 f-14">{{ Str::limit($exam->title, 25) }}</h6>
+                                                <small class="text-muted">{{ $exam->course->name }}</small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">{{ $exam->creator->name }}</small>
+                                        </td>
+                                        <td>
+                                            @if($exam->status === 'draft')
+                                                <span class="badge badge-soft-secondary">Draft</span>
+                                            @elseif($exam->status === 'published')
+                                                <span class="badge badge-soft-success">Published</span>
+                                            @elseif($exam->status === 'ongoing')
+                                                <span class="badge badge-soft-warning">Berlangsung</span>
+                                            @else
+                                                <span class="badge badge-soft-info">Selesai</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="3" class="text-center py-4 text-muted">
+                                            Belum ada ujian dibuat
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
                     </div>
-                @endforeach
+                </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row">
+        <div class="col-12">
+            <h5 class="mb-3"><i class="ph-duotone ph-lightning me-2"></i>Aksi Cepat</h5>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <a href="{{ route('admin.users.create') }}" class="card quick-action-card text-decoration-none">
+                <div class="card-body text-center py-4">
+                    <div class="avatar avatar-xl rounded mx-auto mb-3" style="background: rgba(59, 130, 246, 0.1); display: flex; align-items: center; justify-content: center;">
+                        <i class="ph-duotone ph-user-plus text-primary f-30"></i>
+                    </div>
+                    <h6 class="mb-1">Tambah Pengguna</h6>
+                    <small class="text-muted">Daftarkan user baru</small>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <a href="{{ route('admin.classes.create') }}" class="card quick-action-card text-decoration-none">
+                <div class="card-body text-center py-4">
+                    <div class="avatar avatar-xl rounded mx-auto mb-3" style="background: rgba(16, 185, 129, 0.1); display: flex; align-items: center; justify-content: center;">
+                        <i class="ph-duotone ph-chalkboard text-success f-30"></i>
+                    </div>
+                    <h6 class="mb-1">Tambah Kelas</h6>
+                    <small class="text-muted">Buat kelas baru</small>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <a href="{{ route('admin.courses.create') }}" class="card quick-action-card text-decoration-none">
+                <div class="card-body text-center py-4">
+                    <div class="avatar avatar-xl rounded mx-auto mb-3" style="background: rgba(245, 158, 11, 0.1); display: flex; align-items: center; justify-content: center;">
+                        <i class="ph-duotone ph-book-bookmark text-warning f-30"></i>
+                    </div>
+                    <h6 class="mb-1">Tambah Mapel</h6>
+                    <small class="text-muted">Mata pelajaran baru</small>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <a href="{{ route('admin.users.pending') }}" class="card quick-action-card text-decoration-none">
+                <div class="card-body text-center py-4">
+                    <div class="avatar avatar-xl rounded mx-auto mb-3" style="background: rgba(239, 68, 68, 0.1); display: flex; align-items: center; justify-content: center;">
+                        <i class="ph-duotone ph-user-check text-danger f-30"></i>
+                    </div>
+                    <h6 class="mb-1">Approval User</h6>
+                    <small class="text-muted">Review pendaftaran</small>
+                </div>
+            </a>
         </div>
     </div>
 @endsection

@@ -1,94 +1,136 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('title', 'Tambah Pengguna')
-
-@section('header')
-    <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-bold text-gray-900">Tambah Pengguna Baru</h1>
-        <a href="{{ route('admin.users.index') }}" class="text-indigo-600 hover:text-indigo-900">
-            &larr; Kembali
-        </a>
-    </div>
-@endsection
+@section('page-title', 'Tambah Pengguna')
 
 @section('content')
-    <form action="{{ route('admin.users.store') }}" method="POST" class="max-w-2xl">
-        @csrf
-        
-        <div class="bg-white shadow rounded-lg divide-y divide-gray-200">
-            <div class="p-6 space-y-6">
-                <div>
-                    <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap *</label>
-                    <input type="text" name="name" id="name" value="{{ old('name') }}"
-                           class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('name') border-red-500 @enderror"
-                           required>
-                    @error('name')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="page-block">
+            <div class="row align-items-center">
+                <div class="col-md-12">
+                    <div class="page-header-title">
+                        <h5 class="m-b-10">Tambah Pengguna Baru</h5>
+                    </div>
+                    <ul class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="ph-duotone ph-house"></i></a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('admin.users.index') }}">Pengguna</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Tambah</li>
+                    </ul>
                 </div>
-                
-                <div>
-                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-                    <input type="email" name="email" id="email" value="{{ old('email') }}"
-                           class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('email') border-red-500 @enderror"
-                           required>
-                    @error('email')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
-                
-                <div>
-                    <label for="role_id" class="block text-sm font-medium text-gray-700 mb-1">Role *</label>
-                    <select name="role_id" id="role_id"
-                            class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('role_id') border-red-500 @enderror"
-                            required>
-                        <option value="">Pilih Role</option>
-                        @foreach($roles as $role)
-                            <option value="{{ $role->id }}" {{ old('role_id') == $role->id ? 'selected' : '' }}>
-                                {{ ucfirst($role->name) }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('role_id')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
-                
-                <div>
-                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password *</label>
-                    <input type="password" name="password" id="password"
-                           class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('password') border-red-500 @enderror"
-                           required>
-                    @error('password')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
-                
-                <div>
-                    <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Konfirmasi Password *</label>
-                    <input type="password" name="password_confirmation" id="password_confirmation"
-                           class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                           required>
-                </div>
-                
-                <div class="flex items-center">
-                    <input type="checkbox" name="is_active" id="is_active" value="1"
-                           {{ old('is_active', true) ? 'checked' : '' }}
-                           class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
-                    <label for="is_active" class="ml-2 text-sm text-gray-700">Aktifkan pengguna</label>
-                </div>
-            </div>
-            
-            <div class="p-6 bg-gray-50 flex justify-end space-x-4">
-                <a href="{{ route('admin.users.index') }}"
-                   class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition">
-                    Batal
-                </a>
-                <button type="submit"
-                        class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">
-                    Simpan
-                </button>
             </div>
         </div>
-    </form>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <form action="{{ route('admin.users.store') }}" method="POST">
+                @csrf
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="ph-duotone ph-user-plus me-2"></i>Informasi Pengguna
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label for="name" class="form-label">Nama Lengkap <span class="text-danger">*</span></label>
+                                <input type="text" name="name" id="name" value="{{ old('name') }}"
+                                       class="form-control @error('name') is-invalid @enderror"
+                                       placeholder="Masukkan nama lengkap"
+                                       required>
+                                @error('name')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            
+                            <div class="col-md-12">
+                                <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                                <input type="email" name="email" id="email" value="{{ old('email') }}"
+                                       class="form-control @error('email') is-invalid @enderror"
+                                       placeholder="contoh@email.com"
+                                       required>
+                                @error('email')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            
+                            <div class="col-md-12">
+                                <label for="role_id" class="form-label">Role <span class="text-danger">*</span></label>
+                                <select name="role_id" id="role_id"
+                                        class="form-select @error('role_id') is-invalid @enderror"
+                                        required>
+                                    <option value="">Pilih Role</option>
+                                    @foreach($roles as $role)
+                                        <option value="{{ $role->id }}" {{ old('role_id') == $role->id ? 'selected' : '' }}>
+                                            {{ ucfirst($role->name) }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('role_id')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
+                                <input type="password" name="password" id="password"
+                                       class="form-control @error('password') is-invalid @enderror"
+                                       placeholder="Min. 8 karakter"
+                                       required>
+                                @error('password')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="password_confirmation" class="form-label">Konfirmasi Password <span class="text-danger">*</span></label>
+                                <input type="password" name="password_confirmation" id="password_confirmation"
+                                       class="form-control"
+                                       placeholder="Ulangi password"
+                                       required>
+                            </div>
+                            
+                            <div class="col-md-12">
+                                <div class="form-check form-switch">
+                                    <input type="checkbox" name="is_active" id="is_active" value="1"
+                                           {{ old('is_active', true) ? 'checked' : '' }}
+                                           class="form-check-input">
+                                    <label for="is_active" class="form-check-label">Aktifkan pengguna</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer text-end">
+                        <a href="{{ route('admin.users.index') }}" class="btn btn-outline-secondary me-2">
+                            <i class="ph-duotone ph-x me-1"></i>Batal
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="ph-duotone ph-floppy-disk me-1"></i>Simpan
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="ph-duotone ph-info me-2"></i>Informasi
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted f-14 mb-3">Buat akun pengguna baru untuk mengakses sistem.</p>
+                    <ul class="list-unstyled mb-0 f-14">
+                        <li class="mb-2"><i class="ph ph-check-circle text-success me-2"></i>Email harus unik</li>
+                        <li class="mb-2"><i class="ph ph-check-circle text-success me-2"></i>Password minimal 8 karakter</li>
+                        <li class="mb-2"><i class="ph ph-check-circle text-success me-2"></i>Pilih role sesuai hak akses</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection

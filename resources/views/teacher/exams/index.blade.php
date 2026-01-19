@@ -1,132 +1,321 @@
-@extends('layouts.app')
+@extends('layouts.teacher')
 
 @section('title', 'Kelola Ujian')
-
-@section('header')
-    <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-bold text-gray-900">Kelola Ujian</h1>
-        <a href="{{ route('teacher.exams.create') }}" 
-           class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-            </svg>
-            Buat Ujian Baru
-        </a>
-    </div>
-@endsection
+@section('page-title', 'Kelola Ujian')
 
 @section('content')
-    <!-- Filters -->
-    <div class="bg-white shadow rounded-lg p-4 mb-6">
-        <form action="{{ route('teacher.exams.index') }}" method="GET" class="flex flex-wrap items-center gap-4">
-            <div class="flex-1 min-w-[200px]">
-                <input type="text" name="search" value="{{ request('search') }}" 
-                       placeholder="Cari ujian..."
-                       class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="page-block">
+            <div class="row align-items-center">
+                <div class="col-md-12">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="page-header-title">
+                                <h5 class="m-b-10">Kelola Ujian</h5>
+                            </div>
+                            <ul class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="ph-duotone ph-house"></i></a></li>
+                                <li class="breadcrumb-item active" aria-current="page">Ujian</li>
+                            </ul>
+                        </div>
+                        <a href="{{ route('teacher.exams.create') }}" class="btn btn-primary">
+                            <i class="ph-duotone ph-plus me-2"></i>Buat Ujian Baru
+                        </a>
+                    </div>
+                </div>
             </div>
-            <div class="w-48">
-                <select name="course" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                    <option value="">Semua Mata Pelajaran</option>
-                    @foreach($courses as $course)
-                        <option value="{{ $course->id }}" {{ request('course') == $course->id ? 'selected' : '' }}>
-                            {{ $course->name }}
-                        </option>
-                    @endforeach
-                </select>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card stats-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div>
+                            <p class="text-muted mb-1 small">Total Ujian</p>
+                            <h3 class="mb-0">{{ $exams->total() }}</h3>
+                        </div>
+                        <div class="avatar avatar-md bg-light-primary">
+                            <i class="ph-duotone ph-exam text-primary"></i>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="w-40">
-                <select name="status" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                    <option value="">Semua Status</option>
-                    <option value="draft" {{ request('status') === 'draft' ? 'selected' : '' }}>Draft</option>
-                    <option value="published" {{ request('status') === 'published' ? 'selected' : '' }}>Published</option>
-                    <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Sedang Berlangsung</option>
-                    <option value="ended" {{ request('status') === 'ended' ? 'selected' : '' }}>Berakhir</option>
-                </select>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div>
+                            <p class="text-muted mb-1 small">Sedang Berlangsung</p>
+                            <h3 class="mb-0 text-success">{{ $exams->filter(fn($e) => $e->isActive())->count() }}</h3>
+                        </div>
+                        <div class="avatar avatar-md bg-light-success">
+                            <i class="ph-duotone ph-play-circle text-success"></i>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <button type="submit" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">
-                Filter
-            </button>
-        </form>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div>
+                            <p class="text-muted mb-1 small">Draft</p>
+                            <h3 class="mb-0 text-warning">{{ $exams->where('status', 'draft')->count() }}</h3>
+                        </div>
+                        <div class="avatar avatar-md bg-light-warning">
+                            <i class="ph-duotone ph-pencil-simple-line text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div>
+                            <p class="text-muted mb-1 small">Mata Pelajaran</p>
+                            <h3 class="mb-0 text-info">{{ $courses->count() }}</h3>
+                        </div>
+                        <div class="avatar avatar-md bg-light-info">
+                            <i class="ph-duotone ph-books text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form action="{{ route('teacher.exams.index') }}" method="GET">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label">Cari Ujian</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0">
+                                <i class="ph ph-magnifying-glass"></i>
+                            </span>
+                            <input type="text" name="search" value="{{ request('search') }}" 
+                                   placeholder="Nama ujian..."
+                                   class="form-control border-start-0">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Mata Pelajaran</label>
+                        <select name="course" class="form-select">
+                            <option value="">Semua Mapel</option>
+                            @foreach($courses as $course)
+                                <option value="{{ $course->id }}" {{ request('course') == $course->id ? 'selected' : '' }}>
+                                    {{ $course->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Status</label>
+                        <select name="status" class="form-select">
+                            <option value="">Semua Status</option>
+                            <option value="draft" {{ request('status') === 'draft' ? 'selected' : '' }}>Draft</option>
+                            <option value="published" {{ request('status') === 'published' ? 'selected' : '' }}>Published</option>
+                            <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Sedang Berlangsung</option>
+                            <option value="ended" {{ request('status') === 'ended' ? 'selected' : '' }}>Berakhir</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="ph-duotone ph-funnel me-1"></i>Filter
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
 
     <!-- Exams Table -->
-    <div class="bg-white shadow rounded-lg overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ujian</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jadwal</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Soal</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Peserta</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
-                </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-                @forelse($exams as $exam)
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4">
-                            <div class="text-sm font-medium text-gray-900">{{ $exam->title }}</div>
-                            <div class="text-sm text-gray-500">{{ $exam->course->name }}</div>
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="text-sm text-gray-900">{{ $exam->start_time->format('d M Y, H:i') }}</div>
-                            <div class="text-sm text-gray-500">{{ $exam->duration_minutes }} menit</div>
-                        </td>
-                        <td class="px-6 py-4">
-                            <span class="text-sm text-gray-900">{{ $exam->questions_count }} soal</span>
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="text-sm text-gray-900">{{ $exam->attempts_count }} / {{ $exam->course->students_count }}</div>
-                            @if($exam->isActive())
-                                <a href="{{ route('teacher.monitor.index', $exam) }}" 
-                                   class="text-xs text-indigo-600 hover:underline">
-                                    Monitor Live →
-                                </a>
-                            @endif
-                        </td>
-                        <td class="px-6 py-4">
-                            @if($exam->status === 'draft')
-                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
-                                    Draft
-                                </span>
-                            @elseif($exam->isActive())
-                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 animate-pulse">
-                                    ● Berlangsung
-                                </span>
-                            @elseif(!$exam->hasStarted())
-                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                                    Terjadwal
-                                </span>
-                            @else
-                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
-                                    Berakhir
-                                </span>
-                            @endif
-                        </td>
-                        <td class="px-6 py-4 text-right text-sm font-medium space-x-2">
-                            <a href="{{ route('teacher.exams.show', $exam) }}" 
-                               class="text-indigo-600 hover:text-indigo-900">Detail</a>
-                            <a href="{{ route('teacher.exams.edit', $exam) }}" 
-                               class="text-gray-600 hover:text-gray-900">Edit</a>
-                            <a href="{{ route('teacher.questions.index', $exam) }}" 
-                               class="text-green-600 hover:text-green-900">Soal</a>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="6" class="px-6 py-12 text-center text-gray-500">
-                            Belum ada ujian. <a href="{{ route('teacher.exams.create') }}" class="text-indigo-600 hover:underline">Buat ujian baru</a>
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-        
+    <div class="card table-card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">
+                <i class="ph-duotone ph-list-bullets me-2"></i>Daftar Ujian
+            </h5>
+            @if(request()->hasAny(['search', 'course', 'status']))
+                <a href="{{ route('teacher.exams.index') }}" class="btn btn-sm btn-outline-secondary">
+                    <i class="ph ph-x me-1"></i>Reset Filter
+                </a>
+            @endif
+        </div>
+        <div class="card-body p-0">
+            @if($exams->count() > 0)
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Ujian</th>
+                                <th>Token</th>
+                                <th>Jadwal</th>
+                                <th>Soal</th>
+                                <th>Peserta</th>
+                                <th>Status</th>
+                                <th class="text-end">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($exams as $exam)
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar avatar-sm me-3" style="width: 45px; height: 45px; display: inline-flex; align-items: center; justify-content: center; border-radius: 12px; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                                                <i class="ph-duotone ph-exam text-white"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0">{{ $exam->title }}</h6>
+                                                <small class="text-muted">
+                                                    <i class="ph ph-book-open me-1"></i>{{ $exam->course->name }}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <code class="text-primary font-monospace" style="font-size: 0.85rem; letter-spacing: 1px;">{{ $exam->access_token }}</code>
+                                            <button type="button" class="btn btn-sm btn-light p-1" 
+                                                    onclick="copyToClipboard('{{ $exam->access_token }}')" title="Salin Token">
+                                                <i class="ph ph-copy"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            @if($exam->type === 'flexible')
+                                                <span class="badge bg-light-info">
+                                                    <i class="ph ph-infinity me-1"></i>Fleksibel
+                                                </span>
+                                                <small class="text-muted d-block mt-1">
+                                                    <i class="ph ph-clock me-1"></i>{{ $exam->duration }} menit
+                                                </small>
+                                            @elseif($exam->start_time)
+                                                <span class="d-block">{{ $exam->start_time->format('d M Y') }}</span>
+                                                <small class="text-muted">
+                                                    <i class="ph ph-clock me-1"></i>{{ $exam->start_time->format('H:i') }} • {{ $exam->duration }} menit
+                                                </small>
+                                            @else
+                                                <span class="text-muted">-</span>
+                                            @endif
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light-info">
+                                            <i class="ph ph-list-numbers me-1"></i>{{ $exam->questions_count }} soal
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <span class="fw-medium">{{ $exam->attempts_count }}</span>
+                                            <span class="text-muted">/ {{ $exam->course->students_count ?? 0 }}</span>
+                                        </div>
+                                        @if($exam->isActive())
+                                            <a href="{{ route('teacher.monitor.index', $exam) }}" 
+                                               class="badge bg-success text-white text-decoration-none">
+                                                <i class="ph ph-broadcast me-1"></i>Monitor Live
+                                            </a>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if($exam->status === 'draft')
+                                            <span class="badge bg-light-secondary">
+                                                <i class="ph ph-pencil-simple me-1"></i>Draft
+                                            </span>
+                                        @elseif($exam->isActive())
+                                            <span class="badge bg-success animate-pulse">
+                                                <i class="ph ph-circle-fill me-1" style="font-size: 8px;"></i>Berlangsung
+                                            </span>
+                                        @elseif(!$exam->hasStarted())
+                                            <span class="badge bg-light-info">
+                                                <i class="ph ph-calendar me-1"></i>Terjadwal
+                                            </span>
+                                        @else
+                                            <span class="badge bg-light-danger">
+                                                <i class="ph ph-check-circle me-1"></i>Berakhir
+                                            </span>
+                                        @endif
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="btn-group">
+                                            <a href="{{ route('teacher.exams.show', $exam) }}" 
+                                               class="btn btn-sm btn-light-info" title="Detail">
+                                                <i class="ph-duotone ph-eye"></i>
+                                            </a>
+                                            <a href="{{ route('teacher.exams.edit', $exam) }}" 
+                                               class="btn btn-sm btn-light-warning" title="Edit">
+                                                <i class="ph-duotone ph-pencil-simple"></i>
+                                            </a>
+                                            <a href="{{ route('teacher.questions.index', $exam) }}" 
+                                               class="btn btn-sm btn-light-primary" title="Kelola Soal">
+                                                <i class="ph-duotone ph-list-bullets"></i>
+                                            </a>
+                                            @if($exam->status === 'draft')
+                                                <form action="{{ route('teacher.exams.publish', $exam) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-sm btn-success" title="Publish" onclick="return confirm('Publish ujian ini?')">
+                                                        <i class="ph-duotone ph-paper-plane-tilt"></i>
+                                                    </button>
+                                                </form>
+                                            @endif
+                                            <form action="{{ route('teacher.exams.destroy', $exam) }}" method="POST" class="d-inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-sm btn-light-danger" title="Hapus" 
+                                                        onclick="return confirm('Hapus ujian ini? Semua data akan dihapus permanen.')">
+                                                    <i class="ph-duotone ph-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @else
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="ph-duotone ph-exam"></i>
+                    </div>
+                    <h6>Belum Ada Ujian</h6>
+                    <p class="text-muted mb-3">Mulai buat ujian pertama Anda untuk mata pelajaran yang Anda ajar.</p>
+                    <a href="{{ route('teacher.exams.create') }}" class="btn btn-primary">
+                        <i class="ph-duotone ph-plus me-2"></i>Buat Ujian Baru
+                    </a>
+                </div>
+            @endif
+        </div>
         @if($exams->hasPages())
-            <div class="px-6 py-4 border-t border-gray-200">
+            <div class="card-footer">
                 {{ $exams->links() }}
             </div>
         @endif
     </div>
+
+    <script>
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                // Show temporary success feedback
+                const btn = event.target.closest('button');
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = '<i class="ph ph-check text-success"></i>';
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                }, 1500);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+            });
+        }
+    </script>
 @endsection

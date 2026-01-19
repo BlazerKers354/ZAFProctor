@@ -208,10 +208,10 @@
         examId: {{ $attempt->exam->id }},
         totalQuestions: {{ $questions->count() }},
         remainingTime: {{ $attempt->remaining_time }},
-        requireCamera: {{ $attempt->exam->require_camera ? 'true' : 'false' }},
-        requireFullscreen: {{ $attempt->exam->require_fullscreen ? 'true' : 'false' }},
+        requireCamera: {{ $attempt->exam->settings?->webcam_enabled ? 'true' : 'false' }},
+        requireFullscreen: {{ $attempt->exam->settings?->browser_lock_enabled ? 'true' : 'false' }},
         snapshotInterval: {{ $attempt->exam->settings?->snapshot_interval ?? 30 }},
-        maxViolations: {{ $attempt->exam->max_violations }},
+        maxViolations: {{ $attempt->exam->settings?->max_tab_switches ?? 5 }},
         warningThreshold: {{ $attempt->exam->settings?->warning_threshold ?? 3 }},
         csrfToken: '{{ csrf_token() }}',
         endpoints: {

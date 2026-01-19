@@ -55,19 +55,19 @@
                         <div class="col-6">
                             <div class="bg-light rounded-3 p-3">
                                 <small class="text-muted d-block mb-1">Waktu Mulai</small>
-                                <span class="f-w-600">{{ $exam->start_time->format('d M Y, H:i') }}</span>
+                                <span class="f-w-600">{{ $exam->start_time?->format('d M Y, H:i') ?? 'Fleksibel' }}</span>
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="bg-light rounded-3 p-3">
                                 <small class="text-muted d-block mb-1">Waktu Selesai</small>
-                                <span class="f-w-600">{{ $exam->end_time->format('d M Y, H:i') }}</span>
+                                <span class="f-w-600">{{ $exam->end_time?->format('d M Y, H:i') ?? 'Fleksibel' }}</span>
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="bg-light rounded-3 p-3">
                                 <small class="text-muted d-block mb-1">Durasi</small>
-                                <span class="f-w-600">{{ $exam->duration_minutes }} menit</span>
+                                <span class="f-w-600">{{ $exam->duration }} menit</span>
                             </div>
                         </div>
                         <div class="col-6">
@@ -79,7 +79,7 @@
                         <div class="col-6">
                             <div class="bg-light rounded-3 p-3">
                                 <small class="text-muted d-block mb-1">Nilai Minimum Lulus</small>
-                                <span class="f-w-600">{{ $exam->passing_score }}%</span>
+                                <span class="f-w-600">{{ $exam->settings->passing_score ?? 60 }}%</span>
                             </div>
                         </div>
                         <div class="col-6">
@@ -91,11 +91,11 @@
                     </div>
                     
                     <!-- Instructions -->
-                    @if($exam->instructions)
+                    @if($exam->description)
                         <div class="mb-4">
                             <h6 class="f-w-600 mb-2">Petunjuk Ujian</h6>
                             <div class="bg-light rounded-3 p-3 f-14">
-                                {!! nl2br(e($exam->instructions)) !!}
+                                {!! nl2br(e($exam->description)) !!}
                             </div>
                         </div>
                     @endif
@@ -104,15 +104,15 @@
                     <div class="alert alert-warning mb-4">
                         <h6 class="f-w-600 mb-2"><i class="ph ph-warning me-1"></i>Persyaratan Proctoring</h6>
                         <ul class="mb-0 ps-3 f-14">
-                            @if($exam->require_camera)
+                            @if($exam->settings?->webcam_enabled)
                                 <li>Akses kamera diperlukan untuk pengawasan</li>
                             @endif
-                            @if($exam->require_fullscreen)
+                            @if($exam->settings?->browser_lock_enabled)
                                 <li>Mode fullscreen akan diaktifkan</li>
                             @endif
                             <li>Dilarang membuka tab/aplikasi lain</li>
                             <li>Dilarang copy/paste</li>
-                            <li>Maksimal {{ $exam->max_violations }} pelanggaran sebelum auto-submit</li>
+                            <li>Maksimal {{ $exam->settings?->max_tab_switches ?? 5 }} pelanggaran sebelum auto-submit</li>
                         </ul>
                     </div>
                     

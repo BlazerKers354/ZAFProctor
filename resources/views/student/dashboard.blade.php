@@ -145,7 +145,7 @@
                                     <p class="text-muted mb-2 f-12">{{ $exam->course?->name ?? 'Ujian Umum' }}</p>
                                     <div class="d-flex flex-wrap gap-2">
                                         <span class="badge bg-light text-dark">
-                                            <i class="ph ph-clock me-1"></i>{{ $exam->duration_minutes }} menit
+                                            <i class="ph ph-clock me-1"></i>{{ $exam->duration }} menit
                                         </span>
                                         <span class="badge bg-light text-dark">
                                             <i class="ph ph-question me-1"></i>{{ $exam->questions_count ?? $exam->questions()->count() }} Soal
@@ -204,7 +204,7 @@
                                         <span class="badge badge-soft-warning">
                                             <i class="ph ph-clock me-1"></i>{{ $exam->start_time?->format('H:i') ?? 'TBA' }}
                                         </span>
-                                        <span class="badge bg-light text-muted">{{ $exam->duration_minutes }} min</span>
+                                        <span class="badge bg-light text-muted">{{ $exam->duration }} min</span>
                                     </div>
                                 </div>
                             </div>
@@ -248,6 +248,7 @@
                 </thead>
                 <tbody>
                     @forelse($recentResults as $attempt)
+                        @if($attempt->exam)
                         <tr>
                             <td>
                                 <div class="d-flex align-items-center gap-3">
@@ -299,6 +300,7 @@
                                 @endif
                             </td>
                         </tr>
+                        @endif
                     @empty
                         <tr>
                             <td colspan="5" class="text-center py-5">

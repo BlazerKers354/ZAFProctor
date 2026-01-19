@@ -17,13 +17,18 @@ class EnsureExamInProgress
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $attemptId = $request->route('attempt');
+        $attemptParam = $request->route('attempt');
         
-        if (!$attemptId) {
+        if (!$attemptParam) {
             abort(404, 'Exam attempt not found.');
         }
 
-        $attempt = ExamAttempt::find($attemptId);
+        // Handle both route model binding (ExamAttempt instance) and raw ID
+        if ($attemptParam instanceof ExamAttempt) {
+            $attempt = $attemptParam;
+        } else {
+            $attempt = ExamAttempt::find($attemptParam);
+        }
 
         if (!$attempt) {
             abort(404, 'Exam attempt not found.');

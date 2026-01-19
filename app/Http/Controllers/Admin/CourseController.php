@@ -50,7 +50,8 @@ class CourseController extends Controller
     public function create(): View
     {
         $teachers = User::byRole(Role::TEACHER)->active()->get();
-        return view('admin.courses.create', compact('teachers'));
+        $students = User::byRole(Role::STUDENT)->active()->get();
+        return view('admin.courses.create', compact('teachers', 'students'));
     }
 
     /**
@@ -62,13 +63,23 @@ class CourseController extends Controller
             'code' => ['required', 'string', 'max:20', 'unique:courses'],
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
-            'teacher_id' => ['required', 'exists:users,id'],
+            'teacher_id' => ['nullable', 'exists:users,id'],
+            'students' => ['nullable', 'array'],
+            'students.*' => ['exists:users,id'],
             'is_active' => ['boolean'],
         ]);
 
         $validated['is_active'] = $request->boolean('is_active', true);
+        
+        $students = $request->input('students', []);
+        unset($validated['students']);
 
-        Course::create($validated);
+        $course = Course::create($validated);
+        
+        // Attach students if any
+        if (!empty($students)) {
+            $course->students()->attach($students);
+        }
 
         return redirect()->route('admin.courses.index')
             ->with('success', 'Mata pelajaran berhasil dibuat.');
