@@ -34,6 +34,22 @@ class MonitorController extends Controller
             }])
             ->get();
 
+        // Active attempts (in progress)
+        $activeAttempts = $attempts->where('status', ExamAttempt::STATUS_IN_PROGRESS);
+        
+        // Submitted count
+        $submittedCount = $attempts->whereIn('status', [ExamAttempt::STATUS_SUBMITTED, ExamAttempt::STATUS_GRADED])->count();
+        
+        // Total violations
+        $totalViolations = $attempts->sum('violation_count');
+        
+        // Recent violations
+        $recentViolations = \App\Models\ProctoringLog::whereIn('attempt_id', $attempts->pluck('id'))
+            ->with('attempt.user')
+            ->latest()
+            ->take(10)
+            ->get();
+
         $statistics = $this->examService->getExamStatistics($exam);
 
         $statusCounts = [
@@ -42,7 +58,16 @@ class MonitorController extends Controller
             'submitted' => $attempts->whereIn('status', [ExamAttempt::STATUS_SUBMITTED, ExamAttempt::STATUS_GRADED])->count(),
         ];
 
-        return view('teacher.monitor.index', compact('exam', 'attempts', 'statistics', 'statusCounts'));
+        return view('teacher.monitor.index', compact(
+            'exam', 
+            'attempts', 
+            'activeAttempts',
+            'submittedCount',
+            'totalViolations',
+            'recentViolations',
+            'statistics', 
+            'statusCounts'
+        ));
     }
 
     /**

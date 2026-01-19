@@ -178,10 +178,10 @@
                                     </div>
                                     
                                     <div class="d-flex gap-1 mt-2">
-                                        <a href="{{ route('teacher.monitor.attempt', $attempt) }}"
+                                        <a href="{{ route('teacher.monitor.attempt', [$exam, $attempt]) }}"
                                            class="btn btn-sm btn-light flex-grow-1">Detail</a>
                                         @if($attempt->violation_count > 0)
-                                            <a href="{{ route('teacher.monitor.logs', $attempt) }}"
+                                            <a href="{{ route('teacher.monitor.logs', [$exam, $attempt]) }}"
                                                class="btn btn-sm btn-danger">Log</a>
                                         @endif
                                     </div>

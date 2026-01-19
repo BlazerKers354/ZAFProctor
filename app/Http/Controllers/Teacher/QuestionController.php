@@ -44,21 +44,69 @@ class QuestionController extends Controller
     {
         $this->authorize('manageQuestions', $exam);
 
-        $validated = $request->validate([
+        // Custom validation rules based on question type
+        $rules = [
             'question_type' => ['required', 'in:multiple_choice,essay'],
-            'question' => ['required', 'string'],
-            'points' => ['required', 'integer', 'min:1'],
+            'question' => ['required', 'string', 'min:10'],
+            'points' => ['required', 'integer', 'min:1', 'max:100'],
             'explanation' => ['nullable', 'string'],
-            'options' => ['required_if:question_type,multiple_choice', 'array', 'min:2'],
-            'options.*.text' => ['required_if:question_type,multiple_choice', 'string'],
-            'correct_option' => ['required_if:question_type,multiple_choice', 'integer'],
-        ]);
+            'question_image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+        ];
 
-        DB::transaction(function () use ($validated, $exam) {
+        // Add multiple choice specific validation
+        if ($request->input('question_type') === 'multiple_choice') {
+            $rules['options'] = ['required', 'array', 'min:2', 'max:8'];
+            $rules['options.*.text'] = ['required', 'string', 'min:1'];
+            $rules['correct_option'] = ['required', 'integer', 'min:0'];
+        }
+
+        $messages = [
+            'question.required' => 'Pertanyaan wajib diisi.',
+            'question.min' => 'Pertanyaan minimal 10 karakter.',
+            'points.required' => 'Poin wajib diisi.',
+            'points.min' => 'Poin minimal 1.',
+            'points.max' => 'Poin maksimal 100.',
+            'options.required' => 'Pilihan jawaban wajib diisi untuk soal pilihan ganda.',
+            'options.min' => 'Minimal 2 pilihan jawaban.',
+            'options.*.text.required' => 'Semua pilihan jawaban harus diisi.',
+            'options.*.text.min' => 'Pilihan jawaban tidak boleh kosong.',
+            'correct_option.required' => 'Pilih salah satu jawaban yang benar.',
+            'question_image.image' => 'File harus berupa gambar.',
+            'question_image.max' => 'Ukuran gambar maksimal 2MB.',
+        ];
+
+        $validated = $request->validate($rules, $messages);
+
+        // Filter empty options
+        if (isset($validated['options'])) {
+            $validated['options'] = array_filter($validated['options'], function ($option) {
+                return !empty(trim($option['text'] ?? ''));
+            });
+            $validated['options'] = array_values($validated['options']); // Re-index
+            
+            // Validate minimum 2 options after filtering
+            if (count($validated['options']) < 2) {
+                return back()->withInput()->withErrors(['options' => 'Minimal 2 pilihan jawaban yang valid.']);
+            }
+
+            // Validate correct_option is within range
+            if ($validated['correct_option'] >= count($validated['options'])) {
+                return back()->withInput()->withErrors(['correct_option' => 'Jawaban benar tidak valid.']);
+            }
+        }
+
+        DB::transaction(function () use ($validated, $exam, $request) {
+            // Handle image upload
+            $imagePath = null;
+            if ($request->hasFile('question_image')) {
+                $imagePath = $request->file('question_image')->store('questions', 'public');
+            }
+
             $question = Question::create([
                 'exam_id' => $exam->id,
                 'type' => $validated['question_type'],
                 'question' => $validated['question'],
+                'question_image' => $imagePath,
                 'points' => $validated['points'],
                 'explanation' => $validated['explanation'] ?? null,
                 'order' => $exam->questions()->max('order') + 1,
@@ -79,6 +127,12 @@ class QuestionController extends Controller
                 }
             }
         });
+
+        // Handle different save actions
+        if ($request->input('action') === 'save_and_new') {
+            return redirect()->route('teacher.questions.create', $exam)
+                ->with('success', 'Soal berhasil ditambahkan. Silakan tambah soal berikutnya.');
+        }
 
         return redirect()->route('teacher.questions.index', $exam)
             ->with('success', 'Soal berhasil ditambahkan.');
@@ -105,18 +159,75 @@ class QuestionController extends Controller
 
         $isMultipleChoice = $question->type === Question::TYPE_MULTIPLE_CHOICE;
         
-        $validated = $request->validate([
-            'question' => ['required', 'string'],
-            'points' => ['required', 'integer', 'min:1'],
+        // Build validation rules
+        $rules = [
+            'question' => ['required', 'string', 'min:10'],
+            'points' => ['required', 'integer', 'min:1', 'max:100'],
             'explanation' => ['nullable', 'string'],
-            'options' => [$isMultipleChoice ? 'required' : 'nullable', 'array', 'min:2'],
-            'options.*.text' => [$isMultipleChoice ? 'required' : 'nullable', 'string'],
-            'correct_option' => [$isMultipleChoice ? 'required' : 'nullable', 'integer'],
-        ]);
+            'question_image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+            'remove_image' => ['nullable', 'boolean'],
+        ];
 
-        DB::transaction(function () use ($validated, $question) {
+        if ($isMultipleChoice) {
+            $rules['options'] = ['required', 'array', 'min:2', 'max:8'];
+            $rules['options.*.text'] = ['required', 'string', 'min:1'];
+            $rules['correct_option'] = ['required', 'integer', 'min:0'];
+        }
+
+        $messages = [
+            'question.required' => 'Pertanyaan wajib diisi.',
+            'question.min' => 'Pertanyaan minimal 10 karakter.',
+            'points.required' => 'Poin wajib diisi.',
+            'points.min' => 'Poin minimal 1.',
+            'points.max' => 'Poin maksimal 100.',
+            'options.required' => 'Pilihan jawaban wajib diisi.',
+            'options.min' => 'Minimal 2 pilihan jawaban.',
+            'options.*.text.required' => 'Semua pilihan jawaban harus diisi.',
+            'options.*.text.min' => 'Pilihan jawaban tidak boleh kosong.',
+            'correct_option.required' => 'Pilih salah satu jawaban yang benar.',
+            'question_image.image' => 'File harus berupa gambar.',
+            'question_image.max' => 'Ukuran gambar maksimal 2MB.',
+        ];
+
+        $validated = $request->validate($rules, $messages);
+
+        // Filter empty options for multiple choice
+        if ($isMultipleChoice && isset($validated['options'])) {
+            $validated['options'] = array_filter($validated['options'], function ($option) {
+                return !empty(trim($option['text'] ?? ''));
+            });
+            $validated['options'] = array_values($validated['options']);
+            
+            if (count($validated['options']) < 2) {
+                return back()->withInput()->withErrors(['options' => 'Minimal 2 pilihan jawaban yang valid.']);
+            }
+
+            if ($validated['correct_option'] >= count($validated['options'])) {
+                return back()->withInput()->withErrors(['correct_option' => 'Jawaban benar tidak valid.']);
+            }
+        }
+
+        DB::transaction(function () use ($validated, $question, $request) {
+            // Handle image upload/removal
+            $imagePath = $question->question_image;
+            
+            if ($request->has('remove_image') && $request->remove_image) {
+                // Remove existing image
+                if ($imagePath) {
+                    Storage::disk('public')->delete($imagePath);
+                }
+                $imagePath = null;
+            } elseif ($request->hasFile('question_image')) {
+                // Remove old image if exists
+                if ($imagePath) {
+                    Storage::disk('public')->delete($imagePath);
+                }
+                $imagePath = $request->file('question_image')->store('questions', 'public');
+            }
+
             $question->update([
                 'question' => $validated['question'],
+                'question_image' => $imagePath,
                 'points' => $validated['points'],
                 'explanation' => $validated['explanation'] ?? null,
             ]);
@@ -146,9 +257,14 @@ class QuestionController extends Controller
     /**
      * Remove the specified question.
      */
-    public function destroy(Exam $exam, Question $question): RedirectResponse
+    public function destroy(Request $request, Exam $exam, Question $question): RedirectResponse|JsonResponse
     {
         $this->authorize('manageQuestions', $exam);
+
+        // Delete associated image if exists
+        if ($question->question_image) {
+            Storage::disk('public')->delete($question->question_image);
+        }
 
         $question->delete();
 
@@ -156,6 +272,11 @@ class QuestionController extends Controller
         $exam->questions()->orderBy('order')->get()->each(function ($q, $index) {
             $q->update(['order' => $index + 1]);
         });
+
+        // Return JSON for AJAX requests
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Soal berhasil dihapus.']);
+        }
 
         return redirect()->route('teacher.questions.index', $exam)
             ->with('success', 'Soal berhasil dihapus.');

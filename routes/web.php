@@ -100,7 +100,7 @@ Route::middleware(['auth', 'check.active'])->group(function () {
     });
     
     // Teacher Routes
-    Route::prefix('teacher')->name('teacher.')->middleware('role:teacher,admin')->group(function () {
+    Route::prefix('teacher')->name('teacher.')->middleware('role:teacher')->group(function () {
         // Exam Management
         Route::resource('exams', TeacherExamController::class);
         Route::post('exams/{exam}/publish', [TeacherExamController::class, 'publish'])->name('exams.publish');

@@ -24,11 +24,6 @@ class ExamPolicy
      */
     public function view(User $user, Exam $exam): bool
     {
-        // Admin can view all
-        if ($user->isAdmin()) {
-            return true;
-        }
-
         // Teacher can view their own exams
         if ($user->isTeacher() && $exam->created_by === $user->id) {
             return true;
@@ -48,7 +43,7 @@ class ExamPolicy
      */
     public function create(User $user): bool
     {
-        return $user->isAdmin() || $user->isTeacher();
+        return $user->isTeacher();
     }
 
     /**
@@ -56,12 +51,7 @@ class ExamPolicy
      */
     public function update(User $user, Exam $exam): bool
     {
-        // Admin can update all
-        if ($user->isAdmin()) {
-            return true;
-        }
-
-        // Teacher can update their own exams that are not completed
+        // Only teacher can update their own exams that are not completed
         return $user->isTeacher() 
             && $exam->created_by === $user->id 
             && !in_array($exam->status, [Exam::STATUS_COMPLETED, Exam::STATUS_ONGOING]);
@@ -72,12 +62,7 @@ class ExamPolicy
      */
     public function delete(User $user, Exam $exam): bool
     {
-        // Admin can delete all
-        if ($user->isAdmin()) {
-            return true;
-        }
-
-        // Teacher can delete their own exams (any status)
+        // Only teacher can delete their own exams
         return $user->isTeacher() && $exam->created_by === $user->id;
     }
 
@@ -123,11 +108,6 @@ class ExamPolicy
      */
     public function viewResults(User $user, Exam $exam): bool
     {
-        // Admin can view all
-        if ($user->isAdmin()) {
-            return true;
-        }
-
         // Teacher can view results of their exams
         if ($user->isTeacher() && $exam->created_by === $user->id) {
             return true;
@@ -146,12 +126,7 @@ class ExamPolicy
      */
     public function monitor(User $user, Exam $exam): bool
     {
-        // Admin can monitor all
-        if ($user->isAdmin()) {
-            return true;
-        }
-
-        // Teacher can monitor their own exams
+        // Only teacher can monitor their own exams
         return $user->isTeacher() && $exam->created_by === $user->id;
     }
 }

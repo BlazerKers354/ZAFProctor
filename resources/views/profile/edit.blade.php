@@ -1,4 +1,12 @@
-@extends('layouts.student')
+@php
+    $layoutName = match(true) {
+        auth()->user()->isAdmin() => 'layouts.admin',
+        auth()->user()->isTeacher() => 'layouts.teacher',
+        default => 'layouts.student',
+    };
+@endphp
+
+@extends($layoutName)
 
 @section('title', 'Edit Profil')
 

@@ -790,19 +790,6 @@
                         </a>
                     </li>
 
-                    <!-- Exam Management -->
-                    <li class="pc-item pc-caption">
-                        <label>Ujian</label>
-                    </li>
-
-                    <!-- All Exams -->
-                    <li class="pc-item {{ request()->routeIs('teacher.exams.*') ? 'active' : '' }}">
-                        <a href="{{ route('teacher.exams.index') }}" class="pc-link">
-                            <span class="pc-micon"><i class="ph-duotone ph-exam"></i></span>
-                            <span class="pc-mtext">Kelola Ujian</span>
-                        </a>
-                    </li>
-
                     <!-- Settings -->
                     <li class="pc-item pc-caption">
                         <label>Pengaturan</label>
