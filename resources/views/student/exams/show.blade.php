@@ -106,6 +106,7 @@
                         <ul class="mb-0 ps-3 f-14">
                             @if($exam->settings?->webcam_enabled)
                                 <li>Akses kamera diperlukan untuk pengawasan</li>
+                                <li>Wajah harus terdeteksi selama ujian berlangsung</li>
                             @endif
                             @if($exam->settings?->browser_lock_enabled)
                                 <li>Mode fullscreen akan diaktifkan</li>
@@ -116,37 +117,48 @@
                         </ul>
                     </div>
                     
-                    <!-- Start Exam Form -->
+                    <!-- Start Exam Button/Form -->
                     @if($exam->isActive() && (!$attempt || $attempt->status === 'not_started'))
-                        <form action="{{ route('student.exams.start', $exam) }}" method="POST">
-                            @csrf
-                            
-                            <div class="mb-3">
-                                <label for="access_token" class="form-label f-w-500">Token Akses</label>
-                                <input type="text" 
-                                       name="access_token" 
-                                       id="access_token"
-                                       placeholder="Masukkan token yang diberikan pengawas"
-                                       class="form-control @error('access_token') is-invalid @enderror"
-                                       required>
-                                @error('access_token')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            
-                            <div class="mb-4">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="agree" name="agree" required>
-                                    <label class="form-check-label f-14" for="agree">
-                                        Saya memahami dan menyetujui aturan ujian di atas
-                                    </label>
+                        @if($exam->settings?->webcam_enabled)
+                            {{-- If proctoring enabled, redirect to pre-check page --}}
+                            <a href="{{ route('student.exams.pre-check', $exam) }}" class="btn btn-primary w-100">
+                                <i class="ph ph-camera me-1"></i>Mulai Persiapan Ujian
+                            </a>
+                            <p class="text-center text-muted mt-2 mb-0 f-12">
+                                Anda akan diminta untuk verifikasi kamera dan wajah terlebih dahulu
+                            </p>
+                        @else
+                            {{-- No proctoring, show token form directly --}}
+                            <form action="{{ route('student.exams.start', $exam) }}" method="POST">
+                                @csrf
+                                
+                                <div class="mb-3">
+                                    <label for="access_token" class="form-label f-w-500">Token Akses</label>
+                                    <input type="text" 
+                                           name="access_token" 
+                                           id="access_token"
+                                           placeholder="Masukkan token yang diberikan pengawas"
+                                           class="form-control @error('access_token') is-invalid @enderror"
+                                           required>
+                                    @error('access_token')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
-                            </div>
-                            
-                            <button type="submit" class="btn btn-primary w-100">
-                                <i class="ph ph-play me-1"></i>Mulai Ujian
-                            </button>
-                        </form>
+                                
+                                <div class="mb-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="agree" name="agree" required>
+                                        <label class="form-check-label f-14" for="agree">
+                                            Saya memahami dan menyetujui aturan ujian di atas
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="ph ph-play me-1"></i>Mulai Ujian
+                                </button>
+                            </form>
+                        @endif
                     @elseif($attempt && $attempt->isInProgress())
                         <a href="{{ route('student.exams.take', $attempt) }}" class="btn btn-success w-100">
                             <i class="ph ph-play me-1"></i>Lanjutkan Ujian

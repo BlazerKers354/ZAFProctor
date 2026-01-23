@@ -146,6 +146,7 @@ Route::middleware(['auth', 'check.active'])->group(function () {
         // Exams
         Route::get('exams', [StudentExamController::class, 'index'])->name('exams.index');
         Route::get('exams/{exam}', [StudentExamController::class, 'show'])->name('exams.show');
+        Route::get('exams/{exam}/pre-check', [StudentExamController::class, 'preCheck'])->name('exams.pre-check');
         Route::post('exams/{exam}/start', [StudentExamController::class, 'start'])->name('exams.start');
         
         // Active Exam Session

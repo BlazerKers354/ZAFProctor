@@ -1,826 +1,1411 @@
-@extends('layouts.exam')
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
-@section('content')
-    <div id="exam-app" class="min-h-screen flex flex-col">
-        <!-- Top Bar -->
-        <div class="sticky top-0 z-50 shadow-lg" style="background: var(--exam-header-bg);">
-            <div class="px-4 lg:px-6 py-3">
-                <div class="flex items-center justify-between">
-                    <!-- Left: Exam Info -->
-                    <div class="flex items-center space-x-4">
-                        <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg">
-                            <i class="bi bi-journal-text text-white text-lg"></i>
+    <title>{{ $attempt->exam->title }} - {{ config('app.name', 'ZAFProctor') }}</title>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Phosphor Icons -->
+    <link rel="stylesheet" href="{{ asset('assets/fonts/phosphor/regular/style.css') }}">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    
+    <!-- Custom Exam Styles -->
+    <style>
+        :root {
+            --pc-sidebar-width: 280px;
+            --pc-header-height: 70px;
+            --exam-primary: #4680ff;
+            --exam-success: #2ca87f;
+            --exam-warning: #e58a00;
+            --exam-danger: #dc2626;
+            --exam-dark: #1c232f;
+            --exam-light: #f8f9fa;
+        }
+
+        * {
+            font-family: 'Open Sans', sans-serif;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: var(--exam-primary); border-radius: 10px; opacity: 0.5; }
+
+        /* Header */
+        .exam-header {
+            background: linear-gradient(135deg, var(--exam-dark) 0%, #111827 100%);
+            height: var(--pc-header-height);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1030;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        /* Sidebar */
+        .exam-sidebar {
+            position: fixed;
+            left: 0;
+            top: var(--pc-header-height);
+            width: var(--pc-sidebar-width);
+            height: calc(100vh - var(--pc-header-height));
+            background: linear-gradient(180deg, var(--exam-dark) 0%, #111827 100%);
+            border-right: 1px solid rgba(255,255,255,0.05);
+            overflow-y: auto;
+            z-index: 1020;
+        }
+
+        /* Main Content */
+        .exam-content {
+            margin-left: var(--pc-sidebar-width);
+            margin-top: var(--pc-header-height);
+            padding: 24px;
+            min-height: calc(100vh - var(--pc-header-height));
+            overflow-y: auto;
+            max-height: calc(100vh - var(--pc-header-height));
+        }
+
+        /* Camera Container */
+        .camera-box {
+            width: 100px;
+            height: 70px;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #374151;
+            position: relative;
+            border: 2px solid rgba(255,255,255,0.1);
+        }
+        .camera-box video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1);
+        }
+        .camera-box canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            transform: scaleX(-1);
+        }
+        .camera-status {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+        }
+        .camera-status.active { background: var(--exam-success); }
+        .camera-status.inactive { background: var(--exam-danger); }
+        .camera-placeholder {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #374151;
+            color: #9ca3af;
+        }
+
+        /* Timer Box */
+        .timer-box {
+            background: rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 8px 16px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .timer-display {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #fff;
+            letter-spacing: 2px;
+        }
+        .timer-box.warning {
+            background: linear-gradient(135deg, var(--exam-danger) 0%, #b91c1c 100%);
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        /* Violation Badge */
+        .violation-badge {
+            background: linear-gradient(135deg, var(--exam-danger) 0%, #b91c1c 100%);
+            border-radius: 12px;
+            padding: 8px 14px;
+            display: none;
+        }
+        .violation-badge.show { display: flex; }
+
+        /* Question Navigation */
+        .question-nav-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+        }
+        .q-nav-btn {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: rgba(255,255,255,0.08);
+            color: #9ca3af;
+        }
+        .q-nav-btn:hover {
+            background: rgba(255,255,255,0.15);
+            transform: translateY(-2px);
+        }
+        .q-nav-btn.answered {
+            background: linear-gradient(135deg, var(--exam-success) 0%, #22c55e 100%);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(44, 168, 127, 0.3);
+        }
+        .q-nav-btn.current {
+            box-shadow: 0 0 0 2px #fff;
+        }
+
+        /* Legend */
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .legend-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 6px;
+        }
+        .legend-dot.answered { background: linear-gradient(135deg, var(--exam-success) 0%, #22c55e 100%); }
+        .legend-dot.unanswered { background: rgba(255,255,255,0.08); }
+        .legend-dot.current { background: rgba(255,255,255,0.08); box-shadow: 0 0 0 2px #fff; }
+
+        /* Progress Card */
+        .progress-card {
+            background: linear-gradient(135deg, var(--exam-primary) 0%, #6366f1 100%);
+            border-radius: 16px;
+            padding: 20px;
+            color: #fff;
+        }
+        .progress-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+        .progress-label {
+            font-size: 0.75rem;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Question Card */
+        .question-card {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 4px 25px rgba(0,0,0,0.06);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .question-header {
+            background: linear-gradient(135deg, var(--exam-dark) 0%, #1f2937 100%);
+            padding: 20px 24px;
+            color: #fff;
+        }
+        .question-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        .question-points {
+            background: rgba(70, 128, 255, 0.2);
+            color: #93c5fd;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .question-body {
+            padding: 28px;
+        }
+        .question-text {
+            font-size: 1.15rem;
+            line-height: 1.8;
+            color: #374151;
+            margin-bottom: 24px;
+        }
+
+        /* Option Cards */
+        .option-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 16px 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 14px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: #fff;
+        }
+        .option-item:hover {
+            border-color: var(--exam-primary);
+            background: linear-gradient(135deg, rgba(70, 128, 255, 0.03) 0%, rgba(99, 102, 241, 0.03) 100%);
+            transform: translateX(4px);
+        }
+        .option-item.selected {
+            border-color: var(--exam-primary);
+            background: linear-gradient(135deg, rgba(70, 128, 255, 0.08) 0%, rgba(99, 102, 241, 0.08) 100%);
+        }
+        .option-letter {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            border: 2px solid #d1d5db;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: #6b7280;
+            margin-right: 16px;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+        }
+        .option-item.selected .option-letter {
+            background: var(--exam-primary);
+            border-color: var(--exam-primary);
+            color: #fff;
+        }
+        .option-text {
+            font-size: 1rem;
+            color: #374151;
+            line-height: 1.6;
+            padding-top: 6px;
+        }
+
+        /* Essay Textarea */
+        .essay-textarea {
+            width: 100%;
+            min-height: 200px;
+            border: 2px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 16px 20px;
+            font-size: 1rem;
+            line-height: 1.7;
+            resize: vertical;
+            transition: all 0.2s ease;
+        }
+        .essay-textarea:focus {
+            outline: none;
+            border-color: var(--exam-primary);
+            box-shadow: 0 0 0 4px rgba(70, 128, 255, 0.1);
+        }
+
+        /* Navigation Buttons */
+        .nav-footer {
+            background: #f9fafb;
+            padding: 20px 28px;
+            border-top: 1px solid #e5e7eb;
+        }
+        .btn-nav {
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+        .btn-nav-outline {
+            background: #fff;
+            border: 2px solid #d1d5db;
+            color: #374151;
+        }
+        .btn-nav-outline:hover {
+            border-color: #9ca3af;
+            background: #f9fafb;
+        }
+        .btn-nav-primary {
+            background: linear-gradient(135deg, var(--exam-primary) 0%, #6366f1 100%);
+            border: none;
+            color: #fff;
+        }
+        .btn-nav-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(70, 128, 255, 0.3);
+            color: #fff;
+        }
+        .btn-nav-success {
+            background: linear-gradient(135deg, var(--exam-success) 0%, #22c55e 100%);
+            border: none;
+            color: #fff;
+        }
+        .btn-nav-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(44, 168, 127, 0.3);
+            color: #fff;
+        }
+
+        /* Warning Banner */
+        .warning-banner {
+            position: fixed;
+            top: var(--pc-header-height);
+            left: var(--pc-sidebar-width);
+            right: 0;
+            background: linear-gradient(135deg, var(--exam-danger) 0%, #b91c1c 100%);
+            color: #fff;
+            padding: 12px 20px;
+            text-align: center;
+            z-index: 1025;
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+        .warning-banner.show { display: block; }
+        @keyframes slideDown {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Modals */
+        .exam-modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 1040;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .exam-modal-backdrop.show { display: flex; }
+        .exam-modal {
+            background: #fff;
+            border-radius: 24px;
+            max-width: 450px;
+            width: 90%;
+            overflow: hidden;
+            animation: modalIn 0.3s ease;
+        }
+        @keyframes modalIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .exam-modal-header {
+            padding: 28px;
+            text-align: center;
+        }
+        .exam-modal-header.success { background: linear-gradient(135deg, var(--exam-success) 0%, #22c55e 100%); }
+        .exam-modal-header.warning { background: linear-gradient(135deg, var(--exam-warning) 0%, #f59e0b 100%); }
+        .exam-modal-header.danger { background: linear-gradient(135deg, var(--exam-danger) 0%, #b91c1c 100%); }
+        .exam-modal-header.primary { background: linear-gradient(135deg, var(--exam-primary) 0%, #6366f1 100%); }
+        .exam-modal-icon {
+            width: 70px;
+            height: 70px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 32px;
+            color: #fff;
+        }
+        .exam-modal-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #fff;
+            margin: 0;
+        }
+        .exam-modal-body {
+            padding: 24px 28px;
+        }
+        .exam-modal-footer {
+            padding: 0 28px 24px;
+            display: flex;
+            gap: 12px;
+        }
+
+        /* Submit Summary */
+        .submit-summary {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .summary-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--exam-dark);
+        }
+
+        /* Hidden on load */
+        .question-panel { display: none; }
+        .question-panel.active { display: block; }
+
+        /* Face Modals */
+        .face-modal { z-index: 1050; }
+
+        /* Responsive */
+        @media (max-width: 991px) {
+            .exam-sidebar { width: 240px; }
+            .exam-content { margin-left: 240px; }
+            :root { --pc-sidebar-width: 240px; }
+        }
+        @media (max-width: 767px) {
+            .exam-sidebar { 
+                transform: translateX(-100%); 
+                width: 280px;
+                transition: transform 0.3s ease;
+            }
+            .exam-sidebar.show { transform: translateX(0); }
+            .exam-content { margin-left: 0; }
+            .warning-banner { left: 0; }
+        }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+    <!-- Header -->
+    <header class="exam-header">
+        <div class="container-fluid h-100">
+            <div class="d-flex align-items-center justify-content-between h-100 px-3">
+                <!-- Left: Exam Info -->
+                <div class="d-flex align-items-center gap-3">
+                    <button class="btn btn-link text-white d-lg-none p-0 me-2" onclick="toggleSidebar()">
+                        <i class="bi bi-list fs-4"></i>
+                    </button>
+                    <div class="d-flex align-items-center justify-content-center rounded-3" style="width: 44px; height: 44px; background: linear-gradient(135deg, var(--exam-primary) 0%, #6366f1 100%);">
+                        <i class="bi bi-file-text text-white fs-5"></i>
+                    </div>
+                    <div class="d-none d-sm-block">
+                        <h1 class="text-white mb-0 fw-semibold" style="font-size: 1.1rem;">{{ $attempt->exam->title }}</h1>
+                        <div class="d-flex align-items-center gap-2 text-secondary" style="font-size: 0.8rem;">
+                            <i class="bi bi-book"></i>
+                            <span>{{ $attempt->exam->course->name }}</span>
                         </div>
-                        <div>
-                            <h1 class="text-white font-semibold text-lg leading-tight">{{ $attempt->exam->title }}</h1>
-                            <div class="flex items-center space-x-2 text-gray-400 text-sm">
-                                <i class="bi bi-book"></i>
-                                <span>{{ $attempt->exam->course->name }}</span>
-                            </div>
+                    </div>
+                </div>
+                
+                <!-- Right: Controls -->
+                <div class="d-flex align-items-center gap-3">
+                    <!-- Camera Preview -->
+                    <div class="camera-box d-none d-md-block">
+                        <video id="camera-preview" autoplay muted playsinline></video>
+                        <canvas id="face-canvas"></canvas>
+                        <div id="camera-status" class="camera-status inactive"></div>
+                        <div id="camera-placeholder" class="camera-placeholder">
+                            <i class="bi bi-camera-video-off fs-5"></i>
                         </div>
                     </div>
                     
-                    <div class="flex items-center space-x-4 lg:space-x-6">
-                        <!-- Camera Preview -->
-                        <div class="camera-container hidden sm:block">
-                            <video id="camera-preview" class="w-20 h-14 lg:w-24 lg:h-18 object-cover" autoplay muted playsinline></video>
-                            <div id="camera-status" class="absolute bottom-1 right-1 w-3 h-3 rounded-full bg-green-500 border-2 border-white shadow-sm">
-                                <span class="absolute inset-0 rounded-full bg-green-400 animate-ping opacity-75"></span>
-                            </div>
+                    <!-- Timer -->
+                    <div id="timer-box" class="timer-box d-flex align-items-center gap-2">
+                        <div class="d-flex align-items-center justify-content-center rounded-2" style="width: 36px; height: 36px; background: rgba(251, 191, 36, 0.15);">
+                            <i class="bi bi-clock text-warning fs-5"></i>
                         </div>
-                        
-                        <!-- Timer -->
-                        <div id="timer" class="flex items-center space-x-3 bg-gradient-to-r from-slate-700 to-slate-800 px-4 py-2.5 rounded-xl border border-slate-600 shadow-lg">
-                            <div class="flex items-center justify-center w-8 h-8 bg-amber-500/20 rounded-lg">
-                                <i class="bi bi-clock-fill text-amber-400"></i>
-                            </div>
-                            <div class="text-right">
-                                <div class="text-xs text-slate-400 font-medium">Sisa Waktu</div>
-                                <span id="timer-display" class="font-mono-timer text-xl font-bold text-white tracking-wider">--:--</span>
-                            </div>
+                        <div>
+                            <div class="text-secondary" style="font-size: 0.7rem; line-height: 1;">Sisa Waktu</div>
+                            <span id="timer-display" class="timer-display">--:--</span>
                         </div>
-                        
-                        <!-- Violation Counter -->
-                        <div id="violation-counter" class="items-center space-x-2 bg-gradient-to-r from-red-600 to-red-700 px-3 py-2 rounded-xl shadow-lg border border-red-500" style="display: none;">
-                            <div class="flex items-center justify-center w-7 h-7 bg-white/20 rounded-lg">
-                                <i class="bi bi-exclamation-triangle-fill text-white"></i>
-                            </div>
-                            <div class="text-right">
-                                <div class="text-xs text-red-200">Pelanggaran</div>
-                                <span id="violation-count" class="font-bold text-white text-lg">0</span>
-                            </div>
-                        </div>
-                        
-                        <!-- Submit Button -->
-                        <button onclick="confirmSubmit()" 
-                                class="hidden sm:flex items-center space-x-2 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 px-5 py-2.5 rounded-xl font-medium text-white transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5 border border-indigo-500">
-                            <i class="bi bi-send-fill"></i>
-                            <span>Kumpulkan</span>
-                        </button>
                     </div>
+                    
+                    <!-- Violation Counter -->
+                    <div id="violation-badge" class="violation-badge align-items-center gap-2">
+                        <i class="bi bi-exclamation-triangle text-white fs-6"></i>
+                        <div>
+                            <div class="text-white" style="font-size: 0.65rem; opacity: 0.8; line-height: 1;">Pelanggaran</div>
+                            <span id="violation-count" class="text-white fw-bold" style="font-size: 1.1rem;">0</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <button onclick="confirmSubmit()" class="btn btn-nav-success d-none d-sm-inline-flex">
+                        <i class="bi bi-send"></i>
+                        <span>Kumpulkan</span>
+                    </button>
                 </div>
-            </div>
-            
-            <!-- Progress Bar -->
-            <div class="h-1 bg-slate-700">
-                <div id="progress-bar" class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-500" style="width: 0%"></div>
             </div>
         </div>
         
-        <!-- Warning Banner -->
-        <div id="warning-banner" class="bg-gradient-to-r from-red-600 to-red-700 text-white text-center py-3 hidden shadow-lg">
-            <div class="flex items-center justify-center space-x-2">
-                <i class="bi bi-exclamation-octagon-fill text-lg"></i>
-                <span id="warning-message" class="font-medium">Peringatan!</span>
-            </div>
+        <!-- Progress Bar -->
+        <div style="height: 4px; background: rgba(255,255,255,0.1); position: absolute; bottom: 0; left: 0; right: 0;">
+            <div id="progress-bar" style="height: 100%; width: 0%; background: linear-gradient(90deg, var(--exam-success) 0%, #22c55e 100%); transition: width 0.5s ease;"></div>
         </div>
+    </header>
 
-        <!-- Main Content -->
-        <div class="flex-1 flex">
-            <!-- Question Navigation Sidebar -->
-            <div class="w-64 lg:w-72 p-5 overflow-y-auto border-r border-slate-200" style="background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);">
-                <div class="mb-5">
-                    <h3 class="text-white font-semibold text-sm uppercase tracking-wider mb-1">Navigasi Soal</h3>
-                    <p class="text-slate-400 text-xs">Klik nomor untuk berpindah soal</p>
-                </div>
-                
-                <div class="grid grid-cols-5 gap-2 mb-6" id="question-nav">
-                    @foreach($questions as $index => $question)
-                        <button onclick="goToQuestion({{ $index }})"
-                                id="nav-btn-{{ $index }}"
-                                class="question-nav-btn w-10 h-10 rounded-lg text-sm font-semibold transition-all duration-200
-                                       {{ isset($answeredQuestions[$question->id]) ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/30' : 'bg-slate-700 text-slate-300 hover:bg-slate-600' }}">
-                            {{ $index + 1 }}
-                        </button>
-                    @endforeach
-                </div>
-                
-                <!-- Legend -->
-                <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
-                    <h4 class="text-white text-xs font-semibold uppercase tracking-wider mb-3">Keterangan</h4>
-                    <div class="space-y-2.5">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-6 h-6 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-md shadow"></div>
-                            <span class="text-slate-300 text-sm">Sudah dijawab</span>
-                        </div>
-                        <div class="flex items-center space-x-3">
-                            <div class="w-6 h-6 bg-slate-700 rounded-md"></div>
-                            <span class="text-slate-300 text-sm">Belum dijawab</span>
-                        </div>
-                        <div class="flex items-center space-x-3">
-                            <div class="w-6 h-6 bg-slate-700 rounded-md ring-2 ring-white"></div>
-                            <span class="text-slate-300 text-sm">Soal saat ini</span>
-                        </div>
-                    </div>
-                </div>
+    <!-- Warning Banner -->
+    <div id="warning-banner" class="warning-banner">
+        <div class="d-flex align-items-center justify-content-center gap-2">
+            <i class="bi bi-exclamation-octagon fs-5"></i>
+            <span id="warning-message" class="fw-semibold">Peringatan!</span>
+        </div>
+    </div>
 
-                <!-- Stats Card -->
-                <div class="mt-5 bg-gradient-to-br from-indigo-600 to-purple-700 rounded-xl p-4 shadow-lg">
-                    <h4 class="text-white/80 text-xs font-semibold uppercase tracking-wider mb-3">Progress</h4>
-                    <div class="flex items-end justify-between">
-                        <div>
-                            <span id="answered-count" class="text-3xl font-bold text-white">{{ count($answeredQuestions) }}</span>
-                            <span class="text-white/70 text-lg">/{{ $questions->count() }}</span>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-white/60 text-xs">Terjawab</div>
-                            <div id="answered-percent" class="text-white font-semibold">{{ $questions->count() > 0 ? round((count($answeredQuestions) / $questions->count()) * 100) : 0 }}%</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Mobile Submit Button -->
-                <button onclick="confirmSubmit()" 
-                        class="sm:hidden w-full mt-5 flex items-center justify-center space-x-2 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 px-5 py-3 rounded-xl font-medium text-white transition-all duration-200 shadow-lg">
-                    <i class="bi bi-send-fill"></i>
-                    <span>Kumpulkan Ujian</span>
-                </button>
+    <!-- Sidebar -->
+    <aside id="exam-sidebar" class="exam-sidebar">
+        <div class="p-4">
+            <!-- Section Title -->
+            <div class="mb-4">
+                <h6 class="text-white fw-semibold mb-1 text-uppercase" style="font-size: 0.75rem; letter-spacing: 1px;">Navigasi Soal</h6>
+                <p class="text-secondary mb-0" style="font-size: 0.75rem;">Klik nomor untuk pindah soal</p>
             </div>
             
-            <!-- Question Content -->
-            <div class="flex-1 p-6 lg:p-8 overflow-y-auto" style="background: var(--exam-body-bg);">
-                <div id="questions-container" class="max-w-4xl mx-auto">
-                    @foreach($questions as $index => $question)
-                        <div id="question-{{ $index }}" 
-                             class="question-panel fade-in {{ $index === 0 ? '' : 'hidden' }}">
-                            
-                            <!-- Question Card -->
-                            <div class="glass-effect rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
-                                <!-- Question Header -->
-                                <div class="bg-gradient-to-r from-slate-800 to-slate-900 px-6 py-4">
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center space-x-3">
-                                            <div class="flex items-center justify-center w-10 h-10 bg-white/10 rounded-xl">
-                                                <span class="text-white font-bold">{{ $index + 1 }}</span>
+            <!-- Question Navigation Grid -->
+            <div class="question-nav-grid mb-4" id="question-nav">
+                @foreach($questions as $index => $question)
+                    <button onclick="goToQuestion({{ $index }})"
+                            id="nav-btn-{{ $index }}"
+                            class="q-nav-btn {{ isset($answeredQuestions[$question->id]) ? 'answered' : '' }} {{ $index === 0 ? 'current' : '' }}">
+                        {{ $index + 1 }}
+                    </button>
+                @endforeach
+            </div>
+            
+            <!-- Legend -->
+            <div class="mb-4 p-3 rounded-3" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);">
+                <h6 class="text-white mb-3 text-uppercase" style="font-size: 0.7rem; letter-spacing: 1px;">Keterangan</h6>
+                <div class="legend-item">
+                    <div class="legend-dot answered"></div>
+                    <span class="text-secondary" style="font-size: 0.8rem;">Sudah dijawab</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot unanswered"></div>
+                    <span class="text-secondary" style="font-size: 0.8rem;">Belum dijawab</span>
+                </div>
+                <div class="legend-item mb-0">
+                    <div class="legend-dot current"></div>
+                    <span class="text-secondary" style="font-size: 0.8rem;">Soal aktif</span>
+                </div>
+            </div>
+            
+            <!-- Progress Card -->
+            <div class="progress-card">
+                <div class="progress-label mb-2">Progress Ujian</div>
+                <div class="d-flex align-items-end justify-content-between">
+                    <div>
+                        <span id="answered-count" class="progress-value">{{ count($answeredQuestions) }}</span>
+                        <span style="font-size: 1.25rem; opacity: 0.7;">/{{ $questions->count() }}</span>
+                    </div>
+                    <div class="text-end">
+                        <div class="progress-label">Terjawab</div>
+                        <div id="answered-percent" class="fw-bold" style="font-size: 1.1rem;">{{ $questions->count() > 0 ? round((count($answeredQuestions) / $questions->count()) * 100) : 0 }}%</div>
+                    </div>
+                </div>
+                <div class="progress mt-3" style="height: 6px; background: rgba(255,255,255,0.2); border-radius: 10px;">
+                    <div id="progress-bar-sidebar" class="progress-bar" role="progressbar" style="width: {{ $questions->count() > 0 ? round((count($answeredQuestions) / $questions->count()) * 100) : 0 }}%; background: #fff; border-radius: 10px;"></div>
+                </div>
+            </div>
+            
+            <!-- Mobile Submit -->
+            <button onclick="confirmSubmit()" class="btn btn-nav-success w-100 mt-4 d-sm-none">
+                <i class="bi bi-send me-2"></i>
+                Kumpulkan Ujian
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="exam-content">
+        <div class="container-fluid px-0">
+            <div class="row justify-content-center">
+                <div class="col-12 col-xl-10 col-xxl-9">
+                    <!-- Questions Container -->
+                    <div id="questions-container">
+                        @foreach($questions as $index => $question)
+                            <div id="question-{{ $index }}" class="question-panel {{ $index === 0 ? 'active' : '' }}">
+                                <div class="question-card">
+                                    <!-- Question Header -->
+                                    <div class="question-header">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div class="question-number">{{ $index + 1 }}</div>
+                                                <div>
+                                                    <span class="text-white fw-semibold">Soal {{ $index + 1 }}</span>
+                                                    <span class="text-secondary"> dari {{ $questions->count() }}</span>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <span class="text-white font-medium">Soal {{ $index + 1 }}</span>
-                                                <span class="text-slate-400 text-sm"> dari {{ $questions->count() }}</span>
+                                            <div class="question-points">
+                                                <i class="bi bi-star me-1"></i>{{ $question->points }} poin
                                             </div>
-                                        </div>
-                                        <div class="flex items-center space-x-2 bg-indigo-500/20 px-3 py-1.5 rounded-lg">
-                                            <i class="bi bi-star-fill text-indigo-400 text-sm"></i>
-                                            <span class="text-indigo-300 font-semibold text-sm">{{ $question->points }} poin</span>
                                         </div>
                                     </div>
-                                </div>
-                                
-                                <div class="p-6 lg:p-8">
-                                    <!-- Question Text -->
-                                    <div class="mb-8">
-                                        <p class="text-lg lg:text-xl text-slate-800 leading-relaxed">{!! nl2br(e($question->question)) !!}</p>
+                                    
+                                    <!-- Question Body -->
+                                    <div class="question-body">
+                                        <!-- Question Text -->
+                                        <div class="question-text">
+                                            {!! nl2br(e($question->question)) !!}
+                                        </div>
                                         
                                         @if($question->question_image)
-                                            <div class="mt-6">
+                                            <div class="mb-4">
                                                 <img src="{{ asset('storage/' . $question->question_image) }}" 
-                                                     alt="Question Image" 
-                                                     class="max-w-full lg:max-w-2xl rounded-xl shadow-lg border border-slate-200">
+                                                     alt="Gambar Soal" 
+                                                     class="img-fluid rounded-3" style="max-width: 500px;">
+                                            </div>
+                                        @endif
+                                        
+                                        <!-- Options or Essay -->
+                                        @if($question->isMultipleChoice())
+                                            <div class="options-list">
+                                                @foreach($question->options as $option)
+                                                    <div class="option-item {{ isset($answeredQuestions[$question->id]) && $answeredQuestions[$question->id]->selected_option_id == $option->id ? 'selected' : '' }}"
+                                                         onclick="selectOption({{ $question->id }}, {{ $option->id }}, {{ $index }})"
+                                                         id="option-{{ $question->id }}-{{ $option->id }}">
+                                                        <div class="option-letter" data-label="{{ $option->option_label }}">
+                                                            @if(isset($answeredQuestions[$question->id]) && $answeredQuestions[$question->id]->selected_option_id == $option->id)
+                                                                <i class="bi bi-check"></i>
+                                                            @else
+                                                                {{ $option->option_label }}
+                                                            @endif
+                                                        </div>
+                                                        <div class="option-text">{{ $option->option_text }}</div>
+                                                        <input type="radio" 
+                                                               name="question_{{ $question->id }}" 
+                                                               value="{{ $option->id }}"
+                                                               class="d-none"
+                                                               {{ isset($answeredQuestions[$question->id]) && $answeredQuestions[$question->id]->selected_option_id == $option->id ? 'checked' : '' }}>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @else
+                                            <div class="essay-container">
+                                                <label class="d-flex align-items-center gap-2 mb-2 fw-semibold text-secondary" style="font-size: 0.85rem;">
+                                                    <i class="bi bi-pencil"></i>
+                                                    Jawaban Anda:
+                                                </label>
+                                                <textarea id="essay-{{ $question->id }}"
+                                                          class="essay-textarea"
+                                                          placeholder="Tulis jawaban Anda di sini..."
+                                                          onblur="saveEssayAnswer({{ $question->id }}, {{ $index }})"
+                                                >{{ isset($answeredQuestions[$question->id]) ? $answeredQuestions[$question->id]->essay_answer : '' }}</textarea>
+                                                <div class="mt-2 text-secondary" style="font-size: 0.75rem;">
+                                                    <i class="bi bi-info-circle me-1"></i>Jawaban otomatis tersimpan saat berpindah soal
+                                                </div>
                                             </div>
                                         @endif
                                     </div>
                                     
-                                    <!-- Answer Options -->
-                                    @if($question->isMultipleChoice())
-                                        <div class="space-y-3">
-                                            @foreach($question->options as $option)
-                                                <label class="option-card flex items-start p-4 lg:p-5 bg-white border-2 border-slate-200 rounded-xl cursor-pointer
-                                                              {{ isset($answeredQuestions[$question->id]) && $answeredQuestions[$question->id]->selected_option_id == $option->id ? 'selected border-indigo-500 bg-indigo-50' : '' }}"
-                                                       onclick="selectOption({{ $question->id }}, {{ $option->id }}, {{ $index }})"
-                                                       id="option-{{ $question->id }}-{{ $option->id }}">
-                                                    <div class="flex items-center justify-center w-8 h-8 rounded-lg border-2 border-slate-300 mr-4 flex-shrink-0
-                                                                {{ isset($answeredQuestions[$question->id]) && $answeredQuestions[$question->id]->selected_option_id == $option->id ? 'bg-indigo-600 border-indigo-600' : 'bg-white' }}">
-                                                        @if(isset($answeredQuestions[$question->id]) && $answeredQuestions[$question->id]->selected_option_id == $option->id)
-                                                            <i class="bi bi-check text-white text-lg"></i>
-                                                        @else
-                                                            <span class="text-slate-500 font-semibold text-sm">{{ $option->option_label }}</span>
-                                                        @endif
-                                                    </div>
-                                                    <input type="radio" 
-                                                           name="question_{{ $question->id }}" 
-                                                           value="{{ $option->id }}"
-                                                           class="hidden"
-                                                           {{ isset($answeredQuestions[$question->id]) && $answeredQuestions[$question->id]->selected_option_id == $option->id ? 'checked' : '' }}>
-                                                    <div class="flex-1">
-                                                        <span class="text-slate-800 text-base lg:text-lg">{{ $option->option_text }}</span>
-                                                    </div>
-                                                </label>
-                                            @endforeach
-                                        </div>
-                                    @else
-                                        <!-- Essay Answer -->
-                                        <div>
-                                            <label class="flex items-center space-x-2 text-sm font-semibold text-slate-700 mb-3">
-                                                <i class="bi bi-pencil-square text-indigo-600"></i>
-                                                <span>Jawaban Anda:</span>
-                                            </label>
-                                            <textarea id="essay-{{ $question->id }}"
-                                                      rows="10"
-                                                      class="w-full border-2 border-slate-200 rounded-xl p-5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-slate-800 text-base resize-none"
-                                                      placeholder="Tulis jawaban Anda di sini..."
-                                                      onblur="saveEssayAnswer({{ $question->id }}, {{ $index }})"
-                                            >{{ isset($answeredQuestions[$question->id]) ? $answeredQuestions[$question->id]->essay_answer : '' }}</textarea>
-                                            <div class="flex items-center justify-between mt-2 text-xs text-slate-500">
-                                                <span><i class="bi bi-info-circle mr-1"></i>Jawaban otomatis tersimpan saat Anda berpindah soal</span>
-                                            </div>
-                                        </div>
-                                    @endif
-                                </div>
-                                
-                                <!-- Navigation Buttons -->
-                                <div class="bg-slate-50 px-6 lg:px-8 py-4 border-t border-slate-200">
-                                    <div class="flex justify-between items-center">
-                                        <button onclick="goToQuestion({{ $index - 1 }})" 
-                                                class="flex items-center space-x-2 px-5 py-2.5 border-2 border-slate-300 rounded-xl text-slate-700 hover:bg-slate-100 hover:border-slate-400 transition-all duration-200
-                                                       {{ $index === 0 ? 'invisible' : '' }}">
-                                            <i class="bi bi-arrow-left"></i>
-                                            <span class="font-medium">Sebelumnya</span>
-                                        </button>
-                                        
-                                        @if($index === $questions->count() - 1)
-                                            <button onclick="confirmSubmit()" 
-                                                    class="flex items-center space-x-2 px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-xl hover:from-indigo-700 hover:to-indigo-800 transition-all duration-200 shadow-lg hover:shadow-xl font-medium">
-                                                <span>Kumpulkan Ujian</span>
-                                                <i class="bi bi-send-fill"></i>
+                                    <!-- Navigation Footer -->
+                                    <div class="nav-footer">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <button onclick="goToQuestion({{ $index - 1 }})" 
+                                                    class="btn btn-nav btn-nav-outline {{ $index === 0 ? 'invisible' : '' }}">
+                                                <i class="bi bi-arrow-left"></i>
+                                                <span class="d-none d-sm-inline">Sebelumnya</span>
                                             </button>
-                                        @else
-                                            <button onclick="goToQuestion({{ $index + 1 }})" 
-                                                    class="flex items-center space-x-2 px-5 py-2.5 bg-slate-800 text-white rounded-xl hover:bg-slate-700 transition-all duration-200 shadow-lg font-medium">
-                                                <span>Selanjutnya</span>
-                                                <i class="bi bi-arrow-right"></i>
-                                            </button>
-                                        @endif
+                                            
+                                            @if($index === $questions->count() - 1)
+                                                <button onclick="confirmSubmit()" class="btn btn-nav btn-nav-success">
+                                                    <span>Kumpulkan</span>
+                                                    <i class="bi bi-send"></i>
+                                                </button>
+                                            @else
+                                                <button onclick="goToQuestion({{ $index + 1 }})" class="btn btn-nav btn-nav-primary">
+                                                    <span class="d-none d-sm-inline">Selanjutnya</span>
+                                                    <i class="bi bi-arrow-right"></i>
+                                                </button>
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Submit Confirmation Modal -->
-    <div id="submit-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 overflow-hidden fade-in">
-            <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-center">
-                <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <i class="bi bi-send-check text-white text-3xl"></i>
-                </div>
-                <h3 class="text-xl font-bold text-white">Konfirmasi Pengumpulan</h3>
-            </div>
-            <div class="p-6">
-                <div id="submit-summary" class="mb-6">
-                    <!-- Will be filled by JS -->
-                </div>
-                <div class="flex space-x-3">
-                    <button onclick="closeSubmitModal()" 
-                            class="flex-1 flex items-center justify-center space-x-2 px-4 py-3 border-2 border-slate-300 rounded-xl text-slate-700 hover:bg-slate-50 transition-all duration-200 font-medium">
-                        <i class="bi bi-arrow-left"></i>
-                        <span>Kembali</span>
-                    </button>
-                    <form id="submit-form" action="{{ route('student.exams.submit', $attempt) }}" method="POST" class="flex-1">
-                        @csrf
-                        <button type="submit" 
-                                class="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-xl hover:from-indigo-700 hover:to-indigo-800 transition-all duration-200 font-medium shadow-lg">
-                            <span>Ya, Kumpulkan</span>
-                            <i class="bi bi-check-lg"></i>
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Fullscreen Warning Modal -->
-    <div id="fullscreen-modal" class="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 overflow-hidden fade-in">
-            <div class="bg-gradient-to-r from-amber-500 to-orange-500 p-8 text-center">
-                <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="bi bi-fullscreen text-white text-4xl"></i>
-                </div>
-                <h3 class="text-2xl font-bold text-white mb-2">Mode Fullscreen Diperlukan</h3>
-                <p class="text-white/80">
-                    Ujian ini memerlukan mode fullscreen untuk mencegah kecurangan.
-                </p>
-            </div>
-            <div class="p-6 text-center">
-                <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
-                    <div class="flex items-start space-x-3">
-                        <i class="bi bi-info-circle-fill text-amber-600 text-lg mt-0.5"></i>
-                        <p class="text-amber-800 text-sm text-left">
-                            Keluar dari mode fullscreen akan dicatat sebagai pelanggaran dan dapat mengakibatkan ujian Anda dibatalkan.
-                        </p>
+                        @endforeach
                     </div>
                 </div>
-                <button onclick="enterFullscreen()" 
-                        class="w-full flex items-center justify-center space-x-2 px-6 py-3.5 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-xl hover:from-indigo-700 hover:to-indigo-800 font-semibold transition-all duration-200 shadow-lg hover:shadow-xl">
-                    <i class="bi bi-fullscreen"></i>
-                    <span>Aktifkan Fullscreen</span>
+            </div>
+        </div>
+    </main>
+
+    <!-- Submit Modal -->
+    <div id="submit-modal" class="exam-modal-backdrop">
+        <div class="exam-modal">
+            <div class="exam-modal-header primary">
+                <div class="exam-modal-icon">
+                    <i class="bi bi-send"></i>
+                </div>
+                <h3 class="exam-modal-title">Kumpulkan Ujian?</h3>
+            </div>
+            <div class="exam-modal-body">
+                <div id="submit-summary" class="submit-summary">
+                    <!-- Filled by JS -->
+                </div>
+                <p class="text-center text-secondary mb-0">Apakah Anda yakin ingin mengumpulkan ujian?</p>
+            </div>
+            <div class="exam-modal-footer">
+                <button onclick="closeSubmitModal()" class="btn btn-nav btn-nav-outline flex-fill">
+                    <i class="bi bi-arrow-left"></i> Kembali
+                </button>
+                <form id="submit-form" action="{{ route('student.exams.submit', $attempt) }}" method="POST" class="flex-fill">
+                    @csrf
+                    <button type="submit" class="btn btn-nav btn-nav-success w-100">
+                        Ya, Kumpulkan <i class="bi bi-check"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fullscreen Modal -->
+    <div id="fullscreen-modal" class="exam-modal-backdrop">
+        <div class="exam-modal">
+            <div class="exam-modal-header warning">
+                <div class="exam-modal-icon">
+                    <i class="bi bi-arrows-fullscreen"></i>
+                </div>
+                <h3 class="exam-modal-title">Mode Fullscreen</h3>
+            </div>
+            <div class="exam-modal-body">
+                <div class="alert alert-warning mb-3">
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="bi bi-info-circle fs-5 mt-1"></i>
+                        <p class="mb-0" style="font-size: 0.9rem;">Keluar dari mode fullscreen akan dicatat sebagai pelanggaran dan dapat mengakibatkan ujian dibatalkan.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="exam-modal-footer">
+                <button onclick="enterFullscreen()" class="btn btn-nav btn-nav-primary w-100">
+                    <i class="bi bi-arrows-fullscreen me-2"></i>Aktifkan Fullscreen
                 </button>
             </div>
         </div>
     </div>
-@endsection
 
-@push('scripts')
-<script>
-    // Configuration from server
-    const config = {
-        attemptId: {{ $attempt->id }},
-        examId: {{ $attempt->exam->id }},
-        totalQuestions: {{ $questions->count() }},
-        remainingTime: {{ $attempt->remaining_time }},
-        requireCamera: {{ $attempt->exam->settings?->webcam_enabled ? 'true' : 'false' }},
-        requireFullscreen: {{ $attempt->exam->settings?->browser_lock_enabled ? 'true' : 'false' }},
-        snapshotInterval: {{ $attempt->exam->settings?->snapshot_interval ?? 30 }},
-        maxViolations: {{ $attempt->exam->settings?->max_tab_switches ?? 5 }},
-        warningThreshold: {{ $attempt->exam->settings?->warning_threshold ?? 3 }},
-        csrfToken: '{{ csrf_token() }}',
-        endpoints: {
-            saveAnswer: '{{ route("student.exams.save-answer", $attempt) }}',
-            logViolation: '{{ route("student.proctoring.violation", $attempt) }}',
-            uploadSnapshot: '{{ route("student.proctoring.snapshot", $attempt) }}',
-            heartbeat: '{{ route("student.proctoring.heartbeat", $attempt) }}',
-            autoSubmit: '{{ route("student.exams.auto-submit", $attempt) }}',
-            syncTime: '{{ route("student.exams.sync-time", $attempt) }}',
-        }
-    };
+    <!-- No Face Warning Modal -->
+    <div id="face-warning-modal" class="exam-modal-backdrop face-modal">
+        <div class="exam-modal">
+            <div class="exam-modal-header danger">
+                <div class="exam-modal-icon">
+                    <i class="bi bi-person-x"></i>
+                </div>
+                <h3 class="exam-modal-title">Wajah Tidak Terdeteksi!</h3>
+            </div>
+            <div class="exam-modal-body">
+                <p class="text-center mb-3">
+                    Pastikan wajah Anda terlihat jelas di kamera. Pelanggaran akan dicatat dalam
+                    <span id="face-countdown" class="fw-bold text-danger">5</span> detik.
+                </p>
+                <div class="alert alert-warning">
+                    <ul class="mb-0 ps-3" style="font-size: 0.85rem;">
+                        <li>Posisikan wajah di tengah kamera</li>
+                        <li>Pastikan pencahayaan cukup</li>
+                        <li>Lepas kacamata jika perlu</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    let currentQuestion = 0;
-    let violationCount = {{ $attempt->violation_count }};
-    let answeredQuestions = new Set([
-        @foreach($answeredQuestions as $questionId => $answer)
-            {{ $questionId }},
-        @endforeach
-    ]);
-    let stream = null;
-    let snapshotInterval = null;
-    let timerInterval = null;
-    let heartbeatInterval = null;
+    <!-- Multiple Faces Warning Modal -->
+    <div id="multiple-faces-modal" class="exam-modal-backdrop face-modal">
+        <div class="exam-modal">
+            <div class="exam-modal-header danger">
+                <div class="exam-modal-icon">
+                    <i class="bi bi-people"></i>
+                </div>
+                <h3 class="exam-modal-title">Beberapa Wajah Terdeteksi!</h3>
+            </div>
+            <div class="exam-modal-body">
+                <p class="text-center mb-3">
+                    Terdeteksi <span id="faces-count" class="fw-bold text-danger">2</span> wajah di depan kamera. 
+                    Ujian harus dikerjakan sendiri. Pelanggaran ini telah dicatat.
+                </p>
+            </div>
+            <div class="exam-modal-footer">
+                <button onclick="closeMultipleFacesModal()" class="btn btn-nav btn-nav-primary w-100">
+                    Saya Mengerti
+                </button>
+            </div>
+        </div>
+    </div>
 
-    // Initialize
-    document.addEventListener('DOMContentLoaded', function() {
-        initTimer();
-        initCamera();
-        initProctoring();
-        initFullscreen();
-        startHeartbeat();
-        updateProgressBar();
-        highlightCurrentQuestion(0);
-        
-        // Prevent copy/paste
-        document.addEventListener('copy', preventCopyPaste);
-        document.addEventListener('cut', preventCopyPaste);
-        document.addEventListener('paste', preventCopyPaste);
-        
-        // Prevent right click
-        document.addEventListener('contextmenu', function(e) {
-            e.preventDefault();
-            logViolation('right_click', 'Right click detected');
+    <!-- Face-api.js -->
+    <script src="{{ asset('assets/proctoring/face-api.min.js') }}"></script>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Configuration
+        const config = {
+            attemptId: {{ $attempt->id }},
+            examId: {{ $attempt->exam->id }},
+            totalQuestions: {{ $questions->count() }},
+            remainingTime: {{ $attempt->remaining_time }},
+            requireCamera: {{ $attempt->exam->settings?->webcam_enabled ? 'true' : 'false' }},
+            requireFullscreen: {{ $attempt->exam->settings?->browser_lock_enabled ? 'true' : 'false' }},
+            detectFace: {{ $attempt->exam->settings?->detect_face ?? 'true' }},
+            detectMultipleFaces: {{ $attempt->exam->settings?->detect_multiple_faces ?? 'true' }},
+            snapshotInterval: {{ $attempt->exam->settings?->snapshot_interval ?? 30 }},
+            maxViolations: {{ $attempt->exam->settings?->max_tab_switches ?? 5 }},
+            warningThreshold: {{ $attempt->exam->settings?->warning_threshold ?? 3 }},
+            csrfToken: '{{ csrf_token() }}',
+            modelPath: '{{ asset("assets/proctoring/models") }}',
+            endpoints: {
+                saveAnswer: '{{ route("student.exams.save-answer", $attempt) }}',
+                logViolation: '{{ route("student.proctoring.violation", $attempt) }}',
+                uploadSnapshot: '{{ route("student.proctoring.snapshot", $attempt) }}',
+                heartbeat: '{{ route("student.proctoring.heartbeat", $attempt) }}',
+                autoSubmit: '{{ route("student.exams.auto-submit", $attempt) }}',
+            }
+        };
+
+        // State
+        let currentQuestion = 0;
+        let violationCount = {{ $attempt->violation_count }};
+        let answeredQuestions = new Set([
+            @foreach($answeredQuestions as $questionId => $answer)
+                {{ $questionId }},
+            @endforeach
+        ]);
+        let stream = null;
+        let timerInterval = null;
+        let snapshotInterval = null;
+        let heartbeatInterval = null;
+        let faceDetectionInterval = null;
+        let noFaceWarningTimeout = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async function() {
+            initTimer();
+            updateProgressBar();
+            
+            // Initialize proctoring
+            await initAdvancedProctoring();
+            
+            // Fullscreen
+            initFullscreen();
         });
-        
-        // Prevent keyboard shortcuts
-        document.addEventListener('keydown', preventKeyboardShortcuts);
-    });
 
-    // Update progress bar
-    function updateProgressBar() {
-        const progress = (answeredQuestions.size / config.totalQuestions) * 100;
-        document.getElementById('progress-bar').style.width = progress + '%';
-        
-        // Update stats
-        const countEl = document.getElementById('answered-count');
-        const percentEl = document.getElementById('answered-percent');
-        if (countEl) countEl.textContent = answeredQuestions.size;
-        if (percentEl) percentEl.textContent = Math.round(progress) + '%';
-    }
-
-    // Highlight current question in nav
-    function highlightCurrentQuestion(index) {
-        document.querySelectorAll('#question-nav button').forEach((btn, i) => {
-            btn.classList.remove('ring-2', 'ring-white', 'ring-offset-2', 'ring-offset-slate-800');
-            if (i === index) {
-                btn.classList.add('ring-2', 'ring-white', 'ring-offset-2', 'ring-offset-slate-800');
-            }
-        });
-    }
-
-    // Timer
-    function initTimer() {
-        let timeRemaining = config.remainingTime;
-        
-        function updateTimer() {
-            if (timeRemaining <= 0) {
-                clearInterval(timerInterval);
-                autoSubmit();
-                return;
-            }
-            
-            const hours = Math.floor(timeRemaining / 3600);
-            const minutes = Math.floor((timeRemaining % 3600) / 60);
-            const seconds = timeRemaining % 60;
-            
-            let display = '';
-            if (hours > 0) {
-                display = `${hours.toString().padStart(2, '0')}:`;
-            }
-            display += `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            
-            document.getElementById('timer-display').textContent = display;
-            
-            // Warning when less than 5 minutes
-            if (timeRemaining <= 300) {
-                const timerEl = document.getElementById('timer');
-                timerEl.classList.add('timer-warning');
-                timerEl.style.background = 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)';
-                timerEl.style.borderColor = '#ef4444';
-            }
-            
-            timeRemaining--;
+        // Toggle Sidebar (Mobile)
+        function toggleSidebar() {
+            document.getElementById('exam-sidebar').classList.toggle('show');
         }
-        
-        updateTimer();
-        timerInterval = setInterval(updateTimer, 1000);
-    }
 
-    // Camera
-    async function initCamera() {
-        if (!config.requireCamera) return;
-        
-        try {
-            stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { width: 320, height: 240, facingMode: 'user' },
-                audio: false 
+        // Timer
+        function initTimer() {
+            let timeRemaining = config.remainingTime;
+            const timerBox = document.getElementById('timer-box');
+            const timerDisplay = document.getElementById('timer-display');
+            
+            function updateTimer() {
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    autoSubmit();
+                    return;
+                }
+                
+                const hours = Math.floor(timeRemaining / 3600);
+                const minutes = Math.floor((timeRemaining % 3600) / 60);
+                const seconds = timeRemaining % 60;
+                
+                let display = '';
+                if (hours > 0) {
+                    display = `${hours.toString().padStart(2, '0')}:`;
+                }
+                display += `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                timerDisplay.textContent = display;
+                
+                // Warning when less than 5 minutes
+                if (timeRemaining <= 300) {
+                    timerBox.classList.add('warning');
+                }
+                
+                timeRemaining--;
+            }
+            
+            updateTimer();
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        // Progress Bar
+        function updateProgressBar() {
+            const progress = (answeredQuestions.size / config.totalQuestions) * 100;
+            document.getElementById('progress-bar').style.width = progress + '%';
+            document.getElementById('progress-bar-sidebar').style.width = progress + '%';
+            
+            const countEl = document.getElementById('answered-count');
+            const percentEl = document.getElementById('answered-percent');
+            if (countEl) countEl.textContent = answeredQuestions.size;
+            if (percentEl) percentEl.textContent = Math.round(progress) + '%';
+        }
+
+        // Question Navigation
+        function goToQuestion(index) {
+            if (index < 0 || index >= config.totalQuestions) return;
+            
+            // Hide all panels
+            document.querySelectorAll('.question-panel').forEach(panel => {
+                panel.classList.remove('active');
             });
             
-            const video = document.getElementById('camera-preview');
-            video.srcObject = stream;
+            // Show selected panel
+            document.getElementById(`question-${index}`).classList.add('active');
             
-            document.getElementById('camera-status').classList.remove('bg-red-500');
-            document.getElementById('camera-status').classList.add('bg-green-500');
-            
-            // Start snapshot capture
-            startSnapshotCapture();
-            
-        } catch (error) {
-            console.error('Camera error:', error);
-            document.getElementById('camera-status').classList.remove('bg-green-500');
-            document.getElementById('camera-status').classList.add('bg-red-500');
-            logViolation('camera_disabled', 'Camera access denied or not available');
-        }
-    }
-
-    // Snapshot capture
-    function startSnapshotCapture() {
-        snapshotInterval = setInterval(captureAndUploadSnapshot, config.snapshotInterval * 1000);
-    }
-
-    function captureAndUploadSnapshot(violationType = null, description = null) {
-        const video = document.getElementById('camera-preview');
-        const canvas = document.createElement('canvas');
-        canvas.width = video.videoWidth || 320;
-        canvas.height = video.videoHeight || 240;
-        
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        
-        const imageData = canvas.toDataURL('image/jpeg', 0.8);
-        
-        fetch(config.endpoints.uploadSnapshot, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': config.csrfToken,
-            },
-            body: JSON.stringify({
-                snapshot: imageData,
-                violation_type: violationType,
-                description: description
-            })
-        }).catch(err => console.error('Snapshot upload error:', err));
-    }
-
-    // Proctoring
-    function initProctoring() {
-        // Tab visibility
-        document.addEventListener('visibilitychange', function() {
-            if (document.hidden) {
-                logViolation('tab_switch', 'User switched to another tab');
-            }
-        });
-        
-        // Window blur
-        window.addEventListener('blur', function() {
-            logViolation('window_blur', 'Window lost focus');
-        });
-    }
-
-    // Fullscreen
-    function initFullscreen() {
-        if (!config.requireFullscreen) return;
-        
-        if (!document.fullscreenElement) {
-            document.getElementById('fullscreen-modal').classList.remove('hidden');
-        }
-        
-        document.addEventListener('fullscreenchange', function() {
-            if (!document.fullscreenElement && config.requireFullscreen) {
-                document.getElementById('fullscreen-modal').classList.remove('hidden');
-                logViolation('fullscreen_exit', 'User exited fullscreen mode');
-            } else {
-                document.getElementById('fullscreen-modal').classList.add('hidden');
-            }
-        });
-    }
-
-    function enterFullscreen() {
-        document.documentElement.requestFullscreen().then(() => {
-            document.getElementById('fullscreen-modal').classList.add('hidden');
-        }).catch(err => {
-            console.error('Fullscreen error:', err);
-        });
-    }
-
-    // Log violation
-    async function logViolation(type, description) {
-        violationCount++;
-        updateViolationCounter();
-        showWarning(description);
-        
-        // Capture snapshot with violation
-        if (stream) {
-            captureAndUploadSnapshot(type, description);
-        }
-        
-        try {
-            const response = await fetch(config.endpoints.logViolation, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': config.csrfToken,
-                },
-                body: JSON.stringify({
-                    violation_type: type,
-                    description: description
-                })
+            // Update nav buttons
+            document.querySelectorAll('.q-nav-btn').forEach((btn, i) => {
+                btn.classList.remove('current');
+                if (i === index) btn.classList.add('current');
             });
             
-            const data = await response.json();
+            currentQuestion = index;
             
-            if (data.should_auto_submit) {
-                autoSubmit();
-            }
-        } catch (err) {
-            console.error('Error logging violation:', err);
+            // Scroll to top
+            document.querySelector('.exam-content').scrollTop = 0;
         }
-    }
 
-    function updateViolationCounter() {
-        const counter = document.getElementById('violation-counter');
-        const countEl = document.getElementById('violation-count');
-        
-        counter.style.display = 'flex';
-        countEl.textContent = violationCount;
-        
-        if (violationCount >= config.warningThreshold) {
-            counter.classList.add('animate-pulse');
-        }
-    }
-
-    function showWarning(message) {
-        const banner = document.getElementById('warning-banner');
-        const msgEl = document.getElementById('warning-message');
-        
-        msgEl.textContent = `⚠️ Peringatan: ${message} (${violationCount}/${config.maxViolations})`;
-        banner.classList.remove('hidden');
-        
-        setTimeout(() => {
-            banner.classList.add('hidden');
-        }, 5000);
-    }
-
-    // Heartbeat
-    function startHeartbeat() {
-        heartbeatInterval = setInterval(async () => {
+        // Select Option
+        async function selectOption(questionId, optionId, questionIndex) {
+            // Update UI
+            const allOptions = document.querySelectorAll(`[id^="option-${questionId}-"]`);
+            allOptions.forEach(opt => {
+                opt.classList.remove('selected');
+                const letter = opt.querySelector('.option-letter');
+                letter.innerHTML = letter.dataset.label;
+            });
+            
+            const selected = document.getElementById(`option-${questionId}-${optionId}`);
+            selected.classList.add('selected');
+            selected.querySelector('.option-letter').innerHTML = '<i class="bi bi-check"></i>';
+            
+            // Save answer
             try {
-                const response = await fetch(config.endpoints.heartbeat, {
+                const response = await fetch(config.endpoints.saveAnswer, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': config.csrfToken,
                     },
                     body: JSON.stringify({
-                        camera_enabled: stream !== null
+                        question_id: questionId,
+                        option_id: optionId
                     })
                 });
                 
-                const data = await response.json();
-                
-                if (data.should_submit) {
-                    autoSubmit();
+                if (response.ok) {
+                    answeredQuestions.add(questionId);
+                    updateNavButton(questionIndex, true);
+                    updateProgressBar();
                 }
             } catch (err) {
-                console.error('Heartbeat error:', err);
+                console.error('Error saving answer:', err);
             }
-        }, 30000); // Every 30 seconds
-    }
-
-    // Prevent copy/paste
-    function preventCopyPaste(e) {
-        e.preventDefault();
-        logViolation('copy_paste', 'Copy/paste action detected');
-    }
-
-    // Prevent keyboard shortcuts
-    function preventKeyboardShortcuts(e) {
-        // Ctrl/Cmd + C, V, X, A, P, S, F, Tab, Alt+Tab
-        if ((e.ctrlKey || e.metaKey) && ['c', 'v', 'x', 'a', 'p', 's', 'f'].includes(e.key.toLowerCase())) {
-            e.preventDefault();
-            logViolation('keyboard_shortcut', `Blocked shortcut: ${e.ctrlKey ? 'Ctrl' : 'Cmd'}+${e.key}`);
         }
-        
-        // F12 (DevTools)
-        if (e.key === 'F12') {
-            e.preventDefault();
-            logViolation('keyboard_shortcut', 'Blocked F12 key');
-        }
-        
-        // Alt+Tab (can't fully prevent but can detect blur)
-        if (e.altKey && e.key === 'Tab') {
-            logViolation('keyboard_shortcut', 'Alt+Tab detected');
-        }
-    }
 
-    // Question navigation
-    function goToQuestion(index) {
-        if (index < 0 || index >= config.totalQuestions) return;
-        
-        // Hide all questions
-        document.querySelectorAll('.question-panel').forEach(panel => {
-            panel.classList.add('hidden');
-        });
-        
-        // Show selected question
-        const targetQuestion = document.getElementById(`question-${index}`);
-        targetQuestion.classList.remove('hidden');
-        targetQuestion.classList.add('fade-in');
-        
-        // Update navigation highlight
-        highlightCurrentQuestion(index);
-        
-        currentQuestion = index;
-    }
-
-    // Save answer
-    async function selectOption(questionId, optionId, questionIndex) {
-        // Update UI immediately for better UX
-        const allOptions = document.querySelectorAll(`[id^="option-${questionId}-"]`);
-        allOptions.forEach(opt => {
-            opt.classList.remove('selected', 'border-indigo-500', 'bg-indigo-50');
-            const checkbox = opt.querySelector('div:first-child');
-            checkbox.classList.remove('bg-indigo-600', 'border-indigo-600');
-            checkbox.classList.add('bg-white', 'border-slate-300');
-            checkbox.innerHTML = `<span class="text-slate-500 font-semibold text-sm">${checkbox.dataset.label || ''}</span>`;
-        });
-        
-        const selectedOption = document.getElementById(`option-${questionId}-${optionId}`);
-        selectedOption.classList.add('selected', 'border-indigo-500', 'bg-indigo-50');
-        const selectedCheckbox = selectedOption.querySelector('div:first-child');
-        selectedCheckbox.classList.remove('bg-white', 'border-slate-300');
-        selectedCheckbox.classList.add('bg-indigo-600', 'border-indigo-600');
-        selectedCheckbox.innerHTML = '<i class="bi bi-check text-white text-lg"></i>';
-        
-        try {
-            const response = await fetch(config.endpoints.saveAnswer, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': config.csrfToken,
-                },
-                body: JSON.stringify({
-                    question_id: questionId,
-                    option_id: optionId
-                })
-            });
+        // Save Essay
+        async function saveEssayAnswer(questionId, questionIndex) {
+            const textarea = document.getElementById(`essay-${questionId}`);
+            const answer = textarea.value.trim();
             
-            if (response.ok) {
-                answeredQuestions.add(questionId);
-                updateNavButton(questionIndex, true);
-                updateProgressBar();
-            }
-        } catch (err) {
-            console.error('Error saving answer:', err);
-        }
-    }
-
-    async function saveEssayAnswer(questionId, questionIndex) {
-        const textarea = document.getElementById(`essay-${questionId}`);
-        const answer = textarea.value.trim();
-        
-        if (!answer) return;
-        
-        try {
-            const response = await fetch(config.endpoints.saveAnswer, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': config.csrfToken,
-                },
-                body: JSON.stringify({
-                    question_id: questionId,
-                    essay_answer: answer
-                })
-            });
+            if (!answer) return;
             
-            if (response.ok) {
-                answeredQuestions.add(questionId);
-                updateNavButton(questionIndex, true);
-                updateProgressBar();
+            try {
+                const response = await fetch(config.endpoints.saveAnswer, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': config.csrfToken,
+                    },
+                    body: JSON.stringify({
+                        question_id: questionId,
+                        essay_answer: answer
+                    })
+                });
+                
+                if (response.ok) {
+                    answeredQuestions.add(questionId);
+                    updateNavButton(questionIndex, true);
+                    updateProgressBar();
+                }
+            } catch (err) {
+                console.error('Error saving essay:', err);
             }
-        } catch (err) {
-            console.error('Error saving essay:', err);
         }
-    }
 
-    function updateNavButton(index, answered) {
-        const btn = document.getElementById(`nav-btn-${index}`);
-        if (answered) {
-            btn.classList.remove('bg-slate-700', 'text-slate-300', 'hover:bg-slate-600');
-            btn.classList.add('bg-gradient-to-br', 'from-emerald-500', 'to-emerald-600', 'text-white', 'shadow-lg', 'shadow-emerald-500/30');
+        function updateNavButton(index, answered) {
+            const btn = document.getElementById(`nav-btn-${index}`);
+            if (answered) {
+                btn.classList.add('answered');
+            }
         }
-    }
 
-    // Submit
-    function confirmSubmit() {
-        const answered = answeredQuestions.size;
-        const total = config.totalQuestions;
-        const percentage = Math.round((answered / total) * 100);
-        
-        document.getElementById('submit-summary').innerHTML = `
-            <div class="bg-slate-50 rounded-xl p-4 mb-4">
-                <div class="flex items-center justify-between mb-3">
-                    <span class="text-slate-600">Soal Terjawab</span>
-                    <span class="text-2xl font-bold text-slate-800">${answered}/${total}</span>
+        // Submit Modal
+        function confirmSubmit() {
+            const answered = answeredQuestions.size;
+            const total = config.totalQuestions;
+            const percentage = Math.round((answered / total) * 100);
+            
+            let alertHtml = '';
+            if (answered < total) {
+                alertHtml = `
+                    <div class="alert alert-warning d-flex align-items-center gap-2 mb-3">
+                        <i class="bi bi-exclamation-triangle fs-5"></i>
+                        <span>Masih ada <strong>${total - answered} soal</strong> yang belum dijawab!</span>
+                    </div>
+                `;
+            } else {
+                alertHtml = `
+                    <div class="alert alert-success d-flex align-items-center gap-2 mb-3">
+                        <i class="bi bi-check-circle fs-5"></i>
+                        <span>Semua soal telah dijawab. Bagus!</span>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('submit-summary').innerHTML = `
+                <div class="summary-row">
+                    <span class="text-secondary">Soal Terjawab</span>
+                    <span class="summary-value">${answered}/${total}</span>
                 </div>
-                <div class="w-full bg-slate-200 rounded-full h-2.5">
-                    <div class="bg-gradient-to-r from-indigo-600 to-purple-600 h-2.5 rounded-full transition-all duration-500" style="width: ${percentage}%"></div>
+                <div class="progress mb-3" style="height: 8px; border-radius: 10px;">
+                    <div class="progress-bar bg-success" style="width: ${percentage}%; border-radius: 10px;"></div>
                 </div>
-            </div>
-            ${answered < total ? `
-            <div class="flex items-start space-x-3 bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4">
-                <i class="bi bi-exclamation-triangle-fill text-amber-600 text-lg mt-0.5"></i>
-                <p class="text-amber-800 text-sm">Masih ada <strong>${total - answered} soal</strong> yang belum dijawab!</p>
-            </div>
-            ` : `
-            <div class="flex items-start space-x-3 bg-emerald-50 border border-emerald-200 rounded-xl p-3 mb-4">
-                <i class="bi bi-check-circle-fill text-emerald-600 text-lg mt-0.5"></i>
-                <p class="text-emerald-800 text-sm">Semua soal telah dijawab. Bagus!</p>
-            </div>
-            `}
-            <p class="text-slate-600 text-center">Apakah Anda yakin ingin mengumpulkan ujian?</p>
-        `;
-        
-        document.getElementById('submit-modal').classList.remove('hidden');
-    }
+                ${alertHtml}
+            `;
+            
+            document.getElementById('submit-modal').classList.add('show');
+        }
 
-    function closeSubmitModal() {
-        document.getElementById('submit-modal').classList.add('hidden');
-    }
+        function closeSubmitModal() {
+            document.getElementById('submit-modal').classList.remove('show');
+        }
 
-    async function autoSubmit() {
-        try {
-            const response = await fetch(config.endpoints.autoSubmit, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': config.csrfToken,
+        // Fullscreen
+        function initFullscreen() {
+            if (!config.requireFullscreen) return;
+            
+            if (!document.fullscreenElement) {
+                document.getElementById('fullscreen-modal').classList.add('show');
+            }
+            
+            document.addEventListener('fullscreenchange', function() {
+                if (!document.fullscreenElement && config.requireFullscreen) {
+                    document.getElementById('fullscreen-modal').classList.add('show');
+                    logViolation('fullscreen_exit', 'User exited fullscreen mode');
+                } else {
+                    document.getElementById('fullscreen-modal').classList.remove('show');
                 }
             });
-            
-            const data = await response.json();
-            
-            if (data.redirect) {
-                window.location.href = data.redirect;
-            }
-        } catch (err) {
-            console.error('Auto submit error:', err);
-            // Fallback to form submit
-            document.getElementById('submit-form').submit();
         }
-    }
 
-    // Cleanup on page unload
-    window.addEventListener('beforeunload', function(e) {
-        if (stream) {
-            stream.getTracks().forEach(track => track.stop());
+        function enterFullscreen() {
+            document.documentElement.requestFullscreen().then(() => {
+                document.getElementById('fullscreen-modal').classList.remove('show');
+            }).catch(err => console.error('Fullscreen error:', err));
         }
-        clearInterval(snapshotInterval);
-        clearInterval(timerInterval);
-        clearInterval(heartbeatInterval);
-        
-        // Warn about leaving
-        e.preventDefault();
-        e.returnValue = '';
-    });
-</script>
-@endpush
+
+        // Proctoring
+        async function initAdvancedProctoring() {
+            if (!config.requireCamera) {
+                initBasicProctoring();
+                return;
+            }
+
+            try {
+                // Load face-api models
+                await faceapi.nets.tinyFaceDetector.loadFromUri(config.modelPath);
+                
+                // Init camera
+                await initCamera();
+                
+                // Start face detection
+                if (config.detectFace) startFaceDetection();
+                
+                // Start snapshots
+                startSnapshotCapture();
+                
+                // Start heartbeat
+                startHeartbeat();
+
+            } catch (error) {
+                console.error('[Proctoring] Error:', error);
+            }
+
+            initBasicProctoring();
+        }
+
+        function initBasicProctoring() {
+            // Tab visibility
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) logViolation('tab_switch', 'User switched to another tab');
+            });
+
+            // Window blur
+            window.addEventListener('blur', () => logViolation('window_blur', 'Window lost focus'));
+
+            // Prevent copy/paste
+            ['copy', 'cut', 'paste'].forEach(event => {
+                document.addEventListener(event, e => {
+                    e.preventDefault();
+                    logViolation('copy_paste', `${event} action detected`);
+                });
+            });
+            
+            // Prevent right click
+            document.addEventListener('contextmenu', e => {
+                e.preventDefault();
+                logViolation('right_click', 'Right click detected');
+            });
+            
+            // Prevent keyboard shortcuts
+            document.addEventListener('keydown', preventKeyboardShortcuts);
+        }
+
+        async function initCamera() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { width: 320, height: 240, facingMode: 'user' },
+                    audio: false 
+                });
+                
+                const video = document.getElementById('camera-preview');
+                video.srcObject = stream;
+                
+                await new Promise(resolve => {
+                    video.onloadedmetadata = () => { video.play(); resolve(); };
+                });
+                
+                document.getElementById('camera-placeholder').style.display = 'none';
+                document.getElementById('camera-status').classList.remove('inactive');
+                document.getElementById('camera-status').classList.add('active');
+                
+            } catch (error) {
+                console.error('[Camera] Error:', error);
+                logViolation('camera_disabled', 'Camera access denied');
+            }
+        }
+
+        function startFaceDetection() {
+            const video = document.getElementById('camera-preview');
+            const canvas = document.getElementById('face-canvas');
+            if (!video || !canvas) return;
+
+            canvas.width = video.videoWidth || 320;
+            canvas.height = video.videoHeight || 240;
+            const ctx = canvas.getContext('2d');
+            
+            let consecutiveNoFace = 0;
+
+            faceDetectionInterval = setInterval(async () => {
+                if (!video.videoWidth) return;
+
+                try {
+                    const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 }));
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                    if (detections.length === 0) {
+                        consecutiveNoFace++;
+                        if (consecutiveNoFace >= 3 && !noFaceWarningTimeout) showNoFaceWarning();
+                    } else if (detections.length === 1) {
+                        consecutiveNoFace = 0;
+                        hideNoFaceWarning();
+                        const box = detections[0].box;
+                        ctx.strokeStyle = '#22c55e';
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(box.x, box.y, box.width, box.height);
+                    } else if (detections.length > 1 && config.detectMultipleFaces) {
+                        consecutiveNoFace = 0;
+                        logViolation('multiple_faces', `${detections.length} faces detected`);
+                        showMultipleFacesWarning(detections.length);
+                        detections.forEach(d => {
+                            ctx.strokeStyle = '#ef4444';
+                            ctx.lineWidth = 2;
+                            ctx.strokeRect(d.box.x, d.box.y, d.box.width, d.box.height);
+                        });
+                    }
+                } catch (e) { console.error('[FaceDetection]', e); }
+            }, 2000);
+        }
+
+        function showNoFaceWarning() {
+            const modal = document.getElementById('face-warning-modal');
+            const countdown = document.getElementById('face-countdown');
+            modal.classList.add('show');
+            let seconds = 5;
+            countdown.textContent = seconds;
+
+            noFaceWarningTimeout = setInterval(() => {
+                seconds--;
+                countdown.textContent = seconds;
+                if (seconds <= 0) {
+                    clearInterval(noFaceWarningTimeout);
+                    noFaceWarningTimeout = null;
+                    modal.classList.remove('show');
+                    logViolation('no_face_detected', 'Face not detected');
+                    captureAndUploadSnapshot('no_face_detected', 'No face detected');
+                }
+            }, 1000);
+        }
+
+        function hideNoFaceWarning() {
+            document.getElementById('face-warning-modal').classList.remove('show');
+            if (noFaceWarningTimeout) { clearInterval(noFaceWarningTimeout); noFaceWarningTimeout = null; }
+        }
+
+        function showMultipleFacesWarning(count) {
+            document.getElementById('faces-count').textContent = count;
+            document.getElementById('multiple-faces-modal').classList.add('show');
+        }
+
+        function closeMultipleFacesModal() {
+            document.getElementById('multiple-faces-modal').classList.remove('show');
+        }
+
+        function startSnapshotCapture() {
+            if (config.snapshotInterval <= 0) return;
+            snapshotInterval = setInterval(() => captureAndUploadSnapshot(), config.snapshotInterval * 1000);
+        }
+
+        function captureAndUploadSnapshot(violationType = null, description = null) {
+            const video = document.getElementById('camera-preview');
+            if (!video || !stream) return;
+
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth || 320;
+            canvas.height = video.videoHeight || 240;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Timestamp
+            ctx.fillStyle = 'rgba(0,0,0,0.6)';
+            ctx.fillRect(0, canvas.height - 20, canvas.width, 20);
+            ctx.fillStyle = '#fff';
+            ctx.font = '11px Arial';
+            ctx.fillText(new Date().toLocaleString('id-ID'), 4, canvas.height - 6);
+            
+            fetch(config.endpoints.uploadSnapshot, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': config.csrfToken },
+                body: JSON.stringify({ snapshot: canvas.toDataURL('image/jpeg', 0.7), violation_type: violationType, description: description })
+            }).catch(e => console.error('[Snapshot]', e));
+        }
+
+        function startHeartbeat() {
+            heartbeatInterval = setInterval(async () => {
+                try {
+                    const response = await fetch(config.endpoints.heartbeat, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': config.csrfToken },
+                        body: JSON.stringify({ camera_enabled: stream !== null })
+                    });
+                    const data = await response.json();
+                    if (data.should_submit) autoSubmit();
+                } catch (e) { console.error('[Heartbeat]', e); }
+            }, 30000);
+        }
+
+        async function logViolation(type, description) {
+            violationCount++;
+            updateViolationCounter();
+            showWarning(description);
+            
+            if (stream) captureAndUploadSnapshot(type, description);
+            
+            try {
+                const response = await fetch(config.endpoints.logViolation, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': config.csrfToken },
+                    body: JSON.stringify({ violation_type: type, description: description })
+                });
+                const data = await response.json();
+                if (data.should_auto_submit) autoSubmit();
+            } catch (e) { console.error('[Violation]', e); }
+        }
+
+        function updateViolationCounter() {
+            const badge = document.getElementById('violation-badge');
+            const count = document.getElementById('violation-count');
+            badge.classList.add('show');
+            count.textContent = violationCount;
+        }
+
+        function showWarning(message) {
+            const banner = document.getElementById('warning-banner');
+            const msg = document.getElementById('warning-message');
+            msg.textContent = `⚠️ ${message} (${violationCount}/${config.maxViolations})`;
+            banner.classList.add('show');
+            setTimeout(() => banner.classList.remove('show'), 5000);
+        }
+
+        function preventKeyboardShortcuts(e) {
+            const blocked = ['c', 'v', 'x', 'a', 'p', 's', 'f', 'u'];
+            if ((e.ctrlKey || e.metaKey) && blocked.includes(e.key.toLowerCase())) {
+                e.preventDefault();
+                logViolation('keyboard_shortcut', `Blocked: Ctrl+${e.key}`);
+            }
+            if (e.key === 'F12' || e.key === 'F5') {
+                e.preventDefault();
+                logViolation('keyboard_shortcut', `Blocked ${e.key}`);
+            }
+        }
+
+        async function autoSubmit() {
+            try {
+                const response = await fetch(config.endpoints.autoSubmit, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': config.csrfToken }
+                });
+                const data = await response.json();
+                if (data.redirect) window.location.href = data.redirect;
+            } catch (e) {
+                console.error('[AutoSubmit]', e);
+                document.getElementById('submit-form').submit();
+            }
+        }
+
+        // Cleanup
+        window.addEventListener('beforeunload', function(e) {
+            if (stream) stream.getTracks().forEach(track => track.stop());
+            [snapshotInterval, timerInterval, heartbeatInterval, faceDetectionInterval, noFaceWarningTimeout].forEach(i => { if (i) clearInterval(i); });
+            e.preventDefault();
+            e.returnValue = 'Ujian sedang berlangsung. Yakin ingin keluar?';
+            return e.returnValue;
+        });
+    </script>
+</body>
+</html>

@@ -56,19 +56,53 @@ class ExamController extends Controller
     }
 
     /**
+     * Show pre-exam check page for camera and face verification.
+     */
+    public function preCheck(Exam $exam): View
+    {
+        $this->authorize('view', $exam);
+
+        $user = auth()->user();
+        $attempt = $exam->attempts()->where('user_id', $user->id)->first();
+
+        // If already has an attempt in progress, redirect to take
+        if ($attempt && $attempt->isInProgress()) {
+            return redirect()->route('student.exams.take', $attempt);
+        }
+
+        // If already submitted, redirect to result
+        if ($attempt && $attempt->isSubmitted()) {
+            return redirect()->route('student.exams.result', $attempt);
+        }
+
+        return view('student.exams.pre-check', compact('exam', 'attempt'));
+    }
+
+    /**
      * Start the exam.
      */
     public function start(Request $request, Exam $exam): RedirectResponse|View
     {
         $this->authorize('start', $exam);
 
-        // Validate access token
+        // Validate access token and pre-check
         $request->validate([
             'access_token' => ['required', 'string'],
+            'pre_check_passed' => ['sometimes', 'boolean'],
+            'camera_verified' => ['sometimes', 'boolean'],
+            'face_verified' => ['sometimes', 'boolean'],
         ]);
 
         if ($request->access_token !== $exam->access_token) {
             return back()->withErrors(['access_token' => 'Token akses tidak valid.']);
+        }
+
+        // Check if proctoring is enabled and pre-check was done
+        if ($exam->settings?->webcam_enabled) {
+            if (!$request->input('camera_verified') && !$request->input('pre_check_passed')) {
+                return redirect()->route('student.exams.pre-check', $exam)
+                    ->withErrors(['error' => 'Silakan selesaikan verifikasi kamera terlebih dahulu.']);
+            }
         }
 
         $user = auth()->user();
@@ -80,6 +114,11 @@ class ExamController extends Controller
                 $request->ip(),
                 $request->userAgent()
             );
+
+            // Mark camera as verified if pre-check passed
+            if ($request->input('camera_verified')) {
+                $attempt->update(['camera_enabled' => true]);
+            }
 
             return redirect()->route('student.exams.take', $attempt);
 
