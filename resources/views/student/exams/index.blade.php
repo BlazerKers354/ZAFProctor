@@ -47,7 +47,7 @@
                                     <!-- Exam Title & Course -->
                                     <div>
                                         <h6 class="mb-1 f-w-600">{{ Str::limit($exam->title, 35) }}</h6>
-                                        <small class="text-muted">{{ $exam->course->name }}</small>
+                                        <small class="text-muted">{{ $exam->course?->name ?? 'Ujian Umum' }}</small>
                                     </div>
                                 </div>
                                 

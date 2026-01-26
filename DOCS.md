@@ -262,8 +262,8 @@ MIT License - lihat file [LICENSE](LICENSE) untuk detail.
 
 ## 👥 Kontributor
 
-- Zulfa Alfian - Developer
+- Zulfa Azka Farisadilah - Developer
 
 ---
 
-**ZAFProctor** - Sistem Ujian Online dengan Pengawasan Kamera © 2024
+**ZAFProctor** - Sistem Ujian Online dengan Pengawasan Kamera © 2026

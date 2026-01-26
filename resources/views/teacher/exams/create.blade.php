@@ -83,10 +83,10 @@
                             </div>
                             
                             <div class="col-12">
-                                <label for="instructions" class="form-label">Petunjuk Ujian</label>
-                                <textarea name="instructions" id="instructions" rows="4"
+                                <label for="description" class="form-label">Deskripsi/Petunjuk Ujian</label>
+                                <textarea name="description" id="description" rows="4"
                                           class="form-control"
-                                          placeholder="Berikan petunjuk untuk peserta ujian...">{{ old('instructions') }}</textarea>
+                                          placeholder="Berikan petunjuk untuk peserta ujian...">{{ old('description') }}</textarea>
                             </div>
                         </div>
                     </div>
@@ -100,27 +100,55 @@
                         </h5>
                     </div>
                     <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label for="start_time" class="form-label">Waktu Mulai <span class="text-danger">*</span></label>
-                                <input type="datetime-local" name="start_time" id="start_time" 
-                                       value="{{ old('start_time') }}"
-                                       class="form-control @error('start_time') is-invalid @enderror"
-                                       required>
-                                @error('start_time')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                        <div class="mb-3">
+                            <label class="form-label">Tipe Ujian</label>
+                            <div class="d-flex gap-4">
+                                <div class="form-check">
+                                    <input type="radio" name="type" value="scheduled" id="type_scheduled"
+                                           {{ old('type', 'scheduled') === 'scheduled' ? 'checked' : '' }}
+                                           class="form-check-input"
+                                           onchange="toggleSchedule(true)">
+                                    <label for="type_scheduled" class="form-check-label">
+                                        <i class="ph ph-calendar me-1"></i>Terjadwal
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="radio" name="type" value="flexible" id="type_flexible"
+                                           {{ old('type') === 'flexible' ? 'checked' : '' }}
+                                           class="form-check-input"
+                                           onchange="toggleSchedule(false)">
+                                    <label for="type_flexible" class="form-check-label">
+                                        <i class="ph ph-infinity me-1"></i>Fleksibel
+                                    </label>
+                                </div>
                             </div>
-                            
-                            <div class="col-md-6">
-                                <label for="end_time" class="form-label">Waktu Selesai <span class="text-danger">*</span></label>
-                                <input type="datetime-local" name="end_time" id="end_time" 
-                                       value="{{ old('end_time') }}"
-                                       class="form-control @error('end_time') is-invalid @enderror"
-                                       required>
-                                @error('end_time')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                            <small class="text-muted d-block mt-2">
+                                <strong>Terjadwal:</strong> Ujian hanya bisa diakses pada waktu yang ditentukan<br>
+                                <strong>Fleksibel:</strong> Ujian bisa diakses kapan saja setelah dipublikasikan
+                            </small>
+                        </div>
+
+                        <div id="schedule-fields" style="display: {{ old('type', 'scheduled') === 'scheduled' ? 'block' : 'none' }};">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="start_time" class="form-label">Waktu Mulai</label>
+                                    <input type="datetime-local" name="start_time" id="start_time" 
+                                           value="{{ old('start_time') }}"
+                                           class="form-control @error('start_time') is-invalid @enderror">
+                                    @error('start_time')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label for="end_time" class="form-label">Waktu Selesai</label>
+                                    <input type="datetime-local" name="end_time" id="end_time" 
+                                           value="{{ old('end_time') }}"
+                                           class="form-control @error('end_time') is-invalid @enderror">
+                                    @error('end_time')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -137,43 +165,136 @@
                         <div class="row g-4">
                             <div class="col-md-6">
                                 <div class="form-check form-switch mb-3">
-                                    <input type="checkbox" name="require_camera" id="require_camera" value="1"
-                                           {{ old('require_camera', true) ? 'checked' : '' }}
+                                    <input type="checkbox" name="webcam_enabled" id="webcam_enabled" value="1"
+                                           {{ old('webcam_enabled', true) ? 'checked' : '' }}
                                            class="form-check-input">
-                                    <label for="require_camera" class="form-check-label fw-medium">Wajib Akses Kamera</label>
+                                    <label for="webcam_enabled" class="form-check-label fw-medium">Monitor Webcam</label>
                                 </div>
-                                <small class="text-muted">Peserta harus mengizinkan akses webcam selama ujian</small>
+                                <small class="text-muted">Rekam aktivitas peserta via webcam</small>
                             </div>
                             
                             <div class="col-md-6">
                                 <div class="form-check form-switch mb-3">
-                                    <input type="checkbox" name="require_fullscreen" id="require_fullscreen" value="1"
-                                           {{ old('require_fullscreen', true) ? 'checked' : '' }}
+                                    <input type="checkbox" name="screen_capture_enabled" id="screen_capture_enabled" value="1"
+                                           {{ old('screen_capture_enabled', true) ? 'checked' : '' }}
                                            class="form-check-input">
-                                    <label for="require_fullscreen" class="form-check-label fw-medium">Wajib Mode Fullscreen</label>
+                                    <label for="screen_capture_enabled" class="form-check-label fw-medium">Screen Capture</label>
                                 </div>
-                                <small class="text-muted">Peserta harus dalam mode fullscreen selama ujian</small>
+                                <small class="text-muted">Tangkap screenshot layar secara berkala</small>
                             </div>
                             
+                            <div class="col-md-6">
+                                <div class="form-check form-switch mb-3">
+                                    <input type="checkbox" name="browser_lock_enabled" id="browser_lock_enabled" value="1"
+                                           {{ old('browser_lock_enabled', true) ? 'checked' : '' }}
+                                           class="form-check-input">
+                                    <label for="browser_lock_enabled" class="form-check-label fw-medium">Browser Lock (Fullscreen)</label>
+                                </div>
+                                <small class="text-muted">Kunci browser dalam mode fullscreen selama ujian</small>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-check form-switch mb-3">
+                                    <input type="checkbox" name="tab_switch_detection" id="tab_switch_detection" value="1"
+                                           {{ old('tab_switch_detection', true) ? 'checked' : '' }}
+                                           class="form-check-input">
+                                    <label for="tab_switch_detection" class="form-check-label fw-medium">Deteksi Tab Switch</label>
+                                </div>
+                                <small class="text-muted">Deteksi perpindahan tab browser</small>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="max_tab_switches" class="form-label">Maks Tab Switch / Pelanggaran</label>
+                                <input type="number" name="max_tab_switches" id="max_tab_switches" 
+                                       value="{{ old('max_tab_switches', 5) }}" 
+                                       min="0" max="20"
+                                       class="form-control">
+                                <small class="text-muted">0 = unlimited. Ujian auto-submit jika melebihi batas</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Display Settings -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="ph-duotone ph-eye text-info me-2"></i>Pengaturan Tampilan
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
                             <div class="col-md-6">
                                 <div class="form-check form-switch mb-3">
                                     <input type="checkbox" name="shuffle_questions" id="shuffle_questions" value="1"
                                            {{ old('shuffle_questions') ? 'checked' : '' }}
                                            class="form-check-input">
-                                    <label for="shuffle_questions" class="form-check-label fw-medium">Acak Urutan Soal</label>
+                                    <label for="shuffle_questions" class="form-check-label fw-medium">Acak Soal</label>
                                 </div>
                                 <small class="text-muted">Urutan soal berbeda untuk setiap peserta</small>
                             </div>
                             
                             <div class="col-md-6">
-                                <label for="max_violations" class="form-label">Maksimal Pelanggaran</label>
-                                <input type="number" name="max_violations" id="max_violations" 
-                                       value="{{ old('max_violations', 5) }}" min="1" max="20"
-                                       class="form-control">
-                                <small class="text-muted">Ujian akan otomatis dikumpulkan jika melebihi batas</small>
+                                <div class="form-check form-switch mb-3">
+                                    <input type="checkbox" name="shuffle_options" id="shuffle_options" value="1"
+                                           {{ old('shuffle_options') ? 'checked' : '' }}
+                                           class="form-check-input">
+                                    <label for="shuffle_options" class="form-check-label fw-medium">Acak Opsi Jawaban</label>
+                                </div>
+                                <small class="text-muted">Urutan opsi berbeda untuk setiap peserta</small>
                             </div>
                             
                             <div class="col-md-6">
+                                <div class="form-check form-switch mb-3">
+                                    <input type="checkbox" name="show_correct_answers" id="show_correct_answers" value="1"
+                                           {{ old('show_correct_answers') ? 'checked' : '' }}
+                                           class="form-check-input">
+                                    <label for="show_correct_answers" class="form-check-label fw-medium">Tampilkan Jawaban Benar</label>
+                                </div>
+                                <small class="text-muted">Tampilkan jawaban benar setelah selesai</small>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-check form-switch mb-3">
+                                    <input type="checkbox" name="show_score" id="show_score" value="1"
+                                           {{ old('show_score', true) ? 'checked' : '' }}
+                                           class="form-check-input">
+                                    <label for="show_score" class="form-check-label fw-medium">Tampilkan Nilai</label>
+                                </div>
+                                <small class="text-muted">Peserta dapat melihat nilai langsung</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Attempt Settings -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="ph-duotone ph-repeat text-warning me-2"></i>Pengaturan Percobaan
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="max_attempts" class="form-label">Maksimal Percobaan</label>
+                                <input type="number" name="max_attempts" id="max_attempts" 
+                                       value="{{ old('max_attempts', 1) }}" 
+                                       min="0" max="10"
+                                       class="form-control">
+                                <small class="text-muted">0 = unlimited</small>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label for="grade_method" class="form-label">Metode Penilaian</label>
+                                <select name="grade_method" id="grade_method" class="form-select">
+                                    <option value="highest" {{ old('grade_method', 'highest') === 'highest' ? 'selected' : '' }}>Nilai Tertinggi</option>
+                                    <option value="latest" {{ old('grade_method') === 'latest' ? 'selected' : '' }}>Nilai Terakhir</option>
+                                    <option value="average" {{ old('grade_method') === 'average' ? 'selected' : '' }}>Rata-rata</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
                                 <label for="passing_score" class="form-label">Nilai Minimum Lulus (%)</label>
                                 <input type="number" name="passing_score" id="passing_score" 
                                        value="{{ old('passing_score', 60) }}" min="0" max="100"
@@ -221,6 +342,20 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Info Alert -->
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <div class="alert alert-info mb-0">
+                            <h6 class="alert-heading"><i class="ph ph-info me-2"></i>Catatan</h6>
+                            <small>
+                                <strong>Draft:</strong> Hanya Anda yang dapat melihat ujian<br>
+                                <strong>Published:</strong> Peserta dapat melihat dan mengikuti ujian<br><br>
+                                Setelah membuat ujian, Anda dapat langsung menambahkan soal-soal ujian.
+                            </small>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </form>
@@ -236,5 +371,27 @@
         }
         document.getElementById('access_token').value = token;
     }
+
+    function toggleSchedule(show) {
+        document.getElementById('schedule-fields').style.display = show ? 'block' : 'none';
+        const startTimeInput = document.getElementById('start_time');
+        const endTimeInput = document.getElementById('end_time');
+        
+        if (!show) {
+            startTimeInput.removeAttribute('required');
+            endTimeInput.removeAttribute('required');
+        } else {
+            startTimeInput.setAttribute('required', 'required');
+            endTimeInput.setAttribute('required', 'required');
+        }
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const scheduledRadio = document.getElementById('type_scheduled');
+        if (scheduledRadio) {
+            toggleSchedule(scheduledRadio.checked);
+        }
+    });
 </script>
 @endpush

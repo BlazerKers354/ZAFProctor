@@ -155,7 +155,6 @@
                 </div>
 
                 <!-- Proctoring Settings -->
-                @if($exam->settings)
                 <div class="card mb-4">
                     <div class="card-header">
                         <h5 class="card-title mb-0">
@@ -167,7 +166,7 @@
                             <div class="col-md-6">
                                 <div class="form-check form-switch mb-3">
                                     <input type="checkbox" name="webcam_enabled" id="webcam_enabled" value="1"
-                                           {{ old('webcam_enabled', $exam->settings->webcam_enabled) ? 'checked' : '' }}
+                                           {{ old('webcam_enabled', $exam->settings?->webcam_enabled ?? true) ? 'checked' : '' }}
                                            class="form-check-input">
                                     <label for="webcam_enabled" class="form-check-label fw-medium">Monitor Webcam</label>
                                 </div>
@@ -177,7 +176,7 @@
                             <div class="col-md-6">
                                 <div class="form-check form-switch mb-3">
                                     <input type="checkbox" name="screen_capture_enabled" id="screen_capture_enabled" value="1"
-                                           {{ old('screen_capture_enabled', $exam->settings->screen_capture_enabled) ? 'checked' : '' }}
+                                           {{ old('screen_capture_enabled', $exam->settings?->screen_capture_enabled ?? true) ? 'checked' : '' }}
                                            class="form-check-input">
                                     <label for="screen_capture_enabled" class="form-check-label fw-medium">Screen Capture</label>
                                 </div>
@@ -187,17 +186,17 @@
                             <div class="col-md-6">
                                 <div class="form-check form-switch mb-3">
                                     <input type="checkbox" name="browser_lock_enabled" id="browser_lock_enabled" value="1"
-                                           {{ old('browser_lock_enabled', $exam->settings->browser_lock_enabled) ? 'checked' : '' }}
+                                           {{ old('browser_lock_enabled', $exam->settings?->browser_lock_enabled ?? true) ? 'checked' : '' }}
                                            class="form-check-input">
-                                    <label for="browser_lock_enabled" class="form-check-label fw-medium">Browser Lock</label>
+                                    <label for="browser_lock_enabled" class="form-check-label fw-medium">Browser Lock (Fullscreen)</label>
                                 </div>
-                                <small class="text-muted">Kunci browser selama ujian</small>
+                                <small class="text-muted">Kunci browser dalam mode fullscreen selama ujian</small>
                             </div>
                             
                             <div class="col-md-6">
                                 <div class="form-check form-switch mb-3">
                                     <input type="checkbox" name="tab_switch_detection" id="tab_switch_detection" value="1"
-                                           {{ old('tab_switch_detection', $exam->settings->tab_switch_detection) ? 'checked' : '' }}
+                                           {{ old('tab_switch_detection', $exam->settings?->tab_switch_detection ?? true) ? 'checked' : '' }}
                                            class="form-check-input">
                                     <label for="tab_switch_detection" class="form-check-label fw-medium">Deteksi Tab Switch</label>
                                 </div>
@@ -205,12 +204,12 @@
                             </div>
                             
                             <div class="col-md-6">
-                                <label for="max_tab_switches" class="form-label">Maks Tab Switch</label>
+                                <label for="max_tab_switches" class="form-label">Maks Tab Switch / Pelanggaran</label>
                                 <input type="number" name="max_tab_switches" id="max_tab_switches" 
-                                       value="{{ old('max_tab_switches', $exam->settings->max_tab_switches ?? 3) }}" 
+                                       value="{{ old('max_tab_switches', $exam->settings?->max_tab_switches ?? 5) }}" 
                                        min="0" max="20"
                                        class="form-control">
-                                <small class="text-muted">0 = unlimited</small>
+                                <small class="text-muted">0 = unlimited. Ujian auto-submit jika melebihi batas</small>
                             </div>
                         </div>
                     </div>
@@ -228,7 +227,7 @@
                             <div class="col-md-6">
                                 <div class="form-check form-switch mb-3">
                                     <input type="checkbox" name="shuffle_questions" id="shuffle_questions" value="1"
-                                           {{ old('shuffle_questions', $exam->settings->shuffle_questions) ? 'checked' : '' }}
+                                           {{ old('shuffle_questions', $exam->settings?->shuffle_questions) ? 'checked' : '' }}
                                            class="form-check-input">
                                     <label for="shuffle_questions" class="form-check-label fw-medium">Acak Soal</label>
                                 </div>
@@ -238,7 +237,7 @@
                             <div class="col-md-6">
                                 <div class="form-check form-switch mb-3">
                                     <input type="checkbox" name="shuffle_options" id="shuffle_options" value="1"
-                                           {{ old('shuffle_options', $exam->settings->shuffle_options) ? 'checked' : '' }}
+                                           {{ old('shuffle_options', $exam->settings?->shuffle_options) ? 'checked' : '' }}
                                            class="form-check-input">
                                     <label for="shuffle_options" class="form-check-label fw-medium">Acak Opsi Jawaban</label>
                                 </div>
@@ -248,7 +247,7 @@
                             <div class="col-md-6">
                                 <div class="form-check form-switch mb-3">
                                     <input type="checkbox" name="show_correct_answers" id="show_correct_answers" value="1"
-                                           {{ old('show_correct_answers', $exam->settings->show_correct_answers) ? 'checked' : '' }}
+                                           {{ old('show_correct_answers', $exam->settings?->show_correct_answers) ? 'checked' : '' }}
                                            class="form-check-input">
                                     <label for="show_correct_answers" class="form-check-label fw-medium">Tampilkan Jawaban Benar</label>
                                 </div>
@@ -258,7 +257,7 @@
                             <div class="col-md-6">
                                 <div class="form-check form-switch mb-3">
                                     <input type="checkbox" name="show_score" id="show_score" value="1"
-                                           {{ old('show_score', $exam->settings->show_score) ? 'checked' : '' }}
+                                           {{ old('show_score', $exam->settings?->show_score ?? true) ? 'checked' : '' }}
                                            class="form-check-input">
                                     <label for="show_score" class="form-check-label fw-medium">Tampilkan Nilai</label>
                                 </div>
@@ -277,30 +276,65 @@
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label for="max_attempts" class="form-label">Maksimal Percobaan</label>
                                 <input type="number" name="max_attempts" id="max_attempts" 
-                                       value="{{ old('max_attempts', $exam->settings->max_attempts) }}" 
+                                       value="{{ old('max_attempts', $exam->settings?->max_attempts ?? 1) }}" 
                                        min="0" max="10"
                                        class="form-control">
                                 <small class="text-muted">0 = unlimited</small>
                             </div>
                             
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label for="grade_method" class="form-label">Metode Penilaian</label>
                                 <select name="grade_method" id="grade_method" class="form-select">
-                                    <option value="highest" {{ old('grade_method', $exam->settings->grade_method) === 'highest' ? 'selected' : '' }}>Nilai Tertinggi</option>
-                                    <option value="latest" {{ old('grade_method', $exam->settings->grade_method) === 'latest' ? 'selected' : '' }}>Nilai Terakhir</option>
-                                    <option value="average" {{ old('grade_method', $exam->settings->grade_method) === 'average' ? 'selected' : '' }}>Rata-rata</option>
+                                    <option value="highest" {{ old('grade_method', $exam->settings?->grade_method ?? 'highest') === 'highest' ? 'selected' : '' }}>Nilai Tertinggi</option>
+                                    <option value="latest" {{ old('grade_method', $exam->settings?->grade_method) === 'latest' ? 'selected' : '' }}>Nilai Terakhir</option>
+                                    <option value="average" {{ old('grade_method', $exam->settings?->grade_method) === 'average' ? 'selected' : '' }}>Rata-rata</option>
                                 </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="passing_score" class="form-label">Nilai Minimum Lulus (%)</label>
+                                <input type="number" name="passing_score" id="passing_score" 
+                                       value="{{ old('passing_score', $exam->settings?->passing_score ?? 60) }}" min="0" max="100"
+                                       class="form-control">
                             </div>
                         </div>
                     </div>
                 </div>
-                @endif
             </div>
 
             <div class="col-lg-4">
+                <!-- Access Token -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="ph-duotone ph-key text-warning me-2"></i>Token Akses
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="input-group mb-2">
+                            <input type="text" id="access_token" 
+                                   value="{{ $exam->access_token }}"
+                                   class="form-control font-monospace text-center fw-bold fs-5"
+                                   readonly>
+                            <button type="button" onclick="copyToClipboard('{{ $exam->access_token }}')" class="btn btn-outline-secondary" title="Salin">
+                                <i class="ph ph-copy"></i>
+                            </button>
+                        </div>
+                        <small class="text-muted">Token yang harus dimasukkan peserta untuk memulai ujian</small>
+                        <div class="mt-2">
+                            <form action="{{ route('teacher.exams.regenerate-token', $exam) }}" method="POST" class="d-inline">
+                                @csrf
+                                <button type="submit" class="btn btn-sm btn-outline-warning" onclick="return confirm('Token lama tidak akan bisa digunakan lagi. Lanjutkan?')">
+                                    <i class="ph ph-arrows-clockwise me-1"></i>Regenerate Token
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Status -->
                 <div class="card mb-4">
                     <div class="card-header">
@@ -378,6 +412,15 @@
             startTimeInput.value = '';
             endTimeInput.value = '';
         }
+    }
+
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(function() {
+            // Show success toast or alert
+            alert('Token berhasil disalin!');
+        }).catch(function(err) {
+            console.error('Could not copy text: ', err);
+        });
     }
 
     // Initialize on page load

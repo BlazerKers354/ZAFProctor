@@ -525,7 +525,7 @@
                         <h1 class="text-white mb-0 fw-semibold" style="font-size: 1.1rem;">{{ $attempt->exam->title }}</h1>
                         <div class="d-flex align-items-center gap-2 text-secondary" style="font-size: 0.8rem;">
                             <i class="bi bi-book"></i>
-                            <span>{{ $attempt->exam->course->name }}</span>
+                            <span>{{ $attempt->exam->course?->name ?? 'Ujian Umum' }}</span>
                         </div>
                     </div>
                 </div>

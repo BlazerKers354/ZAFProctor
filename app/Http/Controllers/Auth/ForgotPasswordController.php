@@ -26,7 +26,7 @@ class ForgotPasswordController extends Controller
     /**
      * Handle an incoming password reset link request.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request): RedirectResponse|\Illuminate\Http\JsonResponse
     {
         $request->validate([
             'email' => ['required', 'email'],
@@ -35,6 +35,21 @@ class ForgotPasswordController extends Controller
         $status = Password::sendResetLink(
             $request->only('email')
         );
+
+        // Handle AJAX request
+        if ($request->expectsJson()) {
+            if ($status == Password::RESET_LINK_SENT) {
+                return response()->json([
+                    'success' => true,
+                    'message' => __($status)
+                ]);
+            }
+            
+            return response()->json([
+                'success' => false,
+                'message' => __($status)
+            ], 422);
+        }
 
         return $status == Password::RESET_LINK_SENT
             ? back()->with('status', __($status))

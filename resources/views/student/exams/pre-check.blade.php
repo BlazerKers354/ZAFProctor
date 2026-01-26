@@ -235,7 +235,7 @@
                     </div>
                     <div>
                         <h5 class="mb-1 f-w-600">{{ $exam->title }}</h5>
-                        <span class="text-muted">{{ $exam->course->name }}</span>
+                        <span class="text-muted">{{ $exam->course?->name ?? 'Ujian Umum' }}</span>
                     </div>
                 </div>
                 <div class="row g-2 text-center">
@@ -455,8 +455,10 @@ async function requestCameraAccess() {
         const video = document.getElementById('camera-preview');
         video.srcObject = stream;
         
-        // Hide camera off state
-        document.getElementById('camera-off-state').style.display = 'none';
+        // Hide camera off state - use classList to properly override Bootstrap's d-flex !important
+        const cameraOffState = document.getElementById('camera-off-state');
+        cameraOffState.classList.remove('d-flex');
+        cameraOffState.classList.add('d-none');
         
         // Wait for video to be ready
         video.onloadedmetadata = () => {

@@ -66,6 +66,22 @@ class ExamAttempt extends Model
     }
 
     /**
+     * Alias for user relationship (student)
+     */
+    public function student(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * Get the finished_at attribute (alias for submitted_at)
+     */
+    public function getFinishedAtAttribute()
+    {
+        return $this->submitted_at;
+    }
+
+    /**
      * Get answers for this attempt
      */
     public function answers(): HasMany

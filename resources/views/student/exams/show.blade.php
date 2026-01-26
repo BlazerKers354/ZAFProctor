@@ -23,7 +23,7 @@
                         </div>
                         <div>
                             <h4 class="mb-1 text-white f-w-600">{{ $exam->title }}</h4>
-                            <small class="text-white-50">{{ $exam->course->name }}</small>
+                            <small class="text-white-50">{{ $exam->course?->name ?? 'Ujian Umum' }}</small>
                         </div>
                     </div>
                 </div>

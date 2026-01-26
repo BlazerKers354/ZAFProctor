@@ -49,10 +49,13 @@ Route::middleware('guest')->group(function () {
     })->name('register.teacher.form');
     Route::post('register/guru', [RegisterController::class, 'storeTeacher'])->name('register.teacher');
     
-    Route::get('forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
-    Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
-    Route::get('reset-password/{token}', [ForgotPasswordController::class, 'showResetForm'])->name('password.reset');
-    Route::post('reset-password', [ForgotPasswordController::class, 'reset'])->name('password.update.reset');
+    // Forgot password - redirect ke login karena sudah terintegrasi
+    Route::get('forgot-password', function() {
+        return redirect()->route('login');
+    })->name('password.request');
+    Route::post('forgot-password', [ForgotPasswordController::class, 'store'])->name('password.email');
+    Route::get('reset-password/{token}', [ForgotPasswordController::class, 'reset'])->name('password.reset');
+    Route::post('reset-password', [ForgotPasswordController::class, 'update'])->name('password.update.reset');
 });
 
 // Email Verification Routes (harus diluar auth middleware agar URL bisa digenerate)
@@ -129,8 +132,8 @@ Route::middleware(['auth', 'check.active'])->group(function () {
         // Monitoring
         Route::prefix('exams/{exam}/monitor')->name('monitor.')->group(function () {
             Route::get('/', [MonitorController::class, 'index'])->name('index');
-            Route::get('attempts/{attempt}', [MonitorController::class, 'showAttempt'])->name('attempt');
-            Route::get('attempts/{attempt}/logs', [MonitorController::class, 'showLogs'])->name('logs');
+            Route::get('attempts/{attempt}', [MonitorController::class, 'attempt'])->name('attempt');
+            Route::get('attempts/{attempt}/logs', [MonitorController::class, 'logs'])->name('logs');
             Route::post('attempts/{attempt}/terminate', [MonitorController::class, 'terminate'])->name('terminate');
         });
         

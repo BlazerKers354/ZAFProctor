@@ -16,6 +16,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
     <style>
+        /* Hide browser's default password reveal button */
+        input[type="password"]::-ms-reveal,
+        input[type="password"]::-ms-clear,
+        input[type="password"]::-webkit-credentials-auto-fill-button,
+        input[type="password"]::-webkit-clear-button {
+            display: none !important;
+        }
+        
         * {
             margin: 0;
             padding: 0;
@@ -802,7 +810,8 @@
 
         <!-- Sign In Form -->
         <div class="form-container sign-in">
-            <form method="POST" action="{{ route('login') }}">
+            <!-- Login Form -->
+            <form method="POST" action="{{ route('login') }}" id="login-form">
                 @csrf
                 <h1>Masuk</h1>
 
@@ -834,13 +843,42 @@
                     <label for="remember">Ingat saya</label>
                 </div>
 
-                <a href="{{ route('password.request') }}">Lupa Password?</a>
+                <a href="#" onclick="showForgotPassword(); return false;">Lupa Password?</a>
                 <button type="submit">Masuk</button>
 
                 <div class="mobile-toggle">
                     <span>Belum punya akun? </span>
                     <a href="#" onclick="toggleForm(true); return false;">Daftar di sini</a>
                 </div>
+            </form>
+
+            <!-- Forgot Password Form (Hidden by default) -->
+            <form id="forgot-password-form" style="display: none;">
+                @csrf
+                <h1>Lupa Password?</h1>
+                
+                <div id="forgot-alert-success" class="alert alert-success" style="display: none;">
+                    <i class="fa-solid fa-circle-check"></i> <span id="forgot-success-text"></span>
+                </div>
+                
+                <div id="forgot-alert-error" class="alert alert-error" style="display: none;">
+                    <i class="fa-solid fa-circle-exclamation"></i> <span id="forgot-error-text"></span>
+                </div>
+
+                <p style="text-align: center; color: #666; margin-bottom: 20px;">
+                    Masukkan email Anda dan kami akan mengirimkan link untuk reset password.
+                </p>
+
+                <input type="email" name="email" id="forgot-email" placeholder="Email" required>
+
+                <button type="submit" id="forgot-submit-btn">
+                    <span id="forgot-btn-text" style="color: white;">Kirim Link Reset</span>
+                    <i id="forgot-btn-spinner" class="fa-solid fa-spinner fa-spin" style="display: none; margin-left: 8px;"></i>
+                </button>
+
+                <a href="#" onclick="showLoginForm(); return false;">
+                    <i class="fa-solid fa-arrow-left"></i> Kembali ke Login
+                </a>
             </form>
         </div>
 
@@ -971,6 +1009,82 @@
                 teacherForm.style.display = 'flex';
             @endif
         @endif
+
+        // Forgot Password Functions
+        const loginForm = document.getElementById('login-form');
+        const forgotPasswordForm = document.getElementById('forgot-password-form');
+
+        function showForgotPassword() {
+            loginForm.style.display = 'none';
+            forgotPasswordForm.style.display = 'flex';
+            document.getElementById('forgot-email').focus();
+            // Reset alerts
+            document.getElementById('forgot-alert-success').style.display = 'none';
+            document.getElementById('forgot-alert-error').style.display = 'none';
+        }
+
+        function showLoginForm() {
+            forgotPasswordForm.style.display = 'none';
+            loginForm.style.display = 'flex';
+            // Reset form
+            forgotPasswordForm.reset();
+            document.getElementById('forgot-alert-success').style.display = 'none';
+            document.getElementById('forgot-alert-error').style.display = 'none';
+        }
+
+        // Handle forgot password form submission via AJAX
+        forgotPasswordForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('forgot-email').value;
+            const submitBtn = document.getElementById('forgot-submit-btn');
+            const btnText = document.getElementById('forgot-btn-text');
+            const btnSpinner = document.getElementById('forgot-btn-spinner');
+            const alertSuccess = document.getElementById('forgot-alert-success');
+            const alertError = document.getElementById('forgot-alert-error');
+            const successText = document.getElementById('forgot-success-text');
+            const errorText = document.getElementById('forgot-error-text');
+            
+            // Reset alerts
+            alertSuccess.style.display = 'none';
+            alertError.style.display = 'none';
+            
+            // Show loading state
+            submitBtn.disabled = true;
+            btnText.textContent = 'Mengirim...';
+            btnSpinner.style.display = 'inline-block';
+            
+            try {
+                const response = await fetch('{{ route("password.email") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ email: email })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    successText.textContent = data.message || 'Link reset password telah dikirim ke email Anda!';
+                    alertSuccess.style.display = 'block';
+                    forgotPasswordForm.reset();
+                } else {
+                    errorText.textContent = data.message || data.errors?.email?.[0] || 'Terjadi kesalahan. Silakan coba lagi.';
+                    alertError.style.display = 'block';
+                }
+            } catch (error) {
+                errorText.textContent = 'Terjadi kesalahan jaringan. Silakan coba lagi.';
+                alertError.style.display = 'block';
+            } finally {
+                // Reset button state
+                submitBtn.disabled = false;
+                btnText.textContent = 'Kirim Link Reset';
+                btnSpinner.style.display = 'none';
+            }
+        });
     </script>
 </body>
 </html>

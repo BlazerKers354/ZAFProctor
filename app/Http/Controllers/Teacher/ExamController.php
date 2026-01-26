@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Teacher;
 use App\Http\Controllers\Controller;
 use App\Models\Course;
 use App\Models\Exam;
+use App\Models\ExamAttempt;
 use App\Models\ExamSetting;
 use App\Models\Question;
 use App\Models\QuestionOption;
@@ -62,28 +63,39 @@ class ExamController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
+        $isScheduled = $request->input('type', 'scheduled') === 'scheduled';
+        
+        $rules = [
             'course_id' => ['required', 'exists:courses,id'],
             'title' => ['required', 'string', 'max:255'],
-            'instructions' => ['nullable', 'string'],
-            'start_time' => ['required', 'date', 'after:now'],
-            'end_time' => ['required', 'date', 'after:start_time'],
+            'description' => ['nullable', 'string'],
+            'type' => ['required', 'in:scheduled,flexible'],
             'duration' => ['required', 'integer', 'min:5', 'max:480'],
             'access_token' => ['nullable', 'string', 'max:50'],
             'status' => ['nullable', 'in:draft,published'],
-        ]);
+        ];
+        
+        if ($isScheduled) {
+            $rules['start_time'] = ['required', 'date', 'after:now'];
+            $rules['end_time'] = ['required', 'date', 'after:start_time'];
+        } else {
+            $rules['start_time'] = ['nullable', 'date'];
+            $rules['end_time'] = ['nullable', 'date'];
+        }
+
+        $validated = $request->validate($rules);
 
         $exam = null;
         
-        DB::transaction(function () use ($validated, $request, &$exam) {
+        DB::transaction(function () use ($validated, $request, &$exam, $isScheduled) {
             // Create exam
             $exam = Exam::create([
                 'course_id' => $validated['course_id'],
                 'title' => $validated['title'],
-                'description' => $validated['instructions'],
-                'type' => 'scheduled', // Default to scheduled
-                'start_time' => $validated['start_time'],
-                'end_time' => $validated['end_time'],
+                'description' => $validated['description'] ?? null,
+                'type' => $validated['type'],
+                'start_time' => $isScheduled ? $validated['start_time'] : null,
+                'end_time' => $isScheduled ? $validated['end_time'] : null,
                 'duration' => $validated['duration'],
                 'status' => $validated['status'] ?? 'draft',
                 'created_by' => auth()->id(),
@@ -94,21 +106,21 @@ class ExamController extends Controller
             ExamSetting::create([
                 'exam_id' => $exam->id,
                 // Proctoring settings
-                'webcam_enabled' => $request->boolean('require_camera', true),
-                'screen_capture_enabled' => true,
-                'browser_lock_enabled' => $request->boolean('require_fullscreen', true),
-                'tab_switch_detection' => true,
-                'max_tab_switches' => $request->input('max_violations', 5),
+                'webcam_enabled' => $request->boolean('webcam_enabled', true),
+                'screen_capture_enabled' => $request->boolean('screen_capture_enabled', true),
+                'browser_lock_enabled' => $request->boolean('browser_lock_enabled', true),
+                'tab_switch_detection' => $request->boolean('tab_switch_detection', true),
+                'max_tab_switches' => $request->input('max_tab_switches', 5),
                 
                 // Display settings
                 'shuffle_questions' => $request->boolean('shuffle_questions', false),
-                'shuffle_options' => false,
-                'show_correct_answers' => false,
-                'show_score' => true,
+                'shuffle_options' => $request->boolean('shuffle_options', false),
+                'show_correct_answers' => $request->boolean('show_correct_answers', false),
+                'show_score' => $request->boolean('show_score', true),
                 
                 // Attempt settings
-                'max_attempts' => null,
-                'grade_method' => 'highest',
+                'max_attempts' => $request->input('max_attempts') ?: null,
+                'grade_method' => $request->input('grade_method', 'highest'),
                 
                 // Passing score
                 'passing_score' => $request->input('passing_score', 60),
@@ -185,7 +197,7 @@ class ExamController extends Controller
                     'screen_capture_enabled' => $request->boolean('screen_capture_enabled'),
                     'browser_lock_enabled' => $request->boolean('browser_lock_enabled'),
                     'tab_switch_detection' => $request->boolean('tab_switch_detection'),
-                    'max_tab_switches' => $request->input('max_tab_switches', 3),
+                    'max_tab_switches' => $request->input('max_tab_switches', 5),
                     
                     // Display settings
                     'shuffle_questions' => $request->boolean('shuffle_questions'),
@@ -196,6 +208,9 @@ class ExamController extends Controller
                     // Attempt settings
                     'max_attempts' => $request->input('max_attempts') ?: null,
                     'grade_method' => $request->input('grade_method', 'highest'),
+                    
+                    // Passing score
+                    'passing_score' => $request->input('passing_score', 60),
                 ]
             );
         });
@@ -240,9 +255,184 @@ class ExamController extends Controller
     {
         $this->authorize('update', $exam);
 
-        $exam->regenerateToken();
+        $exam->update(['access_token' => strtoupper(Str::random(8))]);
 
         return back()->with('success', 'Token akses berhasil diperbarui.');
+    }
+
+    /**
+     * Duplicate an exam.
+     */
+    public function duplicate(Exam $exam): RedirectResponse
+    {
+        $this->authorize('view', $exam);
+
+        $newExam = null;
+
+        DB::transaction(function () use ($exam, &$newExam) {
+            // Duplicate exam
+            $newExam = $exam->replicate();
+            $newExam->title = $exam->title . ' (Salinan)';
+            $newExam->status = Exam::STATUS_DRAFT;
+            $newExam->access_token = strtoupper(Str::random(8));
+            $newExam->created_by = auth()->id();
+            $newExam->save();
+
+            // Duplicate settings
+            if ($exam->settings) {
+                $newSettings = $exam->settings->replicate();
+                $newSettings->exam_id = $newExam->id;
+                $newSettings->save();
+            }
+
+            // Duplicate questions and options
+            foreach ($exam->questions as $question) {
+                $newQuestion = $question->replicate();
+                $newQuestion->exam_id = $newExam->id;
+                $newQuestion->save();
+
+                foreach ($question->options as $option) {
+                    $newOption = $option->replicate();
+                    $newOption->question_id = $newQuestion->id;
+                    $newOption->save();
+                }
+            }
+        });
+
+        return redirect()->route('teacher.exams.show', $newExam)
+            ->with('success', 'Ujian berhasil diduplikasi.');
+    }
+
+    /**
+     * Show exam results.
+     */
+    public function results(Exam $exam): View
+    {
+        $this->authorize('view', $exam);
+
+        $exam->load(['course', 'questions', 'settings']);
+        
+        $attempts = $exam->attempts()
+            ->with(['student', 'answers'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        $statistics = $this->examService->getExamStatistics($exam);
+
+        return view('teacher.exams.results', compact('exam', 'attempts', 'statistics'));
+    }
+
+    /**
+     * Export exam data.
+     */
+    public function export(Exam $exam)
+    {
+        $this->authorize('view', $exam);
+
+        $exam->load(['course', 'questions.options', 'attempts.student', 'attempts.answers']);
+        
+        $data = [];
+        
+        foreach ($exam->attempts as $attempt) {
+            $row = [
+                'Nama Siswa' => $attempt->student->name,
+                'NIS' => $attempt->student->nis ?? '-',
+                'Kelas' => $attempt->student->schoolClass?->name ?? '-',
+                'Waktu Mulai' => $attempt->started_at?->format('d/m/Y H:i:s') ?? '-',
+                'Waktu Selesai' => $attempt->finished_at?->format('d/m/Y H:i:s') ?? '-',
+                'Durasi (menit)' => $attempt->started_at && $attempt->finished_at 
+                    ? round($attempt->started_at->diffInMinutes($attempt->finished_at), 1) 
+                    : '-',
+                'Nilai' => $attempt->score ?? '-',
+                'Status' => ucfirst($attempt->status),
+                'Total Pelanggaran' => $attempt->violation_count ?? 0,
+            ];
+            
+            $data[] = $row;
+        }
+        
+        // Generate CSV
+        $filename = 'hasil_' . Str::slug($exam->title) . '_' . now()->format('YmdHis') . '.csv';
+        
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+        
+        $callback = function () use ($data) {
+            $file = fopen('php://output', 'w');
+            
+            // Add BOM for UTF-8
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+            
+            // Headers
+            if (!empty($data)) {
+                fputcsv($file, array_keys($data[0]));
+            }
+            
+            // Data rows
+            foreach ($data as $row) {
+                fputcsv($file, $row);
+            }
+            
+            fclose($file);
+        };
+        
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Show grade form for an attempt.
+     */
+    public function gradeForm(ExamAttempt $attempt): View
+    {
+        $exam = $attempt->exam;
+        $this->authorize('view', $exam);
+
+        $attempt->load(['student', 'answers.question.options', 'exam.questions.options']);
+
+        return view('teacher.exams.grade', compact('exam', 'attempt'));
+    }
+
+    /**
+     * Submit grade for an attempt.
+     */
+    public function submitGrade(Request $request, ExamAttempt $attempt): RedirectResponse
+    {
+        $exam = $attempt->exam;
+        $this->authorize('update', $exam);
+
+        $validated = $request->validate([
+            'scores' => ['required', 'array'],
+            'scores.*' => ['required', 'numeric', 'min:0'],
+            'feedback' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $totalScore = 0;
+        $totalPossible = 0;
+
+        foreach ($validated['scores'] as $answerId => $score) {
+            $answer = $attempt->answers()->find($answerId);
+            if ($answer) {
+                $answer->update(['score' => $score, 'is_graded' => true]);
+                $totalScore += $score;
+                $totalPossible += $answer->question->points ?? 1;
+            }
+        }
+
+        // Calculate percentage score
+        $percentageScore = $totalPossible > 0 ? round(($totalScore / $totalPossible) * 100, 2) : 0;
+
+        $attempt->update([
+            'score' => $percentageScore,
+            'is_graded' => true,
+            'graded_at' => now(),
+            'graded_by' => auth()->id(),
+            'feedback' => $validated['feedback'] ?? null,
+        ]);
+
+        return redirect()->route('teacher.exams.results', $exam)
+            ->with('success', 'Nilai berhasil disimpan.');
     }
 
     /**

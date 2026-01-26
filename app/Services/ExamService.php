@@ -174,11 +174,14 @@ class ExamService
      */
     public function getExamStatistics(Exam $exam): array
     {
-        $attempts = $exam->attempts()->submitted()->get();
+        $allAttempts = $exam->attempts()->get();
+        $submittedAttempts = $exam->attempts()->whereIn('status', ['completed', 'submitted'])->get();
 
-        if ($attempts->isEmpty()) {
+        if ($submittedAttempts->isEmpty()) {
             return [
+                'total_participants' => $allAttempts->count(),
                 'total_attempts' => 0,
+                'completed_attempts' => 0,
                 'average_score' => 0,
                 'highest_score' => 0,
                 'lowest_score' => 0,
@@ -187,13 +190,17 @@ class ExamService
             ];
         }
 
+        $passingScore = $exam->settings?->passing_score ?? 60;
+
         return [
-            'total_attempts' => $attempts->count(),
-            'average_score' => round($attempts->avg('percentage'), 2),
-            'highest_score' => round($attempts->max('percentage'), 2),
-            'lowest_score' => round($attempts->min('percentage'), 2),
-            'pass_rate' => round($attempts->where('is_passed', true)->count() / $attempts->count() * 100, 2),
-            'auto_submit_count' => $attempts->where('is_auto_submitted', true)->count(),
+            'total_participants' => $allAttempts->count(),
+            'total_attempts' => $submittedAttempts->count(),
+            'completed_attempts' => $submittedAttempts->count(),
+            'average_score' => round($submittedAttempts->avg('score') ?? 0, 2),
+            'highest_score' => round($submittedAttempts->max('score') ?? 0, 2),
+            'lowest_score' => round($submittedAttempts->min('score') ?? 0, 2),
+            'pass_rate' => round($submittedAttempts->where('score', '>=', $passingScore)->count() / $submittedAttempts->count() * 100, 2),
+            'auto_submit_count' => $submittedAttempts->where('is_auto_submitted', true)->count(),
         ];
     }
 }

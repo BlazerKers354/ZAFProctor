@@ -266,12 +266,12 @@
                                 <small class="text-muted">{{ $attempt->submitted_at?->format('H:i') ?? '' }} WIB</small>
                             </td>
                             <td class="text-center">
-                                @if($attempt->status === 'graded')
+                                @if($attempt->isSubmitted() && $attempt->score !== null)
                                     @php
-                                        $scoreBg = $attempt->score >= 80 ? 'bg-success' : ($attempt->score >= 70 ? 'bg-warning' : 'bg-danger');
+                                        $scoreBg = $attempt->percentage >= 80 ? 'bg-success' : ($attempt->percentage >= 70 ? 'bg-warning' : 'bg-danger');
                                     @endphp
                                     <div class="score-badge {{ $scoreBg }} text-white rounded-3 d-inline-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-                                        <span class="f-w-600">{{ number_format($attempt->score, 0) }}</span>
+                                        <span class="f-w-600">{{ number_format($attempt->percentage, 0) }}</span>
                                     </div>
                                 @else
                                     <div class="bg-light rounded-3 d-inline-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
@@ -284,6 +284,10 @@
                                     <span class="badge badge-soft-success">
                                         <i class="ph ph-check me-1"></i>Dinilai
                                     </span>
+                                @elseif($attempt->isSubmitted() && $attempt->score !== null)
+                                    <span class="badge badge-soft-info">
+                                        <i class="ph ph-check-circle me-1"></i>Selesai
+                                    </span>
                                 @else
                                     <span class="badge badge-soft-warning">
                                         <i class="ph ph-clock me-1"></i>Menunggu
@@ -291,7 +295,7 @@
                                 @endif
                             </td>
                             <td class="text-end">
-                                @if($attempt->status === 'graded')
+                                @if($attempt->isSubmitted() && $attempt->score !== null)
                                     <a href="{{ route('student.exams.result', $attempt) }}" class="btn btn-light-primary btn-sm">
                                         <i class="ph ph-eye me-1"></i>Detail
                                     </a>

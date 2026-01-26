@@ -121,9 +121,9 @@
                     </span>
                 </div>
                 <div class="card-body">
-                    @if(isset($violationSummary) && count($violationSummary) > 0)
+                    @if(isset($violationSummary['by_type']) && count($violationSummary['by_type']) > 0)
                         <div class="row g-3">
-                            @foreach($violationSummary as $type => $count)
+                            @foreach($violationSummary['by_type'] as $type => $count)
                                 <div class="col-md-4">
                                     <div class="border rounded p-3 text-center">
                                         <h4 class="text-danger mb-1">{{ $count }}</h4>
@@ -131,6 +131,21 @@
                                     </div>
                                 </div>
                             @endforeach
+                        </div>
+                        <hr class="my-3">
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <small class="text-muted d-block">Total</small>
+                                <span class="fw-bold">{{ $violationSummary['total'] ?? 0 }}</span>
+                            </div>
+                            <div class="col-4">
+                                <small class="text-muted d-block">Reviewed</small>
+                                <span class="fw-bold text-success">{{ $violationSummary['reviewed'] ?? 0 }}</span>
+                            </div>
+                            <div class="col-4">
+                                <small class="text-muted d-block">Pending</small>
+                                <span class="fw-bold text-warning">{{ $violationSummary['pending_review'] ?? 0 }}</span>
+                            </div>
                         </div>
                     @else
                         <div class="text-center py-4 text-muted">
@@ -151,13 +166,13 @@
                 <div class="card-body">
                     @if(isset($snapshots) && count($snapshots) > 0)
                         <div class="row g-3">
-                            @foreach($snapshots->take(8) as $snapshot)
+                            @foreach(array_slice($snapshots, 0, 8) as $snapshot)
                                 <div class="col-6 col-md-3">
                                     <div class="position-relative">
-                                        <img src="{{ asset('storage/' . $snapshot->snapshot_path) }}" 
+                                        <img src="{{ asset('storage/' . ($snapshot['snapshot_path'] ?? $snapshot->snapshot_path ?? '')) }}" 
                                              alt="Snapshot" class="img-fluid rounded" style="aspect-ratio: 4/3; object-fit: cover; width: 100%;">
                                         <small class="position-absolute bottom-0 start-0 bg-dark text-white px-2 py-1 rounded-end f-10">
-                                            {{ $snapshot->created_at->format('H:i:s') }}
+                                            {{ is_array($snapshot) ? $snapshot['timestamp'] : $snapshot->created_at->format('H:i:s') }}
                                         </small>
                                     </div>
                                 </div>
