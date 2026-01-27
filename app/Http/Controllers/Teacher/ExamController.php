@@ -408,26 +408,27 @@ class ExamController extends Controller
             'feedback' => ['nullable', 'string', 'max:1000'],
         ]);
 
-        $totalScore = 0;
-        $totalPossible = 0;
-
         foreach ($validated['scores'] as $answerId => $score) {
             $answer = $attempt->answers()->find($answerId);
             if ($answer) {
-                $answer->update(['score' => $score, 'is_graded' => true]);
-                $totalScore += $score;
-                $totalPossible += $answer->question->points ?? 1;
+                // Get max points for this question
+                $maxPoints = $answer->question->points ?? 1;
+                $earnedPoints = min($score, $maxPoints);
+                
+                // Update answer with correct field (points_earned)
+                $answer->update([
+                    'points_earned' => $earnedPoints,
+                    'is_correct' => $earnedPoints >= ($maxPoints * 0.5), // 50% threshold
+                ]);
             }
         }
 
-        // Calculate percentage score
-        $percentageScore = $totalPossible > 0 ? round(($totalScore / $totalPossible) * 100, 2) : 0;
-
+        // Recalculate attempt score using the model method
+        $attempt->calculateScore();
+        
+        // Update attempt status and feedback
         $attempt->update([
-            'score' => $percentageScore,
-            'is_graded' => true,
-            'graded_at' => now(),
-            'graded_by' => auth()->id(),
+            'status' => ExamAttempt::STATUS_GRADED,
             'feedback' => $validated['feedback'] ?? null,
         ]);
 

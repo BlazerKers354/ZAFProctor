@@ -146,8 +146,8 @@
                                 <div class="mb-3">
                                     <label class="form-label text-muted">Jawaban Siswa:</label>
                                     <div class="p-3 bg-light rounded">
-                                        @if($answer && $answer->answer_text)
-                                            {!! nl2br(e($answer->answer_text)) !!}
+                                        @if($answer && $answer->essay_answer)
+                                            {!! nl2br(e($answer->essay_answer)) !!}
                                         @else
                                             <em class="text-muted">Tidak ada jawaban</em>
                                         @endif
@@ -164,7 +164,7 @@
                             @elseif($question->type === 'true_false')
                                 <div class="mb-3">
                                     @php
-                                        $studentAnswer = $answer?->answer_text;
+                                        $studentAnswer = $answer?->essay_answer;
                                         $correctAnswer = $question->correct_answer ?? 'true';
                                     @endphp
                                     <label class="form-label text-muted">Jawaban:</label>
@@ -201,7 +201,7 @@
                                         <div class="col-md-6">
                                             <div class="input-group">
                                                 <input type="number" name="scores[{{ $answer->id }}]" 
-                                                       value="{{ old('scores.' . $answer->id, $answer->score ?? ($answer->is_correct ? $question->points : 0)) }}"
+                                                       value="{{ old('scores.' . $answer->id, $answer->points_earned ?? ($answer->is_correct ? $question->points : 0)) }}"
                                                        min="0" max="{{ $question->points ?? 1 }}" step="0.5"
                                                        class="form-control @error('scores.' . $answer->id) is-invalid @enderror">
                                                 <span class="input-group-text">/ {{ $question->points ?? 1 }}</span>

@@ -727,10 +727,14 @@
                                                 <textarea id="essay-{{ $question->id }}"
                                                           class="essay-textarea"
                                                           placeholder="Tulis jawaban Anda di sini..."
+                                                          oninput="onEssayInput({{ $question->id }}, {{ $index }})"
                                                           onblur="saveEssayAnswer({{ $question->id }}, {{ $index }})"
                                                 >{{ isset($answeredQuestions[$question->id]) ? $answeredQuestions[$question->id]->essay_answer : '' }}</textarea>
-                                                <div class="mt-2 text-secondary" style="font-size: 0.75rem;">
-                                                    <i class="bi bi-info-circle me-1"></i>Jawaban otomatis tersimpan saat berpindah soal
+                                                <div class="mt-2 d-flex justify-content-between align-items-center text-secondary" style="font-size: 0.75rem;">
+                                                    <span><i class="bi bi-info-circle me-1"></i>Jawaban otomatis tersimpan</span>
+                                                    <span id="essay-status-{{ $question->id }}" class="text-success" style="display: none;">
+                                                        <i class="bi bi-check-circle me-1"></i>Tersimpan
+                                                    </span>
                                                 </div>
                                             </div>
                                         @endif
@@ -931,6 +935,9 @@
             
             initTimer();
             updateProgressBar();
+            
+            // Start auto-save for essay answers
+            startEssayAutoSave();
             
             // Initialize proctoring
             await initAdvancedProctoring();
@@ -1253,6 +1260,7 @@
                 answeredQuestions.add(questionId);
                 updateNavButton(questionIndex, true);
                 updateProgressBar();
+                showEssayStatus(questionId, 'offline');
                 showNotification('📝 Jawaban disimpan offline');
                 return;
             }
@@ -1272,6 +1280,7 @@
                     answeredQuestions.add(questionId);
                     updateNavButton(questionIndex, true);
                     updateProgressBar();
+                    showEssayStatus(questionId, 'saved');
                 }
             } catch (err) {
                 console.error('Error saving essay:', err);
@@ -1279,9 +1288,126 @@
                 answeredQuestions.add(questionId);
                 updateNavButton(questionIndex, true);
                 updateProgressBar();
+                showEssayStatus(questionId, 'pending');
                 showNotification('⚠️ Jawaban disimpan lokal, akan disinkronkan...');
                 setTimeout(syncOfflineAnswers, 5000);
             }
+        }
+
+        // Handle essay input - save to localStorage immediately
+        function onEssayInput(questionId, questionIndex) {
+            const textarea = document.getElementById(`essay-${questionId}`);
+            const answer = textarea.value.trim();
+            
+            if (answer) {
+                // Save to localStorage as immediate backup
+                const payload = { question_id: questionId, essay_answer: answer };
+                const queueData = { payload, questionIndex };
+                localStorage.setItem(`answer_${config.attemptId}_${questionId}`, JSON.stringify(queueData));
+                
+                // Mark as unsaved (will be saved on blur or auto-save)
+                showEssayStatus(questionId, 'typing');
+            }
+        }
+        
+        // Show essay save status
+        function showEssayStatus(questionId, status) {
+            const statusEl = document.getElementById(`essay-status-${questionId}`);
+            if (!statusEl) return;
+            
+            statusEl.style.display = 'inline';
+            
+            switch(status) {
+                case 'saved':
+                    statusEl.className = 'text-success';
+                    statusEl.innerHTML = '<i class="bi bi-check-circle me-1"></i>Tersimpan';
+                    setTimeout(() => { statusEl.style.display = 'none'; }, 3000);
+                    break;
+                case 'typing':
+                    statusEl.className = 'text-muted';
+                    statusEl.innerHTML = '<i class="bi bi-pencil me-1"></i>Mengetik...';
+                    break;
+                case 'pending':
+                    statusEl.className = 'text-warning';
+                    statusEl.innerHTML = '<i class="bi bi-clock me-1"></i>Menunggu...';
+                    break;
+                case 'offline':
+                    statusEl.className = 'text-info';
+                    statusEl.innerHTML = '<i class="bi bi-cloud-slash me-1"></i>Disimpan lokal';
+                    break;
+            }
+        }
+
+        // Save all essay answers before submit
+        async function saveAllEssayAnswers() {
+            const essayTextareas = document.querySelectorAll('.essay-textarea');
+            const savePromises = [];
+            
+            essayTextareas.forEach((textarea, index) => {
+                const answer = textarea.value.trim();
+                if (answer) {
+                    // Extract question ID from textarea id (format: essay-{questionId})
+                    const questionId = parseInt(textarea.id.replace('essay-', ''));
+                    if (questionId) {
+                        const payload = { question_id: questionId, essay_answer: answer };
+                        
+                        // Save to server
+                        const savePromise = fetch(config.endpoints.saveAnswer, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': config.csrfToken,
+                            },
+                            body: JSON.stringify(payload)
+                        }).then(response => {
+                            if (response.ok) {
+                                answeredQuestions.add(questionId);
+                                localStorage.removeItem(`answer_${config.attemptId}_${questionId}`);
+                            }
+                        }).catch(err => {
+                            console.error('Error saving essay on submit:', err);
+                            // Save to localStorage as backup
+                            localStorage.setItem(`answer_${config.attemptId}_${questionId}`, JSON.stringify({ payload, questionIndex: index }));
+                        });
+                        
+                        savePromises.push(savePromise);
+                    }
+                }
+            });
+            
+            // Wait for all saves to complete (with timeout)
+            if (savePromises.length > 0) {
+                try {
+                    await Promise.race([
+                        Promise.all(savePromises),
+                        new Promise((_, reject) => setTimeout(() => reject('timeout'), 5000))
+                    ]);
+                } catch (err) {
+                    console.warn('Some essay answers may not have saved:', err);
+                }
+            }
+        }
+
+        // Auto-save essay every 10 seconds
+        let essayAutoSaveInterval;
+        function startEssayAutoSave() {
+            essayAutoSaveInterval = setInterval(() => {
+                const essayTextareas = document.querySelectorAll('.essay-textarea');
+                essayTextareas.forEach((textarea) => {
+                    const answer = textarea.value.trim();
+                    if (answer) {
+                        const questionId = parseInt(textarea.id.replace('essay-', ''));
+                        const questionIndex = Array.from(document.querySelectorAll('.essay-textarea')).indexOf(textarea);
+                        
+                        // Check if content has changed from last saved
+                        const lastSaved = textarea.dataset.lastSaved || '';
+                        if (answer !== lastSaved) {
+                            saveEssayAnswer(questionId, questionIndex);
+                            textarea.dataset.lastSaved = answer;
+                        }
+                    }
+                });
+            }, 10000); // Every 10 seconds
         }
 
         function updateNavButton(index, answered) {
@@ -1292,7 +1418,10 @@
         }
 
         // Submit Modal
-        function confirmSubmit() {
+        async function confirmSubmit() {
+            // Save all unsaved essay answers before showing submit modal
+            await saveAllEssayAnswers();
+            
             const answered = answeredQuestions.size;
             const total = config.totalQuestions;
             const percentage = Math.round((answered / total) * 100);
@@ -1625,8 +1754,8 @@
             // Stop camera stream
             if (stream) stream.getTracks().forEach(track => track.stop());
             
-            // Clear all intervals including timer sync
-            [snapshotInterval, timerInterval, timeSyncInterval, heartbeatInterval, faceDetectionInterval, noFaceWarningTimeout].forEach(i => { 
+            // Clear all intervals including timer sync and essay auto-save
+            [snapshotInterval, timerInterval, timeSyncInterval, heartbeatInterval, faceDetectionInterval, noFaceWarningTimeout, essayAutoSaveInterval].forEach(i => { 
                 if (i) clearInterval(i); 
             });
             
