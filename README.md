@@ -1,66 +1,347 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# ZAFProctor - Sistem Ujian Online dengan Pengawasan Kamera
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistem ujian online (Computer Based Test) berbasis web dengan pengawasan kamera (webcam proctoring) untuk meminimalkan kecurangan peserta ujian.
 
-## About Laravel
+## 📋 Deskripsi
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+ZAFProctor adalah sistem ujian online yang dirancang untuk institusi pendidikan (sekolah/universitas). Sistem ini dilengkapi dengan fitur pengawasan kamera real-time yang dapat mendeteksi dan mencatat perilaku mencurigakan selama ujian berlangsung. Aplikasi ini mendukung multi-role dengan sistem approval untuk pendaftaran pengguna baru.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 🌟 Fitur Utama
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 👨‍💼 Administrator
+- Manajemen pengguna (CRUD admin, guru, siswa)
+- Sistem approval pendaftaran pengguna baru
+- Manajemen kelas (kelompokkan siswa berdasarkan kelas)
+- Manajemen mata pelajaran/kuliah
+- Assign siswa ke kelas dan mata pelajaran
+- Melihat log aktivitas sistem
+- Dashboard statistik
 
-## Learning Laravel
+### 👨‍🏫 Guru/Dosen
+- Membuat dan mengelola ujian (scheduled & flexible)
+- Membuat soal (pilihan ganda & essay)
+- Import/Export soal dari template
+- Duplikasi soal dan ujian
+- Mengatur jadwal dan durasi ujian
+- Mengatur pengaturan proctoring (webcam, screen capture, browser lock)
+- Monitoring peserta ujian secara real-time
+- Melihat log pelanggaran dengan snapshot
+- Menilai jawaban essay
+- Export hasil ujian
+- Regenerate access token ujian
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### 👨‍🎓 Siswa/Mahasiswa
+- Verifikasi email sebelum dapat mengakses sistem
+- Melihat daftar ujian yang tersedia
+- Pre-check kamera dan fullscreen sebelum ujian
+- Mengerjakan ujian dengan pengawasan kamera
+- Melihat hasil ujian (jika diizinkan guru)
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### 📷 Fitur Proctoring
+- **Pengawasan Webcam**: Snapshot otomatis selama ujian dengan interval yang dapat diatur
+- **Screen Capture**: Kemampuan menangkap layar peserta
+- **Browser Lock**: Mengunci browser agar tidak dapat melakukan aktivitas lain
+- **Deteksi Tab Switch**: Mendeteksi ketika peserta berpindah tab dengan batas maksimal
+- **Mode Fullscreen**: Memaksa peserta dalam mode fullscreen
+- **Blokir Copy/Paste**: Mencegah aksi copy-paste
+- **Blokir Right Click**: Mencegah klik kanan
+- **Blokir Keyboard Shortcut**: Mencegah shortcut keyboard terlarang
+- **Pencatatan Pelanggaran**: Log semua aktivitas mencurigakan dengan severity level
+- **Auto-Submit**: Otomatis kumpulkan ujian jika melebihi batas pelanggaran
+- **Heartbeat System**: Monitoring koneksi peserta secara real-time
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## 🛠️ Tech Stack
 
-## Laravel Sponsors
+- **Backend**: Laravel 11 (PHP 8.2+)
+- **Frontend**: Blade Templates + Tailwind CSS + Alpine.js
+- **Database**: PostgreSQL
+- **Proctoring**: WebRTC (MediaDevices API)
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## 📦 Instalasi
 
-### Premium Partners
+### Prasyarat
+- PHP >= 8.2
+- Composer
+- PostgreSQL
+- Node.js & NPM
+- Git
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+### Langkah Instalasi
 
-## Contributing
+1. **Clone repository**
+   ```bash
+   git clone https://github.com/username/zafproctor.git
+   cd zafproctor
+   ```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+2. **Install dependencies**
+   ```bash
+   composer install
+   npm install
+   ```
 
-## Code of Conduct
+3. **Setup environment**
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+4. **Konfigurasi database di `.env`**
+   ```env
+   DB_CONNECTION=pgsql
+   DB_HOST=127.0.0.1
+   DB_PORT=5432
+   DB_DATABASE=zafproctor
+   DB_USERNAME=postgres
+   DB_PASSWORD=your_password
+   ```
 
-## Security Vulnerabilities
+5. **Jalankan migrasi dan seeder**
+   ```bash
+   php artisan migrate
+   php artisan db:seed
+   ```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+6. **Buat symbolic link untuk storage**
+   ```bash
+   php artisan storage:link
+   ```
 
-## License
+7. **Build assets**
+   ```bash
+   npm run build
+   ```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+8. **Jalankan server**
+   ```bash
+   php artisan serve
+   ```
+
+9. **Akses aplikasi**
+   ```
+   http://localhost:8000
+   ```
+
+## 👤 Akun Default
+
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | admin@zafproctor.test | password |
+| Guru | guru@zafproctor.test | password |
+| Siswa | siswa1@zafproctor.test | password |
+
+> **Catatan**: User baru yang mendaftar perlu diapprove oleh admin terlebih dahulu, kecuali akun yang dibuat melalui seeder.
+
+## 🔑 Fitur Authentication
+
+- **Email Verification**: Pengguna harus memverifikasi email sebelum dapat mengakses sistem
+- **Sistem Approval**: Admin dapat menyetujui/menolak pendaftaran user baru
+- **Forgot Password**: Reset password melalui email
+- **Role-based Access**: Akses berbeda untuk admin, guru, dan siswa
+- **Active Status**: Admin dapat menonaktifkan user
+
+## 📐 Struktur Database
+
+### Entity Relationship
+
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│   Roles     │────<│   Users     │>────│  Courses    │>────│   Exams     │
+└─────────────┘     └─────┬───────┘     └─────────────┘     └─────┬───────┘
+                          │                                       │
+                    ┌─────▼─────┐                           ┌─────▼─────┐
+                    │  Classes  │                           │ Questions │
+                    └───────────┘                           └─────┬─────┘
+                                                                  │
+              ┌─────────────┐     ┌─────────────┐          ┌──────▼──────┐
+              │ExamAttempts │────>│  Answers    │          │QuestionOptions│
+              └─────┬───────┘     └─────────────┘          └─────────────┘
+                    │
+              ┌─────▼─────────┐     ┌─────────────┐
+              │ProctoringLogs │     │ExamSettings │
+              └───────────────┘     └─────────────┘
+```
+
+### Tabel Utama
+
+| Tabel | Deskripsi |
+|-------|-----------|
+| `users` | Data pengguna (admin, guru, siswa) dengan sistem approval |
+| `roles` | Role pengguna (admin, teacher, student) |
+| `classes` | Kelas siswa (1A, 1B, 2A, dll) dengan wali kelas |
+| `class_student` | Relasi siswa-kelas dengan tahun ajaran |
+| `courses` | Mata pelajaran/kuliah dengan guru pengampu |
+| `course_student` | Relasi siswa-mata pelajaran |
+| `exams` | Data ujian dengan tipe scheduled/flexible |
+| `exam_settings` | Pengaturan proctoring lengkap per ujian |
+| `questions` | Soal-soal ujian dengan urutan |
+| `question_options` | Pilihan jawaban untuk pilihan ganda |
+| `exam_attempts` | Record pengerjaan ujian dengan tracking pelanggaran |
+| `answers` | Jawaban peserta |
+| `proctoring_logs` | Log pelanggaran proctoring dengan severity |
+| `audit_logs` | Log aktivitas sistem |
+
+## 🔒 Keamanan Proctoring
+
+Sistem mendeteksi dan mencatat berbagai jenis pelanggaran dengan tingkat severity:
+
+| Kode | Pelanggaran | Severity | Deskripsi |
+|------|-------------|----------|-----------|
+| `tab_switch` | Tab Switch | Medium | Peserta berpindah ke tab lain |
+| `window_blur` | Window Blur | Low | Window kehilangan fokus |
+| `fullscreen_exit` | Keluar Fullscreen | High | Peserta keluar dari mode fullscreen |
+| `camera_disabled` | Kamera Dinonaktifkan | Critical | Akses kamera ditolak atau dimatikan |
+| `copy_paste` | Copy/Paste | Medium | Aksi copy/paste terdeteksi |
+| `keyboard_shortcut` | Shortcut Keyboard | Low | Shortcut terlarang terdeteksi |
+| `right_click` | Klik Kanan | Low | Klik kanan mouse |
+
+### Pengaturan Proctoring per Ujian
+
+| Pengaturan | Default | Deskripsi |
+|------------|---------|-----------|
+| `webcam_enabled` | true | Mengaktifkan pengawasan webcam |
+| `screen_capture_enabled` | true | Mengaktifkan tangkapan layar |
+| `browser_lock_enabled` | true | Mengunci browser dari aktivitas lain |
+| `tab_switch_detection` | true | Mendeteksi perpindahan tab |
+| `max_tab_switches` | 5 | Batas maksimal perpindahan tab |
+| `snapshot_interval` | 30 | Interval snapshot dalam detik |
+| `shuffle_questions` | false | Mengacak urutan soal |
+| `shuffle_options` | false | Mengacak urutan pilihan jawaban |
+| `show_score` | true | Menampilkan skor ke peserta |
+| `show_correct_answers` | false | Menampilkan jawaban benar |
+| `passing_score` | 60 | Nilai minimum kelulusan |
+| `max_attempts` | null | Batas percobaan ujian |
+| `grade_method` | highest | Metode penilaian (highest/latest/average) |
+
+## 📁 Struktur Project
+
+```
+zafproctor/
+├── app/
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   │   ├── Admin/
+│   │   │   │   ├── ClassController.php      # Manajemen kelas
+│   │   │   │   ├── CourseController.php     # Manajemen mata pelajaran
+│   │   │   │   └── UserController.php       # Manajemen user + approval
+│   │   │   ├── Auth/
+│   │   │   │   ├── ForgotPasswordController.php
+│   │   │   │   ├── LoginController.php
+│   │   │   │   ├── PasswordController.php
+│   │   │   │   ├── RegisterController.php
+│   │   │   │   └── VerificationController.php  # Email verification
+│   │   │   ├── Student/
+│   │   │   │   ├── ExamController.php       # Mengerjakan ujian
+│   │   │   │   └── ProctoringController.php # Logging pelanggaran
+│   │   │   ├── Teacher/
+│   │   │   │   ├── ExamController.php       # CRUD ujian + grading
+│   │   │   │   ├── MonitorController.php    # Monitoring real-time
+│   │   │   │   └── QuestionController.php   # CRUD soal + import/export
+│   │   │   ├── DashboardController.php
+│   │   │   └── ProfileController.php
+│   │   └── Middleware/
+│   │       ├── CheckActiveUser.php          # Cek user aktif & approved
+│   │       ├── EnsureExamInProgress.php     # Cek sesi ujian aktif
+│   │       ├── LogActivity.php              # Logging aktivitas
+│   │       └── RoleMiddleware.php           # Autentikasi role
+│   ├── Models/
+│   │   ├── Answer.php
+│   │   ├── AuditLog.php
+│   │   ├── Course.php
+│   │   ├── Exam.php                         # Tipe: scheduled/flexible
+│   │   ├── ExamAttempt.php
+│   │   ├── ExamSetting.php                  # Pengaturan proctoring lengkap
+│   │   ├── ProctoringLog.php                # Dengan severity level
+│   │   ├── Question.php
+│   │   ├── QuestionOption.php
+│   │   ├── Role.php
+│   │   ├── SchoolClass.php                  # Manajemen kelas
+│   │   └── User.php                         # Dengan sistem approval
+│   ├── Policies/
+│   │   ├── CoursePolicy.php
+│   │   ├── ExamAttemptPolicy.php
+│   │   ├── ExamPolicy.php
+│   │   └── UserPolicy.php
+│   └── Services/
+│       ├── ExamService.php
+│       └── ProctoringService.php            # Penanganan snapshot & log
+├── database/
+│   ├── migrations/
+│   └── seeders/
+│       ├── ClassSeeder.php
+│       ├── CourseSeeder.php
+│       ├── DatabaseSeeder.php
+│       ├── RoleSeeder.php
+│       └── UserSeeder.php
+├── resources/
+│   └── views/
+│       ├── admin/
+│       │   ├── classes/                     # Manajemen kelas
+│       │   ├── courses/
+│       │   └── users/                       # + approval system
+│       ├── auth/                            # Login, register, verify
+│       ├── layouts/
+│       ├── profile/
+│       ├── student/
+│       │   └── exams/                       # Pre-check, take exam, result
+│       └── teacher/
+│           ├── exams/                       # CRUD + grading
+│           ├── monitor/                     # Real-time monitoring
+│           └── questions/                   # CRUD + import/export
+└── routes/
+    └── web.php
+```
+
+## 🚀 Pengembangan Selanjutnya
+
+- [ ] Integrasi face detection menggunakan TensorFlow.js
+- [ ] Real-time notification menggunakan WebSocket
+- [ ] Bank soal dengan kategori
+- [ ] Multi-language support
+- [ ] Dark mode
+- [ ] Laporan analitik nilai siswa
+
+## 📊 Fitur Akademis Krusial
+
+### 1. **Sistem Ujian Online (CBT - Computer Based Test)**
+Memungkinkan pelaksanaan ujian secara digital dengan fitur:
+- Ujian terjadwal (scheduled) dan fleksibel
+- Timer otomatis dengan sinkronisasi waktu server
+- Auto-save jawaban untuk mencegah kehilangan data
+- Multiple attempt dengan berbagai metode penilaian
+
+### 2. **Proctoring System (Sistem Pengawasan)**
+Implementasi pengawasan ujian digital untuk menjaga integritas akademik:
+- Webcam monitoring dengan snapshot berkala
+- Browser lockdown untuk mencegah kecurangan
+- Deteksi aktivitas mencurigakan (tab switch, copy-paste, dll)
+- Logging pelanggaran dengan bukti screenshot
+
+### 3. **Manajemen Akademik**
+- Struktur hierarki: Kelas → Siswa → Mata Pelajaran → Ujian
+- Wali kelas untuk setiap kelas
+- Enrollment siswa ke mata pelajaran
+
+### 4. **Penilaian & Grading**
+- Auto-grading untuk soal pilihan ganda
+- Manual grading untuk soal essay
+- Berbagai metode penilaian untuk multiple attempts
+- Export hasil ujian
+
+### 5. **Audit & Keamanan**
+- Logging semua aktivitas pengguna
+- Sistem approval untuk pendaftaran
+- Email verification
+- Role-based access control
+
+## 📄 Lisensi
+
+MIT License - lihat file [LICENSE](LICENSE) untuk detail.
+
+## 👥 Kontributor
+
+- Zulfa Azka Farisadilah - Developer
+
+---
+
+**ZAFProctor** - Sistem Ujian Online dengan Pengawasan Kamera © 2026
