@@ -17,7 +17,7 @@ ZAFProctor adalah sistem ujian online yang dirancang untuk institusi pendidikan 
 - Melihat log aktivitas sistem
 - Dashboard statistik
 
-### 👨‍🏫 Guru/Dosen
+### 👨‍🏫 Guru
 - Membuat dan mengelola ujian (scheduled & flexible)
 - Membuat soal (pilihan ganda & essay)
 - Import/Export soal dari template
