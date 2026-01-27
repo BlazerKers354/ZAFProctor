@@ -18,9 +18,10 @@ class ExamService
     public function startExam(Exam $exam, int $userId, string $ipAddress, string $userAgent): ExamAttempt
     {
         return DB::transaction(function () use ($exam, $userId, $ipAddress, $userAgent) {
-            // Check if user already has an attempt
+            // Check if user already has an attempt with pessimistic locking to prevent race condition
             $existingAttempt = ExamAttempt::where('exam_id', $exam->id)
                 ->where('user_id', $userId)
+                ->lockForUpdate()
                 ->first();
 
             if ($existingAttempt && $existingAttempt->isInProgress()) {
@@ -62,13 +63,16 @@ class ExamService
         $questions = $exam->questions()->with('options')->get();
 
         if ($exam->settings?->shuffle_questions) {
-            $questions = $questions->shuffle();
+            // Use attempt ID as seed for consistent shuffle per attempt
+            $questions = $this->seededShuffle($questions, $attempt->id);
         }
 
         if ($exam->settings?->shuffle_options) {
-            $questions = $questions->map(function ($question) {
+            $questions = $questions->map(function ($question) use ($attempt) {
                 if ($question->isMultipleChoice()) {
-                    $question->setRelation('options', $question->options->shuffle());
+                    // Use combination of attempt_id + question_id for consistent option shuffle
+                    $seed = $attempt->id + $question->id;
+                    $question->setRelation('options', $this->seededShuffle($question->options, $seed));
                 }
                 return $question;
             });
@@ -78,10 +82,42 @@ class ExamService
     }
 
     /**
-     * Save an answer
+     * Shuffle a collection with a consistent seed
+     */
+    protected function seededShuffle(Collection $collection, int $seed): Collection
+    {
+        $items = $collection->all();
+        mt_srand($seed);
+        
+        for ($i = count($items) - 1; $i > 0; $i--) {
+            $j = mt_rand(0, $i);
+            $temp = $items[$i];
+            $items[$i] = $items[$j];
+            $items[$j] = $temp;
+        }
+        
+        // Reset random seed
+        mt_srand();
+        
+        return collect($items);
+    }
+
+    /**
+     * Save an answer with validation
      */
     public function saveAnswer(ExamAttempt $attempt, int $questionId, ?int $optionId = null, ?string $essayAnswer = null): Answer
     {
+        // Validate attempt is still in progress
+        if (!$attempt->isInProgress()) {
+            throw new \Exception('Ujian sudah selesai. Tidak dapat menyimpan jawaban.');
+        }
+        
+        // Validate question belongs to this exam
+        $questionExists = $attempt->exam->questions()->where('id', $questionId)->exists();
+        if (!$questionExists) {
+            throw new \Exception('Soal tidak valid untuk ujian ini.');
+        }
+        
         $answer = Answer::updateOrCreate(
             [
                 'attempt_id' => $attempt->id,
@@ -98,11 +134,21 @@ class ExamService
     }
 
     /**
-     * Submit exam
+     * Submit exam with double-submit protection
      */
     public function submitExam(ExamAttempt $attempt, bool $isAutoSubmit = false): ExamAttempt
     {
         return DB::transaction(function () use ($attempt, $isAutoSubmit) {
+            // Lock the attempt to prevent race condition
+            $attempt = ExamAttempt::where('id', $attempt->id)
+                ->lockForUpdate()
+                ->first();
+            
+            // Check if already submitted (prevent double submit)
+            if ($attempt->isSubmitted()) {
+                return $attempt;
+            }
+            
             // Grade all multiple choice answers
             $this->gradeMultipleChoiceAnswers($attempt);
 

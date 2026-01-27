@@ -532,6 +532,12 @@
                 
                 <!-- Right: Controls -->
                 <div class="d-flex align-items-center gap-3">
+                    <!-- Connection Status Indicator -->
+                    <div id="connection-indicator" class="d-flex align-items-center gap-1 px-2 py-1 rounded-2" style="background: rgba(44, 168, 127, 0.2);">
+                        <div id="connection-dot" style="width: 8px; height: 8px; border-radius: 50%; background: #22c55e;"></div>
+                        <span id="connection-text" class="text-white" style="font-size: 0.7rem;">Online</span>
+                    </div>
+                    
                     <!-- Camera Preview -->
                     <div class="camera-box d-none d-md-block">
                         <video id="camera-preview" autoplay muted playsinline></video>
@@ -904,13 +910,25 @@
         ]);
         let stream = null;
         let timerInterval = null;
+        let timeSyncInterval = null;
         let snapshotInterval = null;
         let heartbeatInterval = null;
         let faceDetectionInterval = null;
         let noFaceWarningTimeout = null;
+        
+        // Offline Queue System
+        let offlineQueue = [];
+        let isOnline = navigator.onLine;
+        let isSyncing = false;
 
         // Initialize
         document.addEventListener('DOMContentLoaded', async function() {
+            // Setup online/offline handlers
+            initOfflineHandler();
+            
+            // Restore any unsaved answers from localStorage
+            restoreUnsavedAnswers();
+            
             initTimer();
             updateProgressBar();
             
@@ -920,13 +938,131 @@
             // Fullscreen
             initFullscreen();
         });
+        
+        // Offline Handler
+        function initOfflineHandler() {
+            window.addEventListener('online', () => {
+                isOnline = true;
+                hideConnectionWarning();
+                syncOfflineAnswers();
+            });
+            
+            window.addEventListener('offline', () => {
+                isOnline = false;
+                showConnectionWarning();
+            });
+            
+            // Initial state
+            updateConnectionIndicator(navigator.onLine);
+        }
+        
+        function updateConnectionIndicator(online) {
+            const indicator = document.getElementById('connection-indicator');
+            const dot = document.getElementById('connection-dot');
+            const text = document.getElementById('connection-text');
+            
+            if (online) {
+                indicator.style.background = 'rgba(44, 168, 127, 0.2)';
+                dot.style.background = '#22c55e';
+                text.textContent = 'Online';
+            } else {
+                indicator.style.background = 'rgba(220, 38, 38, 0.2)';
+                dot.style.background = '#dc2626';
+                text.textContent = 'Offline';
+            }
+        }
+        
+        function showConnectionWarning() {
+            updateConnectionIndicator(false);
+            showWarning('⚠️ Koneksi terputus! Jawaban akan disimpan lokal dan disinkronkan saat online.');
+        }
+        
+        function hideConnectionWarning() {
+            updateConnectionIndicator(true);
+            showNotification('✅ Koneksi tersambung kembali. Menyinkronkan jawaban...');
+        }
+        
+        function showNotification(message) {
+            const banner = document.getElementById('warning-banner');
+            const msg = document.getElementById('warning-message');
+            msg.textContent = message;
+            banner.classList.add('show');
+            banner.style.background = 'linear-gradient(135deg, #2ca87f 0%, #22c55e 100%)';
+            setTimeout(() => {
+                banner.classList.remove('show');
+                banner.style.background = '';
+            }, 3000);
+        }
+        
+        async function syncOfflineAnswers() {
+            if (isSyncing || offlineQueue.length === 0) return;
+            
+            isSyncing = true;
+            
+            while (offlineQueue.length > 0 && isOnline) {
+                const data = offlineQueue[0];
+                
+                try {
+                    const response = await fetch(config.endpoints.saveAnswer, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': config.csrfToken,
+                        },
+                        body: JSON.stringify(data.payload)
+                    });
+                    
+                    if (response.ok) {
+                        // Remove from queue and localStorage
+                        offlineQueue.shift();
+                        localStorage.removeItem(`answer_${config.attemptId}_${data.payload.question_id}`);
+                        
+                        answeredQuestions.add(data.payload.question_id);
+                        updateNavButton(data.questionIndex, true);
+                        updateProgressBar();
+                    } else {
+                        break; // Stop on server error
+                    }
+                } catch (err) {
+                    console.error('Sync error:', err);
+                    break;
+                }
+            }
+            
+            isSyncing = false;
+            
+            if (offlineQueue.length === 0) {
+                showNotification('✅ Semua jawaban berhasil disinkronkan!');
+            }
+        }
+        
+        function restoreUnsavedAnswers() {
+            // Check localStorage for any unsaved answers
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith(`answer_${config.attemptId}_`)) {
+                    try {
+                        const data = JSON.parse(localStorage.getItem(key));
+                        if (data && data.payload) {
+                            offlineQueue.push(data);
+                        }
+                    } catch (e) {
+                        console.error('Error restoring answer:', e);
+                    }
+                }
+            }
+            
+            if (offlineQueue.length > 0 && isOnline) {
+                setTimeout(syncOfflineAnswers, 2000);
+            }
+        }
 
         // Toggle Sidebar (Mobile)
         function toggleSidebar() {
             document.getElementById('exam-sidebar').classList.toggle('show');
         }
 
-        // Timer
+        // Timer with Server Sync
         function initTimer() {
             let timeRemaining = config.remainingTime;
             const timerBox = document.getElementById('timer-box');
@@ -935,6 +1071,7 @@
             function updateTimer() {
                 if (timeRemaining <= 0) {
                     clearInterval(timerInterval);
+                    clearInterval(timeSyncInterval);
                     autoSubmit();
                     return;
                 }
@@ -961,6 +1098,44 @@
             
             updateTimer();
             timerInterval = setInterval(updateTimer, 1000);
+            
+            // Sync timer with server every 60 seconds
+            timeSyncInterval = setInterval(async () => {
+                if (!isOnline) return;
+                
+                try {
+                    const response = await fetch(config.endpoints.heartbeat, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': config.csrfToken,
+                        },
+                        body: JSON.stringify({ 
+                            camera_enabled: stream !== null,
+                            client_time: Math.floor(Date.now() / 1000)
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.remaining_time !== undefined) {
+                        // Correct timer if drift > 5 seconds
+                        const drift = Math.abs(timeRemaining - data.remaining_time);
+                        if (drift > 5) {
+                            console.log('Timer synced, drift was:', drift);
+                            timeRemaining = data.remaining_time;
+                        }
+                    }
+                    
+                    if (data.should_submit || data.time_expired) {
+                        clearInterval(timerInterval);
+                        clearInterval(timeSyncInterval);
+                        autoSubmit();
+                    }
+                } catch (e) {
+                    console.error('Time sync failed:', e);
+                }
+            }, 60000);
         }
 
         // Progress Bar
@@ -999,9 +1174,9 @@
             document.querySelector('.exam-content').scrollTop = 0;
         }
 
-        // Select Option
+        // Select Option with Offline Support
         async function selectOption(questionId, optionId, questionIndex) {
-            // Update UI
+            // Update UI immediately
             const allOptions = document.querySelectorAll(`[id^="option-${questionId}-"]`);
             allOptions.forEach(opt => {
                 opt.classList.remove('selected');
@@ -1013,7 +1188,23 @@
             selected.classList.add('selected');
             selected.querySelector('.option-letter').innerHTML = '<i class="bi bi-check"></i>';
             
-            // Save answer
+            const payload = { question_id: questionId, option_id: optionId };
+            const queueData = { payload, questionIndex };
+            
+            // Save to localStorage as backup
+            localStorage.setItem(`answer_${config.attemptId}_${questionId}`, JSON.stringify(queueData));
+            
+            // If offline, queue and return
+            if (!isOnline) {
+                offlineQueue.push(queueData);
+                answeredQuestions.add(questionId);
+                updateNavButton(questionIndex, true);
+                updateProgressBar();
+                showNotification('📝 Jawaban disimpan offline');
+                return;
+            }
+            
+            // Save answer to server
             try {
                 const response = await fetch(config.endpoints.saveAnswer, {
                     method: 'POST',
@@ -1021,28 +1212,50 @@
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': config.csrfToken,
                     },
-                    body: JSON.stringify({
-                        question_id: questionId,
-                        option_id: optionId
-                    })
+                    body: JSON.stringify(payload)
                 });
                 
                 if (response.ok) {
+                    // Remove from localStorage after successful save
+                    localStorage.removeItem(`answer_${config.attemptId}_${questionId}`);
                     answeredQuestions.add(questionId);
                     updateNavButton(questionIndex, true);
                     updateProgressBar();
                 }
             } catch (err) {
                 console.error('Error saving answer:', err);
+                // Queue for later retry
+                offlineQueue.push(queueData);
+                answeredQuestions.add(questionId);
+                updateNavButton(questionIndex, true);
+                updateProgressBar();
+                showNotification('⚠️ Jawaban disimpan lokal, akan disinkronkan...');
+                setTimeout(syncOfflineAnswers, 5000);
             }
         }
 
-        // Save Essay
+        // Save Essay with Offline Support
         async function saveEssayAnswer(questionId, questionIndex) {
             const textarea = document.getElementById(`essay-${questionId}`);
             const answer = textarea.value.trim();
             
             if (!answer) return;
+            
+            const payload = { question_id: questionId, essay_answer: answer };
+            const queueData = { payload, questionIndex };
+            
+            // Save to localStorage as backup
+            localStorage.setItem(`answer_${config.attemptId}_${questionId}`, JSON.stringify(queueData));
+            
+            // If offline, queue and return
+            if (!isOnline) {
+                offlineQueue.push(queueData);
+                answeredQuestions.add(questionId);
+                updateNavButton(questionIndex, true);
+                updateProgressBar();
+                showNotification('📝 Jawaban disimpan offline');
+                return;
+            }
             
             try {
                 const response = await fetch(config.endpoints.saveAnswer, {
@@ -1051,19 +1264,23 @@
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': config.csrfToken,
                     },
-                    body: JSON.stringify({
-                        question_id: questionId,
-                        essay_answer: answer
-                    })
+                    body: JSON.stringify(payload)
                 });
                 
                 if (response.ok) {
+                    localStorage.removeItem(`answer_${config.attemptId}_${questionId}`);
                     answeredQuestions.add(questionId);
                     updateNavButton(questionIndex, true);
                     updateProgressBar();
                 }
             } catch (err) {
                 console.error('Error saving essay:', err);
+                offlineQueue.push(queueData);
+                answeredQuestions.add(questionId);
+                updateNavButton(questionIndex, true);
+                updateProgressBar();
+                showNotification('⚠️ Jawaban disimpan lokal, akan disinkronkan...');
+                setTimeout(syncOfflineAnswers, 5000);
             }
         }
 
@@ -1385,6 +1602,11 @@
         }
 
         async function autoSubmit() {
+            // Try to sync any remaining offline answers before submit
+            if (offlineQueue.length > 0 && isOnline) {
+                await syncOfflineAnswers();
+            }
+            
             try {
                 const response = await fetch(config.endpoints.autoSubmit, {
                     method: 'POST',
@@ -1400,11 +1622,35 @@
 
         // Cleanup
         window.addEventListener('beforeunload', function(e) {
+            // Stop camera stream
             if (stream) stream.getTracks().forEach(track => track.stop());
-            [snapshotInterval, timerInterval, heartbeatInterval, faceDetectionInterval, noFaceWarningTimeout].forEach(i => { if (i) clearInterval(i); });
+            
+            // Clear all intervals including timer sync
+            [snapshotInterval, timerInterval, timeSyncInterval, heartbeatInterval, faceDetectionInterval, noFaceWarningTimeout].forEach(i => { 
+                if (i) clearInterval(i); 
+            });
+            
+            // Warning if there are unsaved answers
+            if (offlineQueue.length > 0) {
+                e.preventDefault();
+                e.returnValue = 'Ada jawaban yang belum tersimpan. Yakin ingin keluar?';
+                return e.returnValue;
+            }
+            
             e.preventDefault();
             e.returnValue = 'Ujian sedang berlangsung. Yakin ingin keluar?';
             return e.returnValue;
+        });
+        
+        // Clean up localStorage on successful submit
+        document.getElementById('submit-form').addEventListener('submit', function() {
+            // Clear all answers for this attempt from localStorage
+            for (let i = localStorage.length - 1; i >= 0; i--) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith(`answer_${config.attemptId}_`)) {
+                    localStorage.removeItem(key);
+                }
+            }
         });
     </script>
 </body>

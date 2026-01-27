@@ -88,11 +88,27 @@ class Exam extends Model
     }
 
     /**
-     * Get settings for this exam
+     * Get settings for this exam with default values
      */
     public function settings(): HasOne
     {
-        return $this->hasOne(ExamSetting::class);
+        return $this->hasOne(ExamSetting::class)->withDefault([
+            'webcam_enabled' => true,
+            'screen_capture_enabled' => true,
+            'browser_lock_enabled' => true,
+            'tab_switch_detection' => true,
+            'max_tab_switches' => 5,
+            'snapshot_interval' => 30,
+            'shuffle_questions' => false,
+            'shuffle_options' => false,
+            'show_correct_answers' => false,
+            'show_score' => true,
+            'passing_score' => 60,
+            'detect_face' => true,
+            'detect_multiple_faces' => true,
+            'warning_threshold' => 3,
+            'auto_submit_threshold' => 5,
+        ]);
     }
 
     /**

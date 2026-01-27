@@ -154,18 +154,25 @@ class ExamController extends Controller
             'essay_answer' => ['nullable', 'string'],
         ]);
 
-        $answer = $this->examService->saveAnswer(
-            $attempt,
-            $validated['question_id'],
-            $validated['option_id'] ?? null,
-            $validated['essay_answer'] ?? null
-        );
+        try {
+            $answer = $this->examService->saveAnswer(
+                $attempt,
+                $validated['question_id'],
+                $validated['option_id'] ?? null,
+                $validated['essay_answer'] ?? null
+            );
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Jawaban tersimpan.',
-            'answer_id' => $answer->id,
-        ]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Jawaban tersimpan.',
+                'answer_id' => $answer->id,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 400);
+        }
     }
 
     /**

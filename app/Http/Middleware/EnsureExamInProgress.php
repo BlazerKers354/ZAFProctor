@@ -47,12 +47,9 @@ class EnsureExamInProgress
 
         // Check if time has expired
         if ($attempt->hasTimeExpired()) {
-            // Auto-submit the exam
-            $attempt->update([
-                'status' => ExamAttempt::STATUS_SUBMITTED,
-                'submitted_at' => now(),
-                'is_auto_submitted' => true,
-            ]);
+            // Auto-submit the exam using ExamService for proper score calculation
+            $examService = app(\App\Services\ExamService::class);
+            $examService->submitExam($attempt, true);
 
             return redirect()->route('student.exams.result', $attempt->id)
                 ->with('info', 'Waktu ujian telah habis. Jawaban Anda telah dikumpulkan secara otomatis.');

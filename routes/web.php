@@ -155,15 +155,23 @@ Route::middleware(['auth', 'check.active'])->group(function () {
         // Active Exam Session
         Route::middleware('exam.in-progress')->group(function () {
             Route::get('attempts/{attempt}/take', [StudentExamController::class, 'take'])->name('exams.take');
-            Route::post('attempts/{attempt}/save-answer', [StudentExamController::class, 'saveAnswer'])->name('exams.save-answer');
+            Route::post('attempts/{attempt}/save-answer', [StudentExamController::class, 'saveAnswer'])
+                ->middleware('throttle:60,1') // Max 60 requests per minute
+                ->name('exams.save-answer');
             Route::post('attempts/{attempt}/submit', [StudentExamController::class, 'submit'])->name('exams.submit');
             Route::post('attempts/{attempt}/auto-submit', [StudentExamController::class, 'autoSubmit'])->name('exams.auto-submit');
             Route::post('attempts/{attempt}/sync-time', [StudentExamController::class, 'syncTime'])->name('exams.sync-time');
             
             // Proctoring
-            Route::post('attempts/{attempt}/proctoring/violation', [ProctoringController::class, 'logViolation'])->name('proctoring.violation');
-            Route::post('attempts/{attempt}/proctoring/snapshot', [ProctoringController::class, 'uploadSnapshot'])->name('proctoring.snapshot');
-            Route::post('attempts/{attempt}/proctoring/heartbeat', [ProctoringController::class, 'heartbeat'])->name('proctoring.heartbeat');
+            Route::post('attempts/{attempt}/proctoring/violation', [ProctoringController::class, 'logViolation'])
+                ->middleware('throttle:30,1') // Max 30 violations logged per minute
+                ->name('proctoring.violation');
+            Route::post('attempts/{attempt}/proctoring/snapshot', [ProctoringController::class, 'uploadSnapshot'])
+                ->middleware('throttle:10,1') // Max 10 snapshots per minute
+                ->name('proctoring.snapshot');
+            Route::post('attempts/{attempt}/proctoring/heartbeat', [ProctoringController::class, 'heartbeat'])
+                ->middleware('throttle:5,1') // Max 5 heartbeats per minute
+                ->name('proctoring.heartbeat');
         });
         
         // Results

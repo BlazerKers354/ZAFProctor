@@ -102,19 +102,21 @@ class ProctoringService
     }
 
     /**
-     * Increment violation count based on type
+     * Increment violation count based on type using atomic update
      */
     protected function incrementViolationCount(ExamAttempt $attempt, string $violationType): void
     {
-        $attempt->violation_count++;
+        // Use atomic increment to prevent race condition
+        $updateData = ['violation_count' => \DB::raw('violation_count + 1')];
 
         if ($violationType === ProctoringLog::TYPE_TAB_SWITCH) {
-            $attempt->tab_switch_count++;
+            $updateData['tab_switch_count'] = \DB::raw('tab_switch_count + 1');
         } elseif ($violationType === ProctoringLog::TYPE_FULLSCREEN_EXIT) {
-            $attempt->fullscreen_exit_count++;
+            $updateData['fullscreen_exit_count'] = \DB::raw('fullscreen_exit_count + 1');
         }
 
-        $attempt->save();
+        ExamAttempt::where('id', $attempt->id)->update($updateData);
+        $attempt->refresh();
     }
 
     /**
