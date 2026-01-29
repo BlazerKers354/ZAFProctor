@@ -1,5 +1,10 @@
 # ZAFProctor - Sistem Ujian Online dengan Pengawasan Kamera
 
+![PHP](https://img.shields.io/badge/PHP-8.2%2B-777BB4?style=flat-square&logo=php&logoColor=white)
+![Laravel](https://img.shields.io/badge/Laravel-11-FF2D20?style=flat-square&logo=laravel&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-3.x-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
+
 Sistem ujian online (Computer Based Test) berbasis web dengan pengawasan kamera (webcam proctoring) untuk meminimalkan kecurangan peserta ujian.
 
 ## 📋 Deskripsi
@@ -54,7 +59,7 @@ ZAFProctor adalah sistem ujian online yang dirancang untuk institusi pendidikan 
 
 - **Backend**: Laravel 11 (PHP 8.2+)
 - **Frontend**: Blade Templates + Tailwind CSS + Alpine.js
-- **Database**: PostgreSQL
+- **Database**: MySQL
 - **Proctoring**: WebRTC (MediaDevices API)
 
 ## 📦 Instalasi
@@ -62,16 +67,25 @@ ZAFProctor adalah sistem ujian online yang dirancang untuk institusi pendidikan 
 ### Prasyarat
 - PHP >= 8.2
 - Composer
-- PostgreSQL
+- MySQL
 - Node.js & NPM
 - Git
+
+### Browser yang Didukung
+Fitur proctoring (webcam) memerlukan browser modern dengan dukungan WebRTC:
+- Google Chrome 60+ (Recommended)
+- Mozilla Firefox 55+
+- Microsoft Edge 79+
+- Safari 11+
+
+> ⚠️ **Penting**: Untuk mengakses webcam, aplikasi harus dijalankan melalui HTTPS atau localhost. Jika menggunakan domain, pastikan SSL sudah terpasang.
 
 ### Langkah Instalasi
 
 1. **Clone repository**
    ```bash
-   git clone https://github.com/username/zafproctor.git
-   cd zafproctor
+   git clone https://github.com/BlazerKers354/ZAFProctor.git
+   cd ZAFProctor
    ```
 
 2. **Install dependencies**
@@ -88,12 +102,24 @@ ZAFProctor adalah sistem ujian online yang dirancang untuk institusi pendidikan 
 
 4. **Konfigurasi database di `.env`**
    ```env
-   DB_CONNECTION=pgsql
+   DB_CONNECTION=mysql
    DB_HOST=127.0.0.1
-   DB_PORT=5432
+   DB_PORT=3306
    DB_DATABASE=zafproctor
-   DB_USERNAME=postgres
+   DB_USERNAME=root
    DB_PASSWORD=your_password
+   ```
+
+   **Konfigurasi Email (untuk verifikasi & reset password)**
+   ```env
+   MAIL_MAILER=smtp
+   MAIL_HOST=smtp.gmail.com
+   MAIL_PORT=587
+   MAIL_USERNAME=your_email@gmail.com
+   MAIL_PASSWORD=your_app_password
+   MAIL_ENCRYPTION=tls
+   MAIL_FROM_ADDRESS=noreply@zafproctor.test
+   MAIL_FROM_NAME="ZAFProctor"
    ```
 
 5. **Jalankan migrasi dan seeder**
@@ -290,6 +316,42 @@ zafproctor/
 │           └── questions/                   # CRUD + import/export
 └── routes/
     └── web.php
+```
+
+## 🧪 Testing
+
+Jalankan test suite dengan perintah:
+
+```bash
+# Jalankan semua test
+php artisan test
+
+# Jalankan test dengan coverage
+php artisan test --coverage
+
+# Jalankan test spesifik
+php artisan test --filter=ExamTest
+```
+
+## 🔧 Troubleshooting
+
+### Kamera tidak terdeteksi
+1. Pastikan browser memiliki izin akses kamera
+2. Pastikan mengakses melalui HTTPS atau localhost
+3. Coba refresh halaman dan izinkan kamera saat diminta
+
+### Error "Mixed Content"
+Jika menggunakan HTTPS, pastikan semua resource (gambar, API) juga menggunakan HTTPS.
+
+### Migration gagal
+```bash
+php artisan migrate:fresh --seed
+```
+
+### Asset tidak muncul
+```bash
+npm run build
+php artisan optimize:clear
 ```
 
 ## 🚀 Pengembangan Selanjutnya

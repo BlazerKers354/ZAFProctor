@@ -139,10 +139,10 @@
                 <h5 class="mb-0"><i class="ph-duotone ph-list-numbers text-primary me-2"></i>Daftar Hasil</h5>
                 <div>
                     <span class="badge bg-light-success me-2">
-                        <i class="ph ph-check me-1"></i>Lulus: {{ $attempts->where('score', '>=', $exam->settings?->passing_score ?? 60)->count() }}
+                        <i class="ph ph-check me-1"></i>Lulus: {{ $attempts->where('percentage', '>=', $exam->settings?->passing_score ?? 60)->count() }}
                     </span>
                     <span class="badge bg-light-danger">
-                        <i class="ph ph-x me-1"></i>Tidak Lulus: {{ $attempts->where('score', '<', $exam->settings?->passing_score ?? 60)->count() }}
+                        <i class="ph ph-x me-1"></i>Tidak Lulus: {{ $attempts->where('percentage', '<', $exam->settings?->passing_score ?? 60)->count() }}
                     </span>
                 </div>
             </div>
@@ -175,7 +175,7 @@
                             @foreach($attempts as $index => $attempt)
                                 @php
                                     $passingScore = $exam->settings?->passing_score ?? 60;
-                                    $isPassed = $attempt->score >= $passingScore;
+                                    $isPassed = $attempt->percentage >= $passingScore;
                                 @endphp
                                 <tr>
                                     <td>{{ $index + 1 }}</td>
@@ -322,7 +322,7 @@
                 </div>
                 <div class="card-body">
                     @php
-                        $passedCount = $attempts->where('score', '>=', $exam->settings?->passing_score ?? 60)->count();
+                        $passedCount = $attempts->where('percentage', '>=', $exam->settings?->passing_score ?? 60)->count();
                         $failedCount = $attempts->count() - $passedCount;
                         $passPercentage = $attempts->count() > 0 ? round(($passedCount / $attempts->count()) * 100, 1) : 0;
                     @endphp

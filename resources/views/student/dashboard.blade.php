@@ -97,8 +97,8 @@
             <div class="card stats-card h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-start justify-content-between mb-3">
-                        <div class="stats-icon bg-brand-color-2 bg-opacity-10" style="color: var(--pc-brand-color-2);">
-                            <i class="ph ph-star"></i>
+                        <div class="stats-icon bg-warning bg-opacity-10 text-warning">
+                            <i class="ph ph-chart-line-up"></i>
                         </div>
                         @php
                             $scoreLabel = $stats['average_score'] >= 80 ? 'Excellent' : ($stats['average_score'] >= 70 ? 'Good' : 'Keep Going');
