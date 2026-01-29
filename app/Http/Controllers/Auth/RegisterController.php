@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\Role;
-use App\Models\SchoolClass;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -13,35 +12,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
-use Illuminate\View\View;
 
 class RegisterController extends Controller
 {
-    /**
-     * Display the registration type selection.
-     */
-    public function create(): View
-    {
-        return view('auth.register');
-    }
-
-    /**
-     * Display student registration form.
-     */
-    public function showStudentForm(): View
-    {
-        $classes = SchoolClass::active()->orderBy('grade_level')->orderBy('name')->get();
-        return view('auth.register-student', compact('classes'));
-    }
-
-    /**
-     * Display teacher registration form.
-     */
-    public function showTeacherForm(): View
-    {
-        return view('auth.register-teacher');
-    }
-
     /**
      * Handle student registration request.
      */
