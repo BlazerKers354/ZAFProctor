@@ -33,9 +33,15 @@ class ExamController extends Controller
             ->with(['course', 'settings'])
             ->withCount(['questions', 'attempts']);
 
+        // Search by title
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where('title', 'ilike', "%{$search}%");
+        }
+
         // Filter by course
-        if ($request->filled('course_id')) {
-            $query->where('course_id', $request->course_id);
+        if ($request->filled('course')) {
+            $query->where('course_id', $request->course);
         }
 
         // Filter by status
@@ -43,7 +49,7 @@ class ExamController extends Controller
             $query->where('status', $request->status);
         }
 
-        $exams = $query->latest()->paginate(15);
+        $exams = $query->latest()->paginate(15)->withQueryString();
         $courses = $user->taughtCourses;
 
         return view('teacher.exams.index', compact('exams', 'courses'));

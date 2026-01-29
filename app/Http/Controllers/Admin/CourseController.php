@@ -38,7 +38,7 @@ class CourseController extends Controller
             $query->where('is_active', $request->status === 'active');
         }
 
-        $courses = $query->latest()->paginate(15);
+        $courses = $query->latest()->paginate(15)->withQueryString();
         $teachers = User::byRole(Role::TEACHER)->get();
 
         return view('admin.courses.index', compact('courses', 'teachers'));

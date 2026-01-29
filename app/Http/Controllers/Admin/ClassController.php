@@ -70,8 +70,16 @@ class ClassController extends Controller
     {
         $class->load(['homeroomTeacher', 'students']);
         $students = $class->students()->orderBy('name')->paginate(20);
+        
+        // Get students not assigned to any class
+        $availableStudents = User::byRole('student')
+            ->approved()
+            ->active()
+            ->whereNull('class_id')
+            ->orderBy('name')
+            ->get();
 
-        return view('admin.classes.show', compact('class', 'students'));
+        return view('admin.classes.show', compact('class', 'students', 'availableStudents'));
     }
 
     /**

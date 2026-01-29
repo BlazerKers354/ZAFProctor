@@ -33,9 +33,7 @@ class UserController extends Controller
 
         // Filter by role
         if ($request->filled('role')) {
-            $query->whereHas('role', function ($q) use ($request) {
-                $q->where('name', $request->role);
-            });
+            $query->where('role_id', $request->role);
         }
 
         // Filter by status
@@ -43,7 +41,7 @@ class UserController extends Controller
             $query->where('is_active', $request->status === 'active');
         }
 
-        $users = $query->latest()->paginate(15);
+        $users = $query->latest()->paginate(15)->withQueryString();
         $roles = Role::all();
 
         return view('admin.users.index', compact('users', 'roles'));

@@ -19,7 +19,7 @@
                 </div>
                 <div class="col-md-6 text-md-end">
                     <a href="{{ route('admin.users.pending') }}" class="btn btn-warning me-2">
-                        <i class="ph-duotone ph-user-check me-2"></i>Approval User
+                        <i class="ph-duotone ph-user-check me-2"></i>Persetujuan Pengguna
                     </a>
                     <a href="{{ route('admin.users.create') }}" class="btn btn-primary">
                         <i class="ph-duotone ph-user-plus me-2"></i>Tambah Pengguna
