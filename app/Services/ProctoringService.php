@@ -6,6 +6,7 @@ use App\Models\AuditLog;
 use App\Models\ExamAttempt;
 use App\Models\ProctoringLog;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class ProctoringService
@@ -82,7 +83,8 @@ class ProctoringService
             $extension
         );
 
-        Storage::disk('local')->put($filename, $imageData);
+        // Store in public disk for teacher access
+        Storage::disk('public')->put($filename, $imageData);
 
         return $filename;
     }
@@ -98,7 +100,8 @@ class ProctoringService
             $attempt->user_id
         );
 
-        return $file->store($path, 'local');
+        // Store in public disk for teacher access
+        return $file->store($path, 'public');
     }
 
     /**
@@ -107,12 +110,12 @@ class ProctoringService
     protected function incrementViolationCount(ExamAttempt $attempt, string $violationType): void
     {
         // Use atomic increment to prevent race condition
-        $updateData = ['violation_count' => \DB::raw('violation_count + 1')];
+        $updateData = ['violation_count' => DB::raw('violation_count + 1')];
 
         if ($violationType === ProctoringLog::TYPE_TAB_SWITCH) {
-            $updateData['tab_switch_count'] = \DB::raw('tab_switch_count + 1');
+            $updateData['tab_switch_count'] = DB::raw('tab_switch_count + 1');
         } elseif ($violationType === ProctoringLog::TYPE_FULLSCREEN_EXIT) {
-            $updateData['fullscreen_exit_count'] = \DB::raw('fullscreen_exit_count + 1');
+            $updateData['fullscreen_exit_count'] = DB::raw('fullscreen_exit_count + 1');
         }
 
         ExamAttempt::where('id', $attempt->id)->update($updateData);
@@ -167,7 +170,7 @@ class ProctoringService
             ->map(function ($log) {
                 return [
                     'id' => $log->id,
-                    'url' => Storage::url($log->snapshot_path),
+                    'url' => Storage::disk('public')->url($log->snapshot_path),
                     'violation_type' => $log->violation_type,
                     'violation_label' => $log->violation_label,
                     'severity' => $log->severity,

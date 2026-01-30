@@ -107,7 +107,7 @@ class ProctoringLog extends Model
             return null;
         }
 
-        return Storage::url($this->snapshot_path);
+        return Storage::disk('public')->url($this->snapshot_path);
     }
 
     /**

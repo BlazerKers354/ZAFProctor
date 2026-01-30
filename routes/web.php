@@ -163,6 +163,8 @@ Route::middleware(['auth', 'check.active'])->group(function () {
             Route::post('attempts/{attempt}/sync-time', [StudentExamController::class, 'syncTime'])->name('exams.sync-time');
             
             // Proctoring
+            Route::get('attempts/{attempt}/proctoring/settings', [ProctoringController::class, 'settings'])
+                ->name('proctoring.settings');
             Route::post('attempts/{attempt}/proctoring/violation', [ProctoringController::class, 'logViolation'])
                 ->middleware('throttle:30,1') // Max 30 violations logged per minute
                 ->name('proctoring.violation');

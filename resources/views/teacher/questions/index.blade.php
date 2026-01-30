@@ -32,21 +32,7 @@
         </div>
     </div>
 
-    <!-- Alert Messages -->
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="ph ph-check-circle me-2"></i>{{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
-
-    @if(session('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="ph ph-warning me-2"></i>{{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
-
+    <!-- Import Errors (specific to import feature) -->
     @if(session('import_errors'))
         <div class="alert alert-warning alert-dismissible fade show" role="alert">
             <h6 class="alert-heading"><i class="ph ph-warning-circle me-2"></i>Beberapa Baris Gagal Diimport</h6>

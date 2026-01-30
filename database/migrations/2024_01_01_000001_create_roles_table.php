@@ -19,12 +19,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // Insert default roles
-        DB::table('roles')->insert([
-            ['name' => 'admin', 'display_name' => 'Administrator', 'description' => 'System administrator with full access', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'teacher', 'display_name' => 'Pengawas/Dosen', 'description' => 'Teacher or exam proctor', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'student', 'display_name' => 'Peserta Ujian', 'description' => 'Exam participant', 'created_at' => now(), 'updated_at' => now()],
-        ]);
+        // Note: Roles are seeded via RoleSeeder to avoid duplication issues
     }
 
     /**

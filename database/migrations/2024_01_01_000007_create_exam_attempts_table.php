@@ -42,7 +42,8 @@ return new class extends Migration
             
             $table->timestamps();
             
-            $table->unique(['exam_id', 'user_id']);
+            // No unique constraint - allows multiple attempts per user per exam
+            $table->index(['exam_id', 'user_id']);
             $table->index('status');
             $table->index('started_at');
         });

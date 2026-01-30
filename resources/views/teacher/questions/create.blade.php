@@ -30,15 +30,7 @@
         </div>
     </div>
 
-    <!-- Success Message -->
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="ph ph-check-circle me-2"></i>{{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
-
-    <!-- Error Messages -->
+    <!-- Validation Error Messages -->
     @if($errors->any())
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <h6 class="alert-heading mb-2"><i class="ph ph-warning me-2"></i>Terdapat kesalahan:</h6>

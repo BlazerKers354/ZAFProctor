@@ -42,15 +42,17 @@ class ProctoringController extends Controller
             $validated['metadata'] ?? null
         );
 
-        // Check if should auto-submit
-        $shouldAutoSubmit = $attempt->violation_count >= ($attempt->exam->settings?->auto_submit_threshold ?? $attempt->exam->max_violations);
+        // Check if should auto-submit - use settings for threshold
+        $settings = $attempt->exam->settings;
+        $maxViolations = $settings?->auto_submit_threshold ?? $settings?->max_tab_switches ?? 5;
+        $shouldAutoSubmit = $attempt->violation_count >= $maxViolations;
 
         return response()->json([
             'success' => true,
             'log_id' => $log->id,
             'violation_count' => $attempt->fresh()->violation_count,
             'should_auto_submit' => $shouldAutoSubmit,
-            'warning_threshold' => $attempt->exam->settings?->warning_threshold ?? 3,
+            'warning_threshold' => $settings?->warning_threshold ?? 3,
         ]);
     }
 
@@ -147,19 +149,19 @@ class ProctoringController extends Controller
         $settings = $exam->settings ?? (object) \App\Models\ExamSetting::getDefaults();
 
         return response()->json([
-            'require_camera' => $exam->require_camera,
-            'require_fullscreen' => $exam->require_fullscreen,
+            'require_camera' => $settings->webcam_enabled ?? true,
+            'require_fullscreen' => $settings->browser_lock_enabled ?? true,
             'snapshot_interval' => $settings->snapshot_interval ?? 30,
             'detect_face' => $settings->detect_face ?? true,
             'detect_multiple_faces' => $settings->detect_multiple_faces ?? true,
-            'detect_tab_switch' => $settings->detect_tab_switch ?? true,
+            'detect_tab_switch' => $settings->detect_tab_switch ?? $settings->tab_switch_detection ?? true,
             'detect_fullscreen_exit' => $settings->detect_fullscreen_exit ?? true,
             'detect_copy_paste' => $settings->detect_copy_paste ?? true,
             'detect_right_click' => $settings->detect_right_click ?? true,
             'block_keyboard_shortcuts' => $settings->block_keyboard_shortcuts ?? true,
             'warning_threshold' => $settings->warning_threshold ?? 3,
-            'auto_submit_threshold' => $settings->auto_submit_threshold ?? 5,
-            'max_violations' => $exam->max_violations,
+            'auto_submit_threshold' => $settings->auto_submit_threshold ?? $settings->max_tab_switches ?? 5,
+            'max_violations' => $settings->auto_submit_threshold ?? $settings->max_tab_switches ?? 5,
         ]);
     }
 }

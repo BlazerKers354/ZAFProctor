@@ -85,13 +85,37 @@ class ExamPolicy
             return false;
         }
 
-        // Check if already attempted
-        $existingAttempt = $exam->attempts()
+        // Check if has an in-progress attempt (can only have one at a time)
+        $inProgressAttempt = $exam->attempts()
             ->where('user_id', $user->id)
-            ->whereIn('status', ['in_progress', 'submitted', 'graded'])
-            ->first();
+            ->where('status', 'in_progress')
+            ->exists();
 
-        return !$existingAttempt;
+        if ($inProgressAttempt) {
+            // Allow - they can continue their in-progress attempt
+            return true;
+        }
+
+        // Count submitted attempts
+        $submittedCount = $exam->attempts()
+            ->where('user_id', $user->id)
+            ->whereIn('status', ['submitted', 'graded'])
+            ->count();
+
+        // Load settings if not already loaded to ensure we have max_attempts
+        if (!$exam->relationLoaded('settings')) {
+            $exam->load('settings');
+        }
+
+        // Get max attempts (0 = unlimited, null defaults to 1)
+        $maxAttempts = $exam->settings->max_attempts ?? 1;
+
+        // If unlimited (0) or hasn't reached max, allow
+        if ($maxAttempts === 0 || $submittedCount < $maxAttempts) {
+            return true;
+        }
+
+        return false;
     }
 
     /**

@@ -142,19 +142,22 @@ class ExamAttempt extends Model
     }
 
     /**
-     * Increment violation count
+     * Get max violations allowed for this attempt
      */
-    public function incrementViolation(string $type = 'general'): void
+    public function getMaxViolationsAttribute(): int
     {
-        $this->violation_count++;
+        $settings = $this->exam->settings;
+        return $settings?->auto_submit_threshold 
+            ?? $settings?->max_tab_switches 
+            ?? 5;
+    }
 
-        if ($type === 'tab_switch') {
-            $this->tab_switch_count++;
-        } elseif ($type === 'fullscreen_exit') {
-            $this->fullscreen_exit_count++;
-        }
-
-        $this->save();
+    /**
+     * Check if violations exceeded
+     */
+    public function hasExceededViolations(): bool
+    {
+        return $this->violation_count >= $this->max_violations;
     }
 
     /**
@@ -167,7 +170,7 @@ class ExamAttempt extends Model
 
         $this->score = $earnedPoints;
         $this->percentage = $totalPoints > 0 ? ($earnedPoints / $totalPoints) * 100 : 0;
-        $this->is_passed = $this->percentage >= ($this->exam->settings->passing_score ?? 60);
+        $this->is_passed = $this->percentage >= ($this->exam->settings?->passing_score ?? 60);
         $this->save();
     }
 

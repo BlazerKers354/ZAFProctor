@@ -18,18 +18,27 @@ class ExamService
     public function startExam(Exam $exam, int $userId, string $ipAddress, string $userAgent): ExamAttempt
     {
         return DB::transaction(function () use ($exam, $userId, $ipAddress, $userAgent) {
-            // Check if user already has an attempt with pessimistic locking to prevent race condition
-            $existingAttempt = ExamAttempt::where('exam_id', $exam->id)
+            // Get all user attempts for this exam with pessimistic locking
+            $existingAttempts = ExamAttempt::where('exam_id', $exam->id)
                 ->where('user_id', $userId)
                 ->lockForUpdate()
-                ->first();
+                ->get();
 
-            if ($existingAttempt && $existingAttempt->isInProgress()) {
-                return $existingAttempt;
+            // Check if user has an in-progress attempt
+            $inProgressAttempt = $existingAttempts->first(fn($a) => $a->isInProgress());
+            if ($inProgressAttempt) {
+                return $inProgressAttempt;
             }
 
-            if ($existingAttempt && $existingAttempt->isSubmitted()) {
-                throw new \Exception('Anda sudah mengerjakan ujian ini.');
+            // Count submitted attempts
+            $submittedCount = $existingAttempts->filter(fn($a) => $a->isSubmitted())->count();
+            
+            // Get max attempts setting (null or 0 = unlimited)
+            $maxAttempts = $exam->settings?->max_attempts;
+            
+            // Check if user has reached max attempts (only if max_attempts is set and > 0)
+            if ($maxAttempts !== null && $maxAttempts > 0 && $submittedCount >= $maxAttempts) {
+                throw new \Exception('Anda sudah mencapai batas maksimal percobaan untuk ujian ini.');
             }
 
             // Create new attempt
@@ -209,8 +218,10 @@ class ExamService
      */
     public function shouldAutoSubmitDueToViolations(ExamAttempt $attempt): bool
     {
-        $maxViolations = $attempt->exam->settings?->auto_submit_threshold 
-            ?? $attempt->exam->max_violations;
+        $settings = $attempt->exam->settings;
+        $maxViolations = $settings?->auto_submit_threshold 
+            ?? $settings?->max_tab_switches 
+            ?? 5;
 
         return $attempt->violation_count >= $maxViolations;
     }
@@ -245,7 +256,7 @@ class ExamService
             'average_score' => round($submittedAttempts->avg('score') ?? 0, 2),
             'highest_score' => round($submittedAttempts->max('score') ?? 0, 2),
             'lowest_score' => round($submittedAttempts->min('score') ?? 0, 2),
-            'pass_rate' => round($submittedAttempts->where('score', '>=', $passingScore)->count() / $submittedAttempts->count() * 100, 2),
+            'pass_rate' => round($submittedAttempts->where('percentage', '>=', $passingScore)->count() / $submittedAttempts->count() * 100, 2),
             'auto_submit_count' => $submittedAttempts->where('is_auto_submitted', true)->count(),
         ];
     }

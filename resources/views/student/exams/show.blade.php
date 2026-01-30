@@ -11,6 +11,20 @@
         </a>
     </div>
 
+    <!-- Error/Success Messages -->
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+            <i class="ph ph-warning me-2"></i>{{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+            <i class="ph ph-check-circle me-2"></i>{{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
     <div class="row justify-content-center">
         <div class="col-lg-8">
             <!-- Exam Info Card -->
@@ -100,6 +114,25 @@
                         </div>
                     @endif
                     
+                    <!-- Attempt Info -->
+                    @if($attemptCount > 0)
+                        <div class="alert alert-info mb-4">
+                            <h6 class="f-w-600 mb-2"><i class="ph ph-info me-1"></i>Informasi Percobaan</h6>
+                            <div class="f-14">
+                                <p class="mb-1">
+                                    Percobaan: <strong>{{ $attemptCount }}</strong> dari 
+                                    <strong>{{ $maxAttempts == 0 ? 'Tak Terbatas' : $maxAttempts }}</strong>
+                                </p>
+                                @if($bestAttempt)
+                                    <p class="mb-0">
+                                        Nilai Terbaik: <strong>{{ number_format($bestAttempt->percentage, 1) }}%</strong>
+                                        ({{ $bestAttempt->submitted_at?->format('d M Y H:i') }})
+                                    </p>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+                    
                     <!-- Proctoring Requirements -->
                     <div class="alert alert-warning mb-4">
                         <h6 class="f-w-600 mb-2"><i class="ph ph-warning me-1"></i>Persyaratan Proctoring</h6>
@@ -118,11 +151,17 @@
                     </div>
                     
                     <!-- Start Exam Button/Form -->
-                    @if($exam->isActive() && (!$attempt || $attempt->status === 'not_started'))
+                    @if($attempt && $attempt->isInProgress())
+                        {{-- Continue in-progress attempt --}}
+                        <a href="{{ route('student.exams.take', $attempt) }}" class="btn btn-success w-100">
+                            <i class="ph ph-play me-1"></i>Lanjutkan Ujian
+                        </a>
+                    @elseif($exam->isActive() && $canRetry)
+                        {{-- Can start new attempt --}}
                         @if($exam->settings?->webcam_enabled)
                             {{-- If proctoring enabled, redirect to pre-check page --}}
                             <a href="{{ route('student.exams.pre-check', $exam) }}" class="btn btn-primary w-100">
-                                <i class="ph ph-camera me-1"></i>Mulai Persiapan Ujian
+                                <i class="ph ph-camera me-1"></i>{{ $attemptCount > 0 ? 'Coba Lagi' : 'Mulai Persiapan Ujian' }}
                             </a>
                             <p class="text-center text-muted mt-2 mb-0 f-12">
                                 Anda akan diminta untuk verifikasi kamera dan wajah terlebih dahulu
@@ -155,18 +194,30 @@
                                 </div>
                                 
                                 <button type="submit" class="btn btn-primary w-100">
-                                    <i class="ph ph-play me-1"></i>Mulai Ujian
+                                    <i class="ph ph-play me-1"></i>{{ $attemptCount > 0 ? 'Coba Lagi' : 'Mulai Ujian' }}
                                 </button>
                             </form>
                         @endif
-                    @elseif($attempt && $attempt->isInProgress())
-                        <a href="{{ route('student.exams.take', $attempt) }}" class="btn btn-success w-100">
-                            <i class="ph ph-play me-1"></i>Lanjutkan Ujian
-                        </a>
-                    @elseif($attempt && $attempt->isSubmitted())
-                        <a href="{{ route('student.exams.result', $attempt) }}" class="btn btn-secondary w-100">
-                            <i class="ph ph-eye me-1"></i>Lihat Hasil
-                        </a>
+                        
+                        {{-- Show best result button if has attempts --}}
+                        @if($bestAttempt)
+                            <div class="mt-3">
+                                <a href="{{ route('student.exams.result', $bestAttempt) }}" class="btn btn-outline-secondary w-100">
+                                    <i class="ph ph-eye me-1"></i>Lihat Hasil Terbaik
+                                </a>
+                            </div>
+                        @endif
+                    @elseif($attemptCount > 0 && !$canRetry)
+                        {{-- Has reached max attempts --}}
+                        <div class="alert alert-secondary mb-3">
+                            <i class="ph ph-check-circle me-1"></i>
+                            Anda telah mencapai batas maksimal percobaan ({{ $maxAttempts }}x)
+                        </div>
+                        @if($bestAttempt)
+                            <a href="{{ route('student.exams.result', $bestAttempt) }}" class="btn btn-secondary w-100">
+                                <i class="ph ph-eye me-1"></i>Lihat Hasil Terbaik
+                            </a>
+                        @endif
                     @else
                         <div class="text-center py-3 text-muted">
                             Ujian tidak tersedia saat ini

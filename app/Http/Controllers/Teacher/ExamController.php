@@ -79,6 +79,11 @@ class ExamController extends Controller
             'duration' => ['required', 'integer', 'min:5', 'max:480'],
             'access_token' => ['nullable', 'string', 'max:50'],
             'status' => ['nullable', 'in:draft,published'],
+            // Settings validation
+            'max_attempts' => ['nullable', 'integer', 'min:0', 'max:10'],
+            'max_tab_switches' => ['nullable', 'integer', 'min:0', 'max:20'],
+            'passing_score' => ['nullable', 'integer', 'min:0', 'max:100'],
+            'grade_method' => ['nullable', 'in:highest,latest,average'],
         ];
         
         if ($isScheduled) {
@@ -124,8 +129,8 @@ class ExamController extends Controller
                 'show_correct_answers' => $request->boolean('show_correct_answers', false),
                 'show_score' => $request->boolean('show_score', true),
                 
-                // Attempt settings
-                'max_attempts' => $request->input('max_attempts') ?: null,
+                // Attempt settings - 0 means unlimited
+                'max_attempts' => $request->filled('max_attempts') ? (int) $request->input('max_attempts') : 1,
                 'grade_method' => $request->input('grade_method', 'highest'),
                 
                 // Passing score
@@ -179,6 +184,11 @@ class ExamController extends Controller
             'end_time' => ['nullable', 'date', 'after:start_time'],
             'duration' => ['required', 'integer', 'min:5', 'max:480'],
             'status' => ['required', 'in:draft,published,ongoing,completed'],
+            // Settings validation
+            'max_attempts' => ['nullable', 'integer', 'min:0', 'max:10'],
+            'max_tab_switches' => ['nullable', 'integer', 'min:0', 'max:20'],
+            'passing_score' => ['nullable', 'integer', 'min:0', 'max:100'],
+            'grade_method' => ['nullable', 'in:highest,latest,average'],
         ]);
 
         DB::transaction(function () use ($validated, $request, $exam) {
@@ -211,8 +221,8 @@ class ExamController extends Controller
                     'show_correct_answers' => $request->boolean('show_correct_answers'),
                     'show_score' => $request->boolean('show_score'),
                     
-                    // Attempt settings
-                    'max_attempts' => $request->input('max_attempts') ?: null,
+                    // Attempt settings - 0 means unlimited
+                    'max_attempts' => $request->filled('max_attempts') ? (int) $request->input('max_attempts') : 1,
                     'grade_method' => $request->input('grade_method', 'highest'),
                     
                     // Passing score

@@ -52,13 +52,17 @@
                                 </div>
                                 
                                 <!-- Status Badge -->
-                                @if($exam->user_attempt && $exam->user_attempt->isSubmitted())
+                                @if($exam->user_attempt && $exam->user_attempt->isInProgress())
+                                    <span class="badge bg-warning">
+                                        <span class="pulse-dot me-1"></span>Dikerjakan
+                                    </span>
+                                @elseif($exam->attempt_count > 0 && !$exam->can_retry)
                                     <span class="badge bg-secondary">
                                         <i class="ph ph-check me-1"></i>Selesai
                                     </span>
-                                @elseif($exam->user_attempt && $exam->user_attempt->isInProgress())
-                                    <span class="badge bg-warning">
-                                        <span class="pulse-dot me-1"></span>Dikerjakan
+                                @elseif($exam->attempt_count > 0 && $exam->can_retry)
+                                    <span class="badge badge-soft-primary">
+                                        <i class="ph ph-arrow-clockwise me-1"></i>Bisa Retry
                                     </span>
                                 @elseif($exam->isActive())
                                     <span class="badge badge-soft-success">
@@ -116,22 +120,33 @@
                             </div>
 
                             <!-- Action Button -->
-                            @if($exam->user_attempt && $exam->user_attempt->isSubmitted())
-                                <div class="d-flex align-items-center justify-content-between">
-                                    @php
-                                        $scoreBg = $exam->user_attempt->is_passed ? 'bg-success' : 'bg-danger';
-                                    @endphp
-                                    <div class="score-badge {{ $scoreBg }} text-white rounded-3 d-flex align-items-center justify-content-center" style="width: 64px; height: 64px;">
-                                        <span class="f-20 f-w-600">{{ number_format($exam->user_attempt->percentage, 0) }}%</span>
-                                    </div>
-                                    <a href="{{ route('student.exams.result', $exam->user_attempt) }}" class="btn btn-light-primary">
-                                        <i class="ph ph-eye me-1"></i>Lihat Hasil
-                                    </a>
-                                </div>
-                            @elseif($exam->user_attempt && $exam->user_attempt->isInProgress())
+                            @if($exam->user_attempt && $exam->user_attempt->isInProgress())
                                 <a href="{{ route('student.exams.take', $exam->user_attempt) }}" class="btn btn-warning w-100">
                                     <i class="ph ph-play me-1"></i>Lanjutkan Ujian
                                 </a>
+                            @elseif($exam->attempt_count > 0 && $exam->best_attempt)
+                                <div class="d-flex align-items-center justify-content-between">
+                                    @php
+                                        $scoreBg = $exam->best_attempt->is_passed ? 'bg-success' : 'bg-danger';
+                                    @endphp
+                                    <div class="score-badge {{ $scoreBg }} text-white rounded-3 d-flex align-items-center justify-content-center" style="width: 64px; height: 64px;">
+                                        <span class="f-20 f-w-600">{{ number_format($exam->best_attempt->percentage, 0) }}%</span>
+                                    </div>
+                                    <div class="d-flex flex-column align-items-end gap-1">
+                                        <small class="text-muted">
+                                            {{ $exam->attempt_count }}/{{ $exam->max_attempts == 0 ? '∞' : $exam->max_attempts }} percobaan
+                                        </small>
+                                        @if($exam->can_retry && $exam->isActive())
+                                            <a href="{{ route('student.exams.show', $exam) }}" class="btn btn-sm btn-primary">
+                                                <i class="ph ph-arrow-clockwise me-1"></i>Coba Lagi
+                                            </a>
+                                        @else
+                                            <a href="{{ route('student.exams.result', $exam->best_attempt) }}" class="btn btn-sm btn-light-primary">
+                                                <i class="ph ph-eye me-1"></i>Lihat Hasil
+                                            </a>
+                                        @endif
+                                    </div>
+                                </div>
                             @elseif($exam->isActive())
                                 <a href="{{ route('student.exams.show', $exam) }}" class="btn btn-primary w-100">
                                     <i class="ph ph-play me-1"></i>Mulai Ujian

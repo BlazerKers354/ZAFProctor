@@ -333,6 +333,19 @@
         
         <!-- Token Entry Form -->
         <div id="token-form-container" class="token-form not-ready">
+            @if($errors->any())
+                <div class="alert alert-danger mb-4">
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="ph ph-warning-circle f-22 mt-1"></i>
+                        <div>
+                            @foreach($errors->all() as $error)
+                                <div>{{ $error }}</div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            @endif
+            
             <div class="text-center mb-4">
                 <div id="form-icon" class="d-inline-flex align-items-center justify-content-center rounded-circle bg-danger bg-opacity-10 p-3 mb-3">
                     <i class="ph ph-lock f-32 text-danger"></i>
@@ -364,7 +377,9 @@
                                autocomplete="off">
                     </div>
                     @error('access_token')
-                        <div class="text-danger mt-1 small">{{ $message }}</div>
+                        <div class="alert alert-danger mt-2 mb-0 py-2">
+                            <i class="ph ph-warning me-1"></i>{{ $message }}
+                        </div>
                     @enderror
                 </div>
                 
@@ -398,6 +413,13 @@ const CONFIG = {
     maxMultipleFacesAllowed: 1,
 };
 
+// Check if returning from token error (need to restore pre-check state)
+const hasTokenError = {{ $errors->has('access_token') ? 'true' : 'false' }};
+const hasAnyError = {{ $errors->any() ? 'true' : 'false' }};
+const previousPreCheckPassed = {{ session('pre_check_passed') ? 'true' : 'false' }};
+const previousCameraVerified = {{ session('camera_verified') ? 'true' : 'false' }};
+const previousFaceVerified = {{ session('face_verified') ? 'true' : 'false' }};
+
 // State
 let stream = null;
 let faceDetectionInterval = null;
@@ -421,6 +443,14 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     // Load face-api models
     await loadFaceApiModels();
+    
+    // If returning from error (token or authorization), auto-start camera verification
+    if ((hasTokenError || hasAnyError) && (previousPreCheckPassed || previousCameraVerified)) {
+        console.log('Returning from error, auto-starting camera...');
+        setTimeout(() => {
+            requestCameraAccess();
+        }, 500);
+    }
 });
 
 // Load face-api.js models

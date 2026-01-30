@@ -891,7 +891,7 @@
             detectFace: {{ $attempt->exam->settings?->detect_face ?? 'true' }},
             detectMultipleFaces: {{ $attempt->exam->settings?->detect_multiple_faces ?? 'true' }},
             snapshotInterval: {{ $attempt->exam->settings?->snapshot_interval ?? 30 }},
-            maxViolations: {{ $attempt->exam->settings?->max_tab_switches ?? 5 }},
+            maxViolations: {{ $attempt->exam->settings?->auto_submit_threshold ?? $attempt->exam->settings?->max_tab_switches ?? 5 }},
             warningThreshold: {{ $attempt->exam->settings?->warning_threshold ?? 3 }},
             csrfToken: '{{ csrf_token() }}',
             modelPath: '{{ asset("assets/proctoring/models") }}',
