@@ -119,20 +119,26 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
 
-        // Get exams available for this student's class
+        // Get enrolled course IDs for this student
+        $enrolledCourseIds = $user->enrolledCourses()->pluck('courses.id');
+
+        // Get exams available for this student's enrolled courses only
         $availableExams = Exam::active()
+            ->whereIn('course_id', $enrolledCourseIds)
             ->with('course')
             ->orderBy('start_time')
             ->get();
 
         $upcomingExams = Exam::upcoming()
+            ->whereIn('course_id', $enrolledCourseIds)
             ->with('course')
             ->orderBy('start_time')
             ->take(5)
             ->get();
 
-        // Exams that student hasn't completed yet
+        // Exams that student hasn't completed yet (only from enrolled courses)
         $activeExams = Exam::active()
+            ->whereIn('course_id', $enrolledCourseIds)
             ->whereDoesntHave('attempts', function ($query) use ($user) {
                 $query->where('user_id', $user->id)
                     ->whereIn('status', ['submitted', 'graded']);

@@ -70,18 +70,7 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-                            
-                            <div class="col-md-6">
-                                <label for="duration" class="form-label">Durasi (menit) <span class="text-danger">*</span></label>
-                                <input type="number" name="duration" id="duration" value="{{ old('duration', 60) }}"
-                                       min="5" max="300"
-                                       class="form-control @error('duration') is-invalid @enderror"
-                                       required>
-                                @error('duration')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            
+
                             <div class="col-12">
                                 <label for="description" class="form-label">Deskripsi/Petunjuk Ujian</label>
                                 <textarea name="description" id="description" rows="4"
@@ -132,22 +121,45 @@
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label for="start_time" class="form-label">Waktu Mulai</label>
-                                    <input type="datetime-local" name="start_time" id="start_time" 
+                                    <input type="datetime-local" name="start_time" id="start_time"
                                            value="{{ old('start_time') }}"
-                                           class="form-control @error('start_time') is-invalid @enderror">
+                                           class="form-control @error('start_time') is-invalid @enderror"
+                                           onchange="validateDuration()">
                                     @error('start_time')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-                                
+
                                 <div class="col-md-6">
                                     <label for="end_time" class="form-label">Waktu Selesai</label>
-                                    <input type="datetime-local" name="end_time" id="end_time" 
+                                    <input type="datetime-local" name="end_time" id="end_time"
                                            value="{{ old('end_time') }}"
-                                           class="form-control @error('end_time') is-invalid @enderror">
+                                           class="form-control @error('end_time') is-invalid @enderror"
+                                           onchange="validateDuration()">
                                     @error('end_time')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-6">
+                                <label for="duration" class="form-label">Durasi Pengerjaan (menit) <span class="text-danger">*</span></label>
+                                <input type="number" name="duration" id="duration" value="{{ old('duration', 60) }}"
+                                       min="5" max="480"
+                                       class="form-control @error('duration') is-invalid @enderror"
+                                       required
+                                       onchange="validateDuration()">
+                                @error('duration')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                                <small class="text-muted">Waktu yang diberikan kepada siswa untuk mengerjakan ujian</small>
+                            </div>
+                            <div class="col-md-6">
+                                <div id="duration-warning" class="alert alert-warning d-none mt-4">
+                                    <i class="ph ph-warning me-1"></i>
+                                    <span id="duration-warning-text"></span>
                                 </div>
                             </div>
                         </div>
@@ -376,14 +388,54 @@
         document.getElementById('schedule-fields').style.display = show ? 'block' : 'none';
         const startTimeInput = document.getElementById('start_time');
         const endTimeInput = document.getElementById('end_time');
-        
+
         if (!show) {
             startTimeInput.removeAttribute('required');
             endTimeInput.removeAttribute('required');
+            // Hide duration warning for flexible exams
+            document.getElementById('duration-warning').classList.add('d-none');
         } else {
             startTimeInput.setAttribute('required', 'required');
             endTimeInput.setAttribute('required', 'required');
+            validateDuration();
         }
+    }
+
+    function validateDuration() {
+        const startTime = document.getElementById('start_time').value;
+        const endTime = document.getElementById('end_time').value;
+        const duration = parseInt(document.getElementById('duration').value) || 0;
+        const warningDiv = document.getElementById('duration-warning');
+        const warningText = document.getElementById('duration-warning-text');
+        const isScheduled = document.getElementById('type_scheduled').checked;
+
+        if (!isScheduled || !startTime || !endTime || !duration) {
+            warningDiv.classList.add('d-none');
+            return true;
+        }
+
+        const start = new Date(startTime);
+        const end = new Date(endTime);
+        const timeWindowMinutes = (end - start) / (1000 * 60);
+
+        if (timeWindowMinutes <= 0) {
+            warningDiv.classList.remove('d-none');
+            warningDiv.classList.remove('alert-warning');
+            warningDiv.classList.add('alert-danger');
+            warningText.textContent = 'Waktu selesai harus lebih besar dari waktu mulai.';
+            return false;
+        }
+
+        if (duration > timeWindowMinutes) {
+            warningDiv.classList.remove('d-none');
+            warningDiv.classList.remove('alert-warning');
+            warningDiv.classList.add('alert-danger');
+            warningText.textContent = `Durasi ujian (${duration} menit) melebihi jendela waktu yang tersedia (${Math.floor(timeWindowMinutes)} menit). Durasi harus kurang dari atau sama dengan selisih waktu mulai dan selesai.`;
+            return false;
+        }
+
+        warningDiv.classList.add('d-none');
+        return true;
     }
 
     // Initialize on page load
@@ -392,6 +444,16 @@
         if (scheduledRadio) {
             toggleSchedule(scheduledRadio.checked);
         }
+
+        // Form validation on submit
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const isScheduled = document.getElementById('type_scheduled').checked;
+            if (isScheduled && !validateDuration()) {
+                e.preventDefault();
+                alert('Durasi ujian tidak boleh melebihi jendela waktu yang tersedia (selisih waktu mulai dan selesai).');
+                return false;
+            }
+        });
     });
 </script>
 @endpush

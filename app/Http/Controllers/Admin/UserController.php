@@ -103,7 +103,7 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user): RedirectResponse
     {
-        $validated = $request->validate([
+        $rules = [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
             'student_id' => ['nullable', 'string', 'max:50', 'unique:users,student_id,' . $user->id],
@@ -111,13 +111,29 @@ class UserController extends Controller
             'role_id' => ['required', 'exists:roles,id'],
             'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
             'is_active' => ['boolean'],
-        ]);
+        ];
 
-        if (!empty($validated['password'])) {
+        // If password is being changed, require current password
+        if ($request->filled('password')) {
+            $rules['current_password'] = ['required', 'string'];
+        }
+
+        $validated = $request->validate($rules);
+
+        // Verify current password if changing password
+        if ($request->filled('password')) {
+            if (!Hash::check($request->current_password, $user->password)) {
+                return back()->withErrors([
+                    'current_password' => 'Password lama tidak sesuai.'
+                ])->withInput();
+            }
             $validated['password'] = Hash::make($validated['password']);
         } else {
             unset($validated['password']);
         }
+
+        // Remove current_password from validated data
+        unset($validated['current_password']);
 
         $validated['is_active'] = $request->boolean('is_active', true);
 

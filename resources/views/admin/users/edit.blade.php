@@ -98,7 +98,18 @@
 
                             <div class="col-12">
                                 <hr class="my-3">
-                                <p class="text-muted small mb-3">Kosongkan password jika tidak ingin mengubah</p>
+                                <p class="text-muted small mb-3">Kosongkan field password jika tidak ingin mengubah</p>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label for="current_password" class="form-label">Password Lama</label>
+                                <input type="password" name="current_password" id="current_password"
+                                       placeholder="Masukkan password lama untuk verifikasi"
+                                       class="form-control @error('current_password') is-invalid @enderror">
+                                @error('current_password')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                                <small class="text-muted">Wajib diisi jika ingin mengganti password baru</small>
                             </div>
 
                             <div class="col-md-6">

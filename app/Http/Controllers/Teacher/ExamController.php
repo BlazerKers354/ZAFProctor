@@ -70,7 +70,7 @@ class ExamController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $isScheduled = $request->input('type', 'scheduled') === 'scheduled';
-        
+
         $rules = [
             'course_id' => ['required', 'exists:courses,id'],
             'title' => ['required', 'string', 'max:255'],
@@ -85,9 +85,9 @@ class ExamController extends Controller
             'passing_score' => ['nullable', 'integer', 'min:0', 'max:100'],
             'grade_method' => ['nullable', 'in:highest,latest,average'],
         ];
-        
+
         if ($isScheduled) {
-            $rules['start_time'] = ['required', 'date', 'after:now'];
+            $rules['start_time'] = ['required', 'date'];
             $rules['end_time'] = ['required', 'date', 'after:start_time'];
         } else {
             $rules['start_time'] = ['nullable', 'date'];
@@ -95,6 +95,19 @@ class ExamController extends Controller
         }
 
         $validated = $request->validate($rules);
+
+        // Validate duration vs time window for scheduled exams
+        if ($isScheduled && $request->filled('start_time') && $request->filled('end_time')) {
+            $startTime = \Carbon\Carbon::parse($validated['start_time']);
+            $endTime = \Carbon\Carbon::parse($validated['end_time']);
+            $timeWindowMinutes = $startTime->diffInMinutes($endTime);
+
+            if ($validated['duration'] > $timeWindowMinutes) {
+                return back()->withErrors([
+                    'duration' => "Durasi ujian ({$validated['duration']} menit) tidak boleh melebihi jendela waktu yang tersedia ({$timeWindowMinutes} menit)."
+                ])->withInput();
+            }
+        }
 
         $exam = null;
         
@@ -175,13 +188,13 @@ class ExamController extends Controller
     {
         $this->authorize('update', $exam);
 
-        $validated = $request->validate([
+        $isScheduled = $request->input('type', 'scheduled') === 'scheduled';
+
+        $rules = [
             'course_id' => ['required', 'exists:courses,id'],
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'type' => ['required', 'in:scheduled,flexible'],
-            'start_time' => ['nullable', 'date'],
-            'end_time' => ['nullable', 'date', 'after:start_time'],
             'duration' => ['required', 'integer', 'min:5', 'max:480'],
             'status' => ['required', 'in:draft,published,ongoing,completed'],
             // Settings validation
@@ -189,17 +202,40 @@ class ExamController extends Controller
             'max_tab_switches' => ['nullable', 'integer', 'min:0', 'max:20'],
             'passing_score' => ['nullable', 'integer', 'min:0', 'max:100'],
             'grade_method' => ['nullable', 'in:highest,latest,average'],
-        ]);
+        ];
 
-        DB::transaction(function () use ($validated, $request, $exam) {
+        if ($isScheduled) {
+            $rules['start_time'] = ['required', 'date'];
+            $rules['end_time'] = ['required', 'date', 'after:start_time'];
+        } else {
+            $rules['start_time'] = ['nullable', 'date'];
+            $rules['end_time'] = ['nullable', 'date'];
+        }
+
+        $validated = $request->validate($rules);
+
+        // Validate duration vs time window for scheduled exams
+        if ($isScheduled && $request->filled('start_time') && $request->filled('end_time')) {
+            $startTime = \Carbon\Carbon::parse($validated['start_time']);
+            $endTime = \Carbon\Carbon::parse($validated['end_time']);
+            $timeWindowMinutes = $startTime->diffInMinutes($endTime);
+
+            if ($validated['duration'] > $timeWindowMinutes) {
+                return back()->withErrors([
+                    'duration' => "Durasi ujian ({$validated['duration']} menit) tidak boleh melebihi jendela waktu yang tersedia ({$timeWindowMinutes} menit)."
+                ])->withInput();
+            }
+        }
+
+        DB::transaction(function () use ($validated, $request, $exam, $isScheduled) {
             // Update exam basic info
             $exam->update([
                 'course_id' => $validated['course_id'],
                 'title' => $validated['title'],
                 'description' => $validated['description'],
                 'type' => $validated['type'],
-                'start_time' => $validated['type'] === 'scheduled' ? $validated['start_time'] : null,
-                'end_time' => $validated['type'] === 'scheduled' ? $validated['end_time'] : null,
+                'start_time' => $isScheduled ? $validated['start_time'] : null,
+                'end_time' => $isScheduled ? $validated['end_time'] : null,
                 'duration' => $validated['duration'],
                 'status' => $validated['status'],
             ]);
