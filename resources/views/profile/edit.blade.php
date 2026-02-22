@@ -34,7 +34,14 @@
             <div class="card">
                 <div class="card-body text-center">
                     <div class="user-avatar mb-4">
-                        <div class="avatar-circle mx-auto" style="width: 120px; height: 120px; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        @php
+                            $avatarGradient = match(true) {
+                                auth()->user()->isAdmin() => 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+                                auth()->user()->isTeacher() => 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                                default => 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)',
+                            };
+                        @endphp
+                        <div class="avatar-circle mx-auto" style="width: 120px; height: 120px; background: {{ $avatarGradient }}; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
                             <span style="font-size: 48px; color: white; font-weight: 600;">{{ strtoupper(substr($user->name, 0, 1)) }}</span>
                         </div>
                     </div>

@@ -60,7 +60,7 @@
                                         <small class="text-muted">{{ $user->email }}</small>
                                     </td>
                                     <td>
-                                        <span class="badge bg-light-{{ $user->role->name == 'teacher' ? 'warning' : 'primary' }}">
+                                        <span class="badge bg-light-{{ $user->role->name == 'teacher' ? 'success' : 'primary' }}">
                                             {{ ucfirst($user->role->name) }}
                                         </span>
                                     </td>

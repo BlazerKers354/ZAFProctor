@@ -4,35 +4,44 @@
 @section('page-title', 'Dashboard')
 
 @section('content')
-    <!-- Page Header -->
-    <div class="page-header">
-        <div class="page-block">
+    <!-- Welcome Banner -->
+    <div class="card mb-4" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #334155 100%); border: none; overflow: hidden; position: relative;">
+        <div class="card-body p-4" style="position: relative; z-index: 1;">
             <div class="row align-items-center">
-                <div class="col-md-12">
-                    <div class="page-header-title">
-                        <h5 class="m-b-10">Dashboard Administrator</h5>
+                <div class="col-md-8">
+                    <div class="d-flex align-items-center gap-3">
+                        <div style="background: linear-gradient(135deg, #3b82f6, #8b5cf6); border-radius: 14px;" class="p-3">
+                            <i class="ph-duotone ph-chart-pie-slice f-30 text-white"></i>
+                        </div>
+                        <div>
+                            <p class="mb-1 f-14" style="color: rgba(255,255,255,0.5);">Panel Administrasi</p>
+                            <h3 class="mb-0 text-white f-w-600">Dashboard Administrator</h3>
+                        </div>
                     </div>
-                    <ul class="breadcrumb">
-                        <li class="breadcrumb-item"><i class="ph-duotone ph-house"></i></li>
-                        <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
-                    </ul>
+                </div>
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <span class="badge px-3 py-2" style="background: rgba(255,255,255,0.08); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.06); color: rgba(255,255,255,0.7);">
+                        <i class="ph-duotone ph-calendar me-1"></i>{{ now()->locale('id')->translatedFormat('l, d M Y') }}
+                    </span>
                 </div>
             </div>
         </div>
+        <div style="position: absolute; top: -30px; right: -20px; width: 160px; height: 160px; border-radius: 50%; background: rgba(59,130,246,0.06);"></div>
+        <div style="position: absolute; bottom: -20px; right: 100px; width: 100px; height: 100px; border-radius: 50%; background: rgba(139,92,246,0.05);"></div>
     </div>
 
     <!-- Main Stats -->
     <div class="row">
         <div class="col-md-6 col-xl-3">
-            <div class="card stats-card">
+            <div class="card stats-card" style="border-left: 3px solid #3b82f6;">
                 <div class="card-body">
                     <div class="d-flex align-items-start justify-content-between">
                         <div>
                             <p class="stats-label mb-2">Total Pengguna</p>
                             <h3 class="stats-value">{{ number_format($stats['total_users']) }}</h3>
                         </div>
-                        <div class="stats-icon bg-primary bg-opacity-10">
-                            <i class="ph-duotone ph-users text-primary"></i>
+                        <div class="stats-icon" style="background: rgba(59,130,246,0.08);">
+                            <i class="ph-duotone ph-users" style="color: #3b82f6;"></i>
                         </div>
                     </div>
                     <div class="mt-3 pt-3 border-top">
@@ -46,15 +55,15 @@
         </div>
 
         <div class="col-md-6 col-xl-3">
-            <div class="card stats-card">
+            <div class="card stats-card" style="border-left: 3px solid #10b981;">
                 <div class="card-body">
                     <div class="d-flex align-items-start justify-content-between">
                         <div>
                             <p class="stats-label mb-2">Total Mata Pelajaran</p>
                             <h3 class="stats-value">{{ number_format($stats['total_courses']) }}</h3>
                         </div>
-                        <div class="stats-icon bg-success bg-opacity-10">
-                            <i class="ph-duotone ph-books text-success"></i>
+                        <div class="stats-icon" style="background: rgba(16,185,129,0.08);">
+                            <i class="ph-duotone ph-books" style="color: #10b981;"></i>
                         </div>
                     </div>
                     <div class="mt-3 pt-3 border-top">
@@ -68,15 +77,15 @@
         </div>
 
         <div class="col-md-6 col-xl-3">
-            <div class="card stats-card">
+            <div class="card stats-card" style="border-left: 3px solid #f59e0b;">
                 <div class="card-body">
                     <div class="d-flex align-items-start justify-content-between">
                         <div>
                             <p class="stats-label mb-2">Total Ujian</p>
                             <h3 class="stats-value">{{ number_format($stats['total_exams']) }}</h3>
                         </div>
-                        <div class="stats-icon bg-warning bg-opacity-10">
-                            <i class="ph-duotone ph-exam text-warning"></i>
+                        <div class="stats-icon" style="background: rgba(245,158,11,0.08);">
+                            <i class="ph-duotone ph-exam" style="color: #f59e0b;"></i>
                         </div>
                     </div>
                     <div class="mt-3 pt-3 border-top">
@@ -90,15 +99,15 @@
         </div>
 
         <div class="col-md-6 col-xl-3">
-            <div class="card stats-card">
+            <div class="card stats-card" style="border-left: 3px solid #06b6d4;">
                 <div class="card-body">
                     <div class="d-flex align-items-start justify-content-between">
                         <div>
                             <p class="stats-label mb-2">Ujian Selesai</p>
                             <h3 class="stats-value">{{ number_format($stats['completed_attempts']) }}</h3>
                         </div>
-                        <div class="stats-icon bg-info bg-opacity-10">
-                            <i class="ph-duotone ph-check-circle text-info"></i>
+                        <div class="stats-icon" style="background: rgba(6,182,212,0.08);">
+                            <i class="ph-duotone ph-check-circle" style="color: #06b6d4;"></i>
                         </div>
                     </div>
                     <div class="mt-3 pt-3 border-top">

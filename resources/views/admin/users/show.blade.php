@@ -40,7 +40,7 @@
                             <span class="text-white fw-bold" style="font-size: 2.5rem;">{{ strtoupper(substr($user->name, 0, 1)) }}</span>
                         </div>
                         <h4 class="mb-1">{{ $user->name }}</h4>
-                        <span class="badge bg-light-{{ $user->role->name == 'admin' ? 'danger' : ($user->role->name == 'teacher' ? 'warning' : 'primary') }} mb-2">
+                        <span class="badge bg-light-{{ $user->role->name == 'admin' ? 'danger' : ($user->role->name == 'teacher' ? 'success' : 'primary') }} mb-2">
                             {{ ucfirst($user->role->name) }}
                         </span>
                         <br>
@@ -116,7 +116,7 @@
                                     <tbody>
                                         @foreach($user->enrolledCourses as $course)
                                             <tr>
-                                                <td><span class="badge bg-secondary">{{ $course->code }}</span></td>
+                                                <td><span class="badge badge-soft-secondary">{{ $course->code }}</span></td>
                                                 <td>{{ $course->name }}</td>
                                                 <td>{{ $course->teacher->name ?? '-' }}</td>
                                             </tr>
@@ -211,9 +211,9 @@
                                     <tbody>
                                         @foreach($user->taughtCourses as $course)
                                             <tr>
-                                                <td><span class="badge bg-secondary">{{ $course->code }}</span></td>
+                                                <td><span class="badge badge-soft-secondary">{{ $course->code }}</span></td>
                                                 <td>{{ $course->name }}</td>
-                                                <td><span class="badge bg-primary">{{ $course->students()->count() }}</span></td>
+                                                <td><span class="badge badge-soft-primary">{{ $course->students()->count() }}</span></td>
                                                 <td>
                                                     @if($course->is_active)
                                                         <span class="badge bg-light-success">Aktif</span>

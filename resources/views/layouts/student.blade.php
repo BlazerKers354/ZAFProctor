@@ -21,14 +21,14 @@
 
     <style>
         :root {
-            --pc-sidebar-width: 280px;
-            --pc-header-height: 74px;
-            --bs-body-bg: #f8f9fa;
-            --pc-sidebar-background: linear-gradient(180deg, #4f46e5 0%, #7c3aed 100%);
-            --pc-sidebar-color: rgba(255,255,255,0.8);
+            --pc-sidebar-width: 272px;
+            --pc-header-height: 70px;
+            --bs-body-bg: #f5f3ff;
+            --pc-sidebar-background: #1a1040;
+            --pc-sidebar-color: rgba(255,255,255,0.6);
             --pc-sidebar-color-active: #ffffff;
-            --pc-brand-color-1: #4f46e5;
-            --pc-brand-color-2: #7c3aed;
+            --pc-brand-color-1: #7c3aed;
+            --pc-brand-color-2: #6d28d9;
         }
 
         * {
@@ -49,7 +49,36 @@
             z-index: 1025;
             background: var(--pc-sidebar-background);
             transition: all 0.3s ease;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            border-right: 1px solid rgba(255,255,255,0.04);
+        }
+
+        .pc-sidebar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(ellipse at 50% 0%, rgba(124, 58, 237, 0.12) 0%, transparent 50%),
+                radial-gradient(ellipse at 0% 100%, rgba(167, 139, 250, 0.06) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .pc-sidebar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px);
+            background-size: 28px 28px;
+            pointer-events: none;
+            z-index: 0;
         }
 
         .pc-sidebar .navbar-wrapper {
@@ -57,14 +86,16 @@
             height: 100%;
             display: flex;
             flex-direction: column;
+            position: relative;
+            z-index: 1;
         }
 
         .pc-sidebar .m-header {
             height: var(--pc-header-height);
             display: flex;
             align-items: center;
-            padding: 16px 24px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
         }
 
         .pc-sidebar .m-header .b-brand {
@@ -78,13 +109,14 @@
         }
 
         .pc-sidebar .m-header .logo-icon {
-            width: 40px;
-            height: 40px;
-            background: rgba(255,255,255,0.2);
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
             border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25);
         }
 
         .pc-sidebar .navbar-content {
@@ -142,9 +174,11 @@
         }
 
         .pc-sidebar .pc-item.active .pc-link {
-            background: rgba(255,255,255,0.2);
+            background: rgba(139, 92, 246, 0.15);
             color: var(--pc-sidebar-color-active);
             font-weight: 600;
+            border-left: 3px solid #a78bfa;
+            padding-left: 13px;
         }
 
         .pc-sidebar .pc-micon {
@@ -192,8 +226,20 @@
             height: var(--pc-header-height);
             background: #fff;
             z-index: 1024;
-            box-shadow: 0 1px 0 rgba(0,0,0,0.05);
+            box-shadow: 0 1px 0 rgba(0,0,0,0.04);
             transition: all 0.3s ease;
+            border-bottom: 1px solid #e8eaed;
+        }
+
+        .pc-header::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, #7c3aed, #a78bfa, #c4b5fd);
+            opacity: 0.6;
         }
 
         .pc-header .header-wrapper {
@@ -249,9 +295,14 @@
         /* Card Styles */
         .card {
             border: none;
-            border-radius: 12px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03);
             margin-bottom: 24px;
+            transition: box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
         }
 
         .card-header {
@@ -275,6 +326,12 @@
         .stats-card {
             position: relative;
             overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.08);
         }
 
         .stats-card .stats-icon {
@@ -351,12 +408,12 @@
 
         /* Exam Card Styles */
         .exam-card {
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .exam-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.1);
         }
 
         .exam-card .exam-icon {
@@ -400,7 +457,7 @@
         }
 
         .badge-soft-primary {
-            background: rgba(79, 70, 229, 0.1);
+            background: rgba(124, 58, 237, 0.1);
             color: var(--pc-brand-color-1);
         }
 
@@ -470,17 +527,40 @@
 
         /* Button Styles */
         .btn-primary {
-            background: var(--pc-brand-color-1);
-            border-color: var(--pc-brand-color-1);
+            background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
+            border-color: transparent;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-primary:hover::after {
+            left: 100%;
         }
 
         .btn-primary:hover {
-            background: #4338ca;
-            border-color: #4338ca;
+            background: linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%);
+            border-color: transparent;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(124, 58, 237, 0.3);
         }
 
+        .text-primary { color: var(--pc-brand-color-1) !important; }
+        .bg-primary { background-color: var(--pc-brand-color-1) !important; }
+
         .btn-light-primary {
-            background: rgba(79, 70, 229, 0.1);
+            background: rgba(124, 58, 237, 0.1);
             color: var(--pc-brand-color-1);
             border: none;
         }
@@ -589,7 +669,9 @@
             <div class="m-header">
                 <a href="{{ route('dashboard') }}" class="b-brand">
                     <span class="logo-icon">
-                        <i class="ph ph-exam text-white f-24"></i>
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="white" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2L3 7v10l9 5 9-5V7l-9-5zm0 2.18l6.2 3.45v2.3L12 13.36 5.8 9.93v-2.3L12 4.18zM5.8 11.64L12 15.05l6.2-3.41v4.73L12 19.82l-6.2-3.45v-4.73z"/>
+                        </svg>
                     </span>
                     <span class="logo-text">ZAFProctor</span>
                 </a>

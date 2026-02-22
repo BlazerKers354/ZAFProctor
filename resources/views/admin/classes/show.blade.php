@@ -64,7 +64,7 @@
                         </li>
                         <li class="list-group-item d-flex justify-content-between px-0">
                             <span class="text-muted"><i class="ph-duotone ph-users me-2"></i>Jumlah Siswa</span>
-                            <span class="badge bg-primary">{{ $class->students->count() }}</span>
+                            <span class="badge badge-soft-primary">{{ $class->students->count() }}</span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between px-0">
                             <span class="text-muted"><i class="ph-duotone ph-calendar me-2"></i>Dibuat</span>

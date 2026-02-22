@@ -30,7 +30,7 @@
             <!-- Exam Info Card -->
             <div class="card">
                 <!-- Header -->
-                <div class="card-header bg-primary text-white py-4">
+                <div class="card-header text-white py-4" style="background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);">
                     <div class="d-flex align-items-center gap-3">
                         <div class="bg-white bg-opacity-25 rounded-3 p-3">
                             <i class="ph ph-file-text f-28"></i>
@@ -90,16 +90,22 @@
                                 <span class="f-w-600">{{ $exam->question_count }} soal</span>
                             </div>
                         </div>
-                        <div class="col-6">
+                        <div class="col-4">
                             <div class="bg-light rounded-3 p-3">
                                 <small class="text-muted d-block mb-1">Nilai Minimum Lulus</small>
                                 <span class="f-w-600">{{ $exam->settings->passing_score ?? 60 }}%</span>
                             </div>
                         </div>
-                        <div class="col-6">
+                        <div class="col-4">
                             <div class="bg-light rounded-3 p-3">
                                 <small class="text-muted d-block mb-1">Total Poin</small>
                                 <span class="f-w-600">{{ $exam->total_points }} poin</span>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="bg-light rounded-3 p-3">
+                                <small class="text-muted d-block mb-1">Maks Percobaan</small>
+                                <span class="f-w-600">{{ ($exam->settings->max_attempts ?? 0) == 0 ? 'Tak Terbatas' : $exam->settings->max_attempts . 'x' }}</span>
                             </div>
                         </div>
                     </div>
@@ -134,21 +140,47 @@
                     @endif
                     
                     <!-- Proctoring Requirements -->
+                    @php
+                        $settings = $exam->settings;
+                        $hasProctoringRules = $settings?->webcam_enabled || $settings?->browser_lock_enabled || $settings?->detect_tab_switch || $settings?->detect_copy_paste || $settings?->detect_right_click || $settings?->block_keyboard_shortcuts || $settings?->detect_fullscreen_exit;
+                    @endphp
+                    @if($hasProctoringRules)
                     <div class="alert alert-warning mb-4">
                         <h6 class="f-w-600 mb-2"><i class="ph ph-warning me-1"></i>Persyaratan Proctoring</h6>
                         <ul class="mb-0 ps-3 f-14">
-                            @if($exam->settings?->webcam_enabled)
+                            @if($settings->webcam_enabled)
                                 <li>Akses kamera diperlukan untuk pengawasan</li>
-                                <li>Wajah harus terdeteksi selama ujian berlangsung</li>
+                                @if($settings->detect_face)
+                                    <li>Wajah harus terdeteksi selama ujian berlangsung</li>
+                                @endif
+                                @if($settings->detect_multiple_faces)
+                                    <li>Hanya 1 wajah yang diperbolehkan di depan kamera</li>
+                                @endif
                             @endif
-                            @if($exam->settings?->browser_lock_enabled)
+                            @if($settings->browser_lock_enabled)
                                 <li>Mode fullscreen akan diaktifkan</li>
                             @endif
-                            <li>Dilarang membuka tab/aplikasi lain</li>
-                            <li>Dilarang copy/paste</li>
-                            <li>Maksimal {{ $exam->settings?->max_tab_switches ?? 5 }} pelanggaran sebelum auto-submit</li>
+                            @if($settings->detect_fullscreen_exit)
+                                <li>Keluar dari fullscreen akan dicatat sebagai pelanggaran</li>
+                            @endif
+                            @if($settings->detect_tab_switch)
+                                <li>Dilarang membuka tab/aplikasi lain (maks {{ $settings->max_tab_switches ?? 5 }} pelanggaran)</li>
+                            @endif
+                            @if($settings->detect_copy_paste)
+                                <li>Dilarang melakukan copy/paste</li>
+                            @endif
+                            @if($settings->detect_right_click)
+                                <li>Klik kanan tidak diizinkan</li>
+                            @endif
+                            @if($settings->block_keyboard_shortcuts)
+                                <li>Shortcut keyboard tertentu diblokir</li>
+                            @endif
+                            @if($settings->auto_submit_threshold)
+                                <li>Maksimal {{ $settings->auto_submit_threshold }} pelanggaran sebelum ujian otomatis disubmit</li>
+                            @endif
                         </ul>
                     </div>
+                    @endif
                     
                     <!-- Start Exam Button/Form -->
                     @if($attempt && $attempt->isInProgress())

@@ -23,7 +23,7 @@
         .cover .logo-icon {
             width: 90px;
             height: 90px;
-            background: #4f46e5;
+            background: #3b82f6;
             border-radius: 20px;
             margin: 0 auto 30px;
             display: flex;
@@ -36,12 +36,12 @@
         }
         .cover h1 {
             font-size: 32pt;
-            color: #4f46e5;
+            color: #3b82f6;
             margin-bottom: 5px;
         }
         .cover .subtitle {
             font-size: 16pt;
-            color: #6366f1;
+            color: #60a5fa;
             margin-bottom: 40px;
         }
         .cover .desc {
@@ -61,8 +61,8 @@
         }
         .toc h2 {
             font-size: 18pt;
-            color: #4f46e5;
-            border-bottom: 3px solid #4f46e5;
+            color: #3b82f6;
+            border-bottom: 3px solid #3b82f6;
             padding-bottom: 10px;
             margin-bottom: 25px;
         }
@@ -81,14 +81,14 @@
         .toc-section {
             font-weight: bold;
             font-size: 12pt;
-            color: #4f46e5;
+            color: #3b82f6;
             margin-top: 15px;
         }
 
         /* Section headers */
         h2 {
             font-size: 18pt;
-            color: #4f46e5;
+            color: #3b82f6;
             border-bottom: 3px solid #e0e7ff;
             padding-bottom: 8px;
             margin-top: 30px;
@@ -96,7 +96,7 @@
         }
         h3 {
             font-size: 14pt;
-            color: #6366f1;
+            color: #60a5fa;
             margin-top: 25px;
             margin-bottom: 12px;
         }
@@ -176,7 +176,7 @@
         .step-number {
             display: table-cell;
             width: 45px;
-            background: #4f46e5;
+            background: #3b82f6;
             color: white;
             text-align: center;
             vertical-align: middle;
@@ -226,7 +226,7 @@
             margin: 15px 0;
         }
         .screenshot .mock-header {
-            background: #4f46e5;
+            background: #3b82f6;
             color: white;
             padding: 8px 16px;
             border-radius: 6px 6px 0 0;
@@ -257,7 +257,7 @@
             font-size: 10pt;
         }
         th {
-            background: #4f46e5;
+            background: #3b82f6;
             color: white;
             padding: 10px 12px;
             text-align: left;
@@ -317,7 +317,7 @@
         }
         .flow-arrow {
             text-align: center;
-            color: #4f46e5;
+            color: #3b82f6;
             font-size: 16pt;
             margin: 3px 0;
         }
@@ -366,8 +366,18 @@
 
     <!-- ==================== COVER PAGE ==================== -->
     <div class="cover">
-        <div style="background: #4f46e5; width: 90px; height: 90px; border-radius: 20px; margin: 0 auto 30px; text-align: center; line-height: 90px;">
-            <span style="color: white; font-size: 36pt; font-weight: bold;">Z</span>
+        <div style="width: 90px; height: 90px; margin: 0 auto 30px; text-align: center;">
+            <svg width="90" height="90" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M30 5L52 17V43L30 55L8 43V17L30 5Z" fill="url(#gd_g1_cover)" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>
+                <path d="M30 5L52 17L30 29L8 17L30 5Z" fill="url(#gd_g2_cover)" opacity="0.9"/>
+                <path d="M30 29V55L8 43V17L30 29Z" fill="url(#gd_g3_cover)" opacity="0.7"/>
+                <path d="M30 20L40 26V38L30 44L20 38V26L30 20Z" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+                <defs>
+                    <linearGradient id="gd_g1_cover" x1="8" y1="5" x2="52" y2="55"><stop stop-color="#3b82f6"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient>
+                    <linearGradient id="gd_g2_cover" x1="8" y1="5" x2="52" y2="29"><stop stop-color="#60a5fa"/><stop offset="1" stop-color="#a78bfa"/></linearGradient>
+                    <linearGradient id="gd_g3_cover" x1="8" y1="17" x2="30" y2="55"><stop stop-color="#2563eb"/><stop offset="1" stop-color="#7c3aed"/></linearGradient>
+                </defs>
+            </svg>
         </div>
         <h1>ZAFProctor</h1>
         <div class="subtitle">Panduan Pengguna</div>
@@ -449,9 +459,19 @@
 
     <div class="illustration">
         <div style="margin-bottom: 10px;">
-            <div style="display: inline-block; background: #4f46e5; color: white; width: 60px; height: 60px; border-radius: 50%; text-align: center; line-height: 60px; font-size: 24pt; font-weight: bold;">Z</div>
+            <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M30 5L52 17V43L30 55L8 43V17L30 5Z" fill="url(#gd_g1_illus)" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>
+                <path d="M30 5L52 17L30 29L8 17L30 5Z" fill="url(#gd_g2_illus)" opacity="0.9"/>
+                <path d="M30 29V55L8 43V17L30 29Z" fill="url(#gd_g3_illus)" opacity="0.7"/>
+                <path d="M30 20L40 26V38L30 44L20 38V26L30 20Z" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+                <defs>
+                    <linearGradient id="gd_g1_illus" x1="8" y1="5" x2="52" y2="55"><stop stop-color="#3b82f6"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient>
+                    <linearGradient id="gd_g2_illus" x1="8" y1="5" x2="52" y2="29"><stop stop-color="#60a5fa"/><stop offset="1" stop-color="#a78bfa"/></linearGradient>
+                    <linearGradient id="gd_g3_illus" x1="8" y1="17" x2="30" y2="55"><stop stop-color="#2563eb"/><stop offset="1" stop-color="#7c3aed"/></linearGradient>
+                </defs>
+            </svg>
         </div>
-        <div style="font-size: 14pt; font-weight: bold; color: #4f46e5;">ZAFProctor</div>
+        <div style="font-size: 14pt; font-weight: bold; color: #3b82f6;">ZAFProctor</div>
         <div style="font-size: 10pt; color: #64748b; margin-top: 5px;">Sistem Ujian Online dengan Pengawasan Kamera</div>
         <div style="margin-top: 15px;">
             <table style="max-width: 400px; margin: 0 auto; border: none;">
@@ -459,7 +479,7 @@
                     <td style="text-align: center; border: none; padding: 8px;">
                         <div style="background: #e0e7ff; border-radius: 8px; padding: 10px;">
                             <div style="font-size: 18pt;">&#128249;</div>
-                            <div style="font-size: 8pt; color: #4f46e5; font-weight: bold;">Webcam Proctoring</div>
+                            <div style="font-size: 8pt; color: #3b82f6; font-weight: bold;">Webcam Proctoring</div>
                         </div>
                     </td>
                     <td style="text-align: center; border: none; padding: 8px;">
@@ -558,12 +578,12 @@
 
     <div class="illustration">
         <div style="background: white; border-radius: 10px; padding: 20px; max-width: 350px; margin: 0 auto; border: 1px solid #e2e8f0;">
-            <div style="font-size: 14pt; font-weight: bold; color: #4f46e5; margin-bottom: 15px;">Formulir Pendaftaran</div>
+            <div style="font-size: 14pt; font-weight: bold; color: #3b82f6; margin-bottom: 15px;">Formulir Pendaftaran</div>
             <div style="background: #f1f5f9; border-radius: 6px; padding: 8px 12px; margin-bottom: 8px; text-align: left; font-size: 9pt; color: #94a3b8;">Nama Lengkap</div>
             <div style="background: #f1f5f9; border-radius: 6px; padding: 8px 12px; margin-bottom: 8px; text-align: left; font-size: 9pt; color: #94a3b8;">Email</div>
             <div style="background: #f1f5f9; border-radius: 6px; padding: 8px 12px; margin-bottom: 8px; text-align: left; font-size: 9pt; color: #94a3b8;">Password</div>
             <div style="background: #f1f5f9; border-radius: 6px; padding: 8px 12px; margin-bottom: 15px; text-align: left; font-size: 9pt; color: #94a3b8;">Pilih Peran: Guru / Siswa</div>
-            <div style="background: #4f46e5; color: white; border-radius: 6px; padding: 8px; font-size: 10pt; font-weight: bold;">Daftar</div>
+            <div style="background: #3b82f6; color: white; border-radius: 6px; padding: 8px; font-size: 10pt; font-weight: bold;">Daftar</div>
         </div>
         <div class="caption">Tampilan form pendaftaran akun ZAFProctor</div>
     </div>

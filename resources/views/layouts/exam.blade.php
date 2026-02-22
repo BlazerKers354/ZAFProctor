@@ -20,8 +20,8 @@
     
     <style>
         :root {
-            --exam-primary: #4f46e5;
-            --exam-primary-dark: #4338ca;
+            --exam-primary: #7c3aed;
+            --exam-primary-dark: #6d28d9;
             --exam-success: #10b981;
             --exam-warning: #f59e0b;
             --exam-danger: #ef4444;

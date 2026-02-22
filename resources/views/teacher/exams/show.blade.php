@@ -464,7 +464,7 @@
 
             <!-- Access Token -->
             <div class="card mb-4">
-                <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
                     <h5 class="mb-0 text-white"><i class="ph-duotone ph-key me-2"></i>Token Akses Ujian</h5>
                 </div>
                 <div class="card-body">

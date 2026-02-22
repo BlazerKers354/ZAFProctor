@@ -18,14 +18,14 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     
     <!-- Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('assets/fonts/phosphor/duotone/style.css') }}">
     
     <!-- Custom Exam Styles -->
     <style>
         :root {
             --pc-sidebar-width: 280px;
             --pc-header-height: 70px;
-            --exam-primary: #4680ff;
+            --exam-primary: #7c3aed;
             --exam-success: #2ca87f;
             --exam-warning: #e58a00;
             --exam-danger: #dc2626;
@@ -35,10 +35,12 @@
 
         * {
             font-family: 'Open Sans', sans-serif;
+            @if($attempt->exam->settings?->detect_copy_paste)
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
+            @endif
         }
 
         body {
@@ -214,7 +216,7 @@
 
         /* Progress Card */
         .progress-card {
-            background: linear-gradient(135deg, var(--exam-primary) 0%, #6366f1 100%);
+            background: linear-gradient(135deg, var(--exam-primary) 0%, #6d28d9 100%);
             border-radius: 16px;
             padding: 20px;
             color: #fff;
@@ -364,7 +366,7 @@
             background: #f9fafb;
         }
         .btn-nav-primary {
-            background: linear-gradient(135deg, var(--exam-primary) 0%, #6366f1 100%);
+            background: linear-gradient(135deg, var(--exam-primary) 0%, #6d28d9 100%);
             border: none;
             color: #fff;
         }
@@ -435,7 +437,7 @@
         .exam-modal-header.success { background: linear-gradient(135deg, var(--exam-success) 0%, #22c55e 100%); }
         .exam-modal-header.warning { background: linear-gradient(135deg, var(--exam-warning) 0%, #f59e0b 100%); }
         .exam-modal-header.danger { background: linear-gradient(135deg, var(--exam-danger) 0%, #b91c1c 100%); }
-        .exam-modal-header.primary { background: linear-gradient(135deg, var(--exam-primary) 0%, #6366f1 100%); }
+        .exam-modal-header.primary { background: linear-gradient(135deg, var(--exam-primary) 0%, #6d28d9 100%); }
         .exam-modal-icon {
             width: 70px;
             height: 70px;
@@ -507,7 +509,7 @@
         }
     </style>
 </head>
-<body oncontextmenu="return false;">
+<body @if($attempt->exam->settings?->detect_right_click) oncontextmenu="return false;" @endif>
 
     <!-- Header -->
     <header class="exam-header">
@@ -516,15 +518,15 @@
                 <!-- Left: Exam Info -->
                 <div class="d-flex align-items-center gap-3">
                     <button class="btn btn-link text-white d-lg-none p-0 me-2" onclick="toggleSidebar()">
-                        <i class="bi bi-list fs-4"></i>
+                        <i class="ph ph-list fs-4"></i>
                     </button>
-                    <div class="d-flex align-items-center justify-content-center rounded-3" style="width: 44px; height: 44px; background: linear-gradient(135deg, var(--exam-primary) 0%, #6366f1 100%);">
-                        <i class="bi bi-file-text text-white fs-5"></i>
+                    <div class="d-flex align-items-center justify-content-center rounded-3" style="width: 44px; height: 44px; background: linear-gradient(135deg, var(--exam-primary) 0%, #6d28d9 100%);">
+                        <i class="ph-duotone ph-file-text text-white fs-5"></i>
                     </div>
                     <div class="d-none d-sm-block">
                         <h1 class="text-white mb-0 fw-semibold" style="font-size: 1.1rem;">{{ $attempt->exam->title }}</h1>
                         <div class="d-flex align-items-center gap-2 text-secondary" style="font-size: 0.8rem;">
-                            <i class="bi bi-book"></i>
+                            <i class="ph ph-book-open"></i>
                             <span>{{ $attempt->exam->course?->name ?? 'Ujian Umum' }}</span>
                         </div>
                     </div>
@@ -544,14 +546,14 @@
                         <canvas id="face-canvas"></canvas>
                         <div id="camera-status" class="camera-status inactive"></div>
                         <div id="camera-placeholder" class="camera-placeholder">
-                            <i class="bi bi-camera-video-off fs-5"></i>
+                            <i class="ph ph-camera-slash fs-5"></i>
                         </div>
                     </div>
                     
                     <!-- Timer -->
                     <div id="timer-box" class="timer-box d-flex align-items-center gap-2">
                         <div class="d-flex align-items-center justify-content-center rounded-2" style="width: 36px; height: 36px; background: rgba(251, 191, 36, 0.15);">
-                            <i class="bi bi-clock text-warning fs-5"></i>
+                            <i class="ph ph-clock text-warning fs-5"></i>
                         </div>
                         <div>
                             <div class="text-secondary" style="font-size: 0.7rem; line-height: 1;">Sisa Waktu</div>
@@ -561,7 +563,7 @@
                     
                     <!-- Violation Counter -->
                     <div id="violation-badge" class="violation-badge align-items-center gap-2">
-                        <i class="bi bi-exclamation-triangle text-white fs-6"></i>
+                        <i class="ph ph-warning text-white fs-6"></i>
                         <div>
                             <div class="text-white" style="font-size: 0.65rem; opacity: 0.8; line-height: 1;">Pelanggaran</div>
                             <span id="violation-count" class="text-white fw-bold" style="font-size: 1.1rem;">0</span>
@@ -570,7 +572,7 @@
                     
                     <!-- Submit Button -->
                     <button onclick="confirmSubmit()" class="btn btn-nav-success d-none d-sm-inline-flex">
-                        <i class="bi bi-send"></i>
+                        <i class="ph ph-paper-plane-tilt"></i>
                         <span>Kumpulkan</span>
                     </button>
                 </div>
@@ -586,7 +588,7 @@
     <!-- Warning Banner -->
     <div id="warning-banner" class="warning-banner">
         <div class="d-flex align-items-center justify-content-center gap-2">
-            <i class="bi bi-exclamation-octagon fs-5"></i>
+            <i class="ph ph-warning-octagon fs-5"></i>
             <span id="warning-message" class="fw-semibold">Peringatan!</span>
         </div>
     </div>
@@ -648,7 +650,7 @@
             
             <!-- Mobile Submit -->
             <button onclick="confirmSubmit()" class="btn btn-nav-success w-100 mt-4 d-sm-none">
-                <i class="bi bi-send me-2"></i>
+                <i class="ph ph-paper-plane-tilt me-2"></i>
                 Kumpulkan Ujian
             </button>
         </div>
@@ -675,7 +677,7 @@
                                                 </div>
                                             </div>
                                             <div class="question-points">
-                                                <i class="bi bi-star me-1"></i>{{ $question->points }} poin
+                                                <i class="ph ph-star me-1"></i>{{ $question->points }} poin
                                             </div>
                                         </div>
                                     </div>
@@ -704,7 +706,7 @@
                                                          id="option-{{ $question->id }}-{{ $option->id }}">
                                                         <div class="option-letter" data-label="{{ $option->option_label }}">
                                                             @if(isset($answeredQuestions[$question->id]) && $answeredQuestions[$question->id]->selected_option_id == $option->id)
-                                                                <i class="bi bi-check"></i>
+                                                                <i class="ph ph-check"></i>
                                                             @else
                                                                 {{ $option->option_label }}
                                                             @endif
@@ -721,7 +723,7 @@
                                         @else
                                             <div class="essay-container">
                                                 <label class="d-flex align-items-center gap-2 mb-2 fw-semibold text-secondary" style="font-size: 0.85rem;">
-                                                    <i class="bi bi-pencil"></i>
+                                                    <i class="ph ph-pencil-simple"></i>
                                                     Jawaban Anda:
                                                 </label>
                                                 <textarea id="essay-{{ $question->id }}"
@@ -731,9 +733,9 @@
                                                           onblur="saveEssayAnswer({{ $question->id }}, {{ $index }})"
                                                 >{{ isset($answeredQuestions[$question->id]) ? $answeredQuestions[$question->id]->essay_answer : '' }}</textarea>
                                                 <div class="mt-2 d-flex justify-content-between align-items-center text-secondary" style="font-size: 0.75rem;">
-                                                    <span><i class="bi bi-info-circle me-1"></i>Jawaban otomatis tersimpan</span>
+                                                    <span><i class="ph ph-info me-1"></i>Jawaban otomatis tersimpan</span>
                                                     <span id="essay-status-{{ $question->id }}" class="text-success" style="display: none;">
-                                                        <i class="bi bi-check-circle me-1"></i>Tersimpan
+                                                        <i class="ph ph-check-circle me-1"></i>Tersimpan
                                                     </span>
                                                 </div>
                                             </div>
@@ -745,19 +747,19 @@
                                         <div class="d-flex justify-content-between align-items-center">
                                             <button onclick="goToQuestion({{ $index - 1 }})" 
                                                     class="btn btn-nav btn-nav-outline {{ $index === 0 ? 'invisible' : '' }}">
-                                                <i class="bi bi-arrow-left"></i>
+                                                <i class="ph ph-arrow-left"></i>
                                                 <span class="d-none d-sm-inline">Sebelumnya</span>
                                             </button>
                                             
                                             @if($index === $questions->count() - 1)
                                                 <button onclick="confirmSubmit()" class="btn btn-nav btn-nav-success">
                                                     <span>Kumpulkan</span>
-                                                    <i class="bi bi-send"></i>
+                                                    <i class="ph ph-paper-plane-tilt"></i>
                                                 </button>
                                             @else
                                                 <button onclick="goToQuestion({{ $index + 1 }})" class="btn btn-nav btn-nav-primary">
                                                     <span class="d-none d-sm-inline">Selanjutnya</span>
-                                                    <i class="bi bi-arrow-right"></i>
+                                                    <i class="ph ph-arrow-right"></i>
                                                 </button>
                                             @endif
                                         </div>
@@ -776,7 +778,7 @@
         <div class="exam-modal">
             <div class="exam-modal-header primary">
                 <div class="exam-modal-icon">
-                    <i class="bi bi-send"></i>
+                    <i class="ph ph-paper-plane-tilt"></i>
                 </div>
                 <h3 class="exam-modal-title">Kumpulkan Ujian?</h3>
             </div>
@@ -788,12 +790,12 @@
             </div>
             <div class="exam-modal-footer">
                 <button onclick="closeSubmitModal()" class="btn btn-nav btn-nav-outline flex-fill">
-                    <i class="bi bi-arrow-left"></i> Kembali
+                    <i class="ph ph-arrow-left"></i> Kembali
                 </button>
                 <form id="submit-form" action="{{ route('student.exams.submit', $attempt) }}" method="POST" class="flex-fill">
                     @csrf
                     <button type="submit" class="btn btn-nav btn-nav-success w-100">
-                        Ya, Kumpulkan <i class="bi bi-check"></i>
+                        Ya, Kumpulkan <i class="ph ph-check"></i>
                     </button>
                 </form>
             </div>
@@ -805,21 +807,21 @@
         <div class="exam-modal">
             <div class="exam-modal-header warning">
                 <div class="exam-modal-icon">
-                    <i class="bi bi-arrows-fullscreen"></i>
+                    <i class="ph ph-arrows-out"></i>
                 </div>
                 <h3 class="exam-modal-title">Mode Fullscreen</h3>
             </div>
             <div class="exam-modal-body">
                 <div class="alert alert-warning mb-3">
                     <div class="d-flex align-items-start gap-2">
-                        <i class="bi bi-info-circle fs-5 mt-1"></i>
-                        <p class="mb-0" style="font-size: 0.9rem;">Keluar dari mode fullscreen akan dicatat sebagai pelanggaran dan dapat mengakibatkan ujian dibatalkan.</p>
+                        <i class="ph ph-info fs-5 mt-1"></i>
+                        <p class="mb-0" style="font-size: 0.9rem;">Keluar dari mode fullscreen akan dicatat sebagai pelanggaran. Maksimal {{ $attempt->exam->settings?->auto_submit_threshold ?? 5 }} pelanggaran sebelum ujian otomatis disubmit.</p>
                     </div>
                 </div>
             </div>
             <div class="exam-modal-footer">
                 <button onclick="enterFullscreen()" class="btn btn-nav btn-nav-primary w-100">
-                    <i class="bi bi-arrows-fullscreen me-2"></i>Aktifkan Fullscreen
+                    <i class="ph ph-arrows-out me-2"></i>Aktifkan Fullscreen
                 </button>
             </div>
         </div>
@@ -830,7 +832,7 @@
         <div class="exam-modal">
             <div class="exam-modal-header danger">
                 <div class="exam-modal-icon">
-                    <i class="bi bi-person-x"></i>
+                    <i class="ph ph-user-minus"></i>
                 </div>
                 <h3 class="exam-modal-title">Wajah Tidak Terdeteksi!</h3>
             </div>
@@ -855,7 +857,7 @@
         <div class="exam-modal">
             <div class="exam-modal-header danger">
                 <div class="exam-modal-icon">
-                    <i class="bi bi-people"></i>
+                    <i class="ph ph-users"></i>
                 </div>
                 <h3 class="exam-modal-title">Beberapa Wajah Terdeteksi!</h3>
             </div>
@@ -888,8 +890,13 @@
             remainingTime: {{ $attempt->remaining_time }},
             requireCamera: {{ $attempt->exam->settings?->webcam_enabled ? 'true' : 'false' }},
             requireFullscreen: {{ $attempt->exam->settings?->browser_lock_enabled ? 'true' : 'false' }},
-            detectFace: {{ $attempt->exam->settings?->detect_face ?? 'true' }},
-            detectMultipleFaces: {{ $attempt->exam->settings?->detect_multiple_faces ?? 'true' }},
+            detectFace: {{ ($attempt->exam->settings?->detect_face ?? true) ? 'true' : 'false' }},
+            detectMultipleFaces: {{ ($attempt->exam->settings?->detect_multiple_faces ?? true) ? 'true' : 'false' }},
+            detectTabSwitch: {{ $attempt->exam->settings?->detect_tab_switch ? 'true' : 'false' }},
+            detectCopyPaste: {{ $attempt->exam->settings?->detect_copy_paste ? 'true' : 'false' }},
+            detectRightClick: {{ $attempt->exam->settings?->detect_right_click ? 'true' : 'false' }},
+            blockKeyboardShortcuts: {{ $attempt->exam->settings?->block_keyboard_shortcuts ? 'true' : 'false' }},
+            detectFullscreenExit: {{ $attempt->exam->settings?->detect_fullscreen_exit ? 'true' : 'false' }},
             snapshotInterval: {{ $attempt->exam->settings?->snapshot_interval ?? 30 }},
             maxViolations: {{ $attempt->exam->settings?->auto_submit_threshold ?? $attempt->exam->settings?->max_tab_switches ?? 5 }},
             warningThreshold: {{ $attempt->exam->settings?->warning_threshold ?? 3 }},
@@ -1193,7 +1200,7 @@
             
             const selected = document.getElementById(`option-${questionId}-${optionId}`);
             selected.classList.add('selected');
-            selected.querySelector('.option-letter').innerHTML = '<i class="bi bi-check"></i>';
+            selected.querySelector('.option-letter').innerHTML = '<i class="ph ph-check"></i>';
             
             const payload = { question_id: questionId, option_id: optionId };
             const queueData = { payload, questionIndex };
@@ -1320,20 +1327,20 @@
             switch(status) {
                 case 'saved':
                     statusEl.className = 'text-success';
-                    statusEl.innerHTML = '<i class="bi bi-check-circle me-1"></i>Tersimpan';
+                    statusEl.innerHTML = '<i class="ph ph-check-circle me-1"></i>Tersimpan';
                     setTimeout(() => { statusEl.style.display = 'none'; }, 3000);
                     break;
                 case 'typing':
                     statusEl.className = 'text-muted';
-                    statusEl.innerHTML = '<i class="bi bi-pencil me-1"></i>Mengetik...';
+                    statusEl.innerHTML = '<i class="ph ph-pencil-simple me-1"></i>Mengetik...';
                     break;
                 case 'pending':
                     statusEl.className = 'text-warning';
-                    statusEl.innerHTML = '<i class="bi bi-clock me-1"></i>Menunggu...';
+                    statusEl.innerHTML = '<i class="ph ph-clock me-1"></i>Menunggu...';
                     break;
                 case 'offline':
                     statusEl.className = 'text-info';
-                    statusEl.innerHTML = '<i class="bi bi-cloud-slash me-1"></i>Disimpan lokal';
+                    statusEl.innerHTML = '<i class="ph ph-cloud-slash me-1"></i>Disimpan lokal';
                     break;
             }
         }
@@ -1430,14 +1437,14 @@
             if (answered < total) {
                 alertHtml = `
                     <div class="alert alert-warning d-flex align-items-center gap-2 mb-3">
-                        <i class="bi bi-exclamation-triangle fs-5"></i>
+                        <i class="ph ph-warning fs-5"></i>
                         <span>Masih ada <strong>${total - answered} soal</strong> yang belum dijawab!</span>
                     </div>
                 `;
             } else {
                 alertHtml = `
                     <div class="alert alert-success d-flex align-items-center gap-2 mb-3">
-                        <i class="bi bi-check-circle fs-5"></i>
+                        <i class="ph ph-check-circle fs-5"></i>
                         <span>Semua soal telah dijawab. Bagus!</span>
                     </div>
                 `;
@@ -1472,7 +1479,9 @@
             document.addEventListener('fullscreenchange', function() {
                 if (!document.fullscreenElement && config.requireFullscreen) {
                     document.getElementById('fullscreen-modal').classList.add('show');
-                    logViolation('fullscreen_exit', 'User exited fullscreen mode');
+                    if (config.detectFullscreenExit) {
+                        logViolation('fullscreen_exit', 'User exited fullscreen mode');
+                    }
                 } else {
                     document.getElementById('fullscreen-modal').classList.remove('show');
                 }
@@ -1517,29 +1526,37 @@
 
         function initBasicProctoring() {
             // Tab visibility
-            document.addEventListener('visibilitychange', () => {
-                if (document.hidden) logViolation('tab_switch', 'User switched to another tab');
-            });
+            if (config.detectTabSwitch) {
+                document.addEventListener('visibilitychange', () => {
+                    if (document.hidden) logViolation('tab_switch', 'User switched to another tab');
+                });
 
-            // Window blur
-            window.addEventListener('blur', () => logViolation('window_blur', 'Window lost focus'));
+                // Window blur
+                window.addEventListener('blur', () => logViolation('window_blur', 'Window lost focus'));
+            }
 
             // Prevent copy/paste
-            ['copy', 'cut', 'paste'].forEach(event => {
-                document.addEventListener(event, e => {
-                    e.preventDefault();
-                    logViolation('copy_paste', `${event} action detected`);
+            if (config.detectCopyPaste) {
+                ['copy', 'cut', 'paste'].forEach(event => {
+                    document.addEventListener(event, e => {
+                        e.preventDefault();
+                        logViolation('copy_paste', `${event} action detected`);
+                    });
                 });
-            });
+            }
             
             // Prevent right click
-            document.addEventListener('contextmenu', e => {
-                e.preventDefault();
-                logViolation('right_click', 'Right click detected');
-            });
+            if (config.detectRightClick) {
+                document.addEventListener('contextmenu', e => {
+                    e.preventDefault();
+                    logViolation('right_click', 'Right click detected');
+                });
+            }
             
             // Prevent keyboard shortcuts
-            document.addEventListener('keydown', preventKeyboardShortcuts);
+            if (config.blockKeyboardShortcuts) {
+                document.addEventListener('keydown', preventKeyboardShortcuts);
+            }
         }
 
         async function initCamera() {

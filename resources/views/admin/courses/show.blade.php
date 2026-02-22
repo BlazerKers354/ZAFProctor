@@ -40,7 +40,7 @@
                             <span class="text-white fw-bold fs-2">{{ strtoupper(substr($course->code, 0, 2)) }}</span>
                         </div>
                         <h4 class="mb-1">{{ $course->name }}</h4>
-                        <span class="badge bg-secondary">{{ $course->code }}</span>
+                        <span class="badge badge-soft-secondary">{{ $course->code }}</span>
                         @if($course->is_active)
                             <span class="badge bg-light-success">Aktif</span>
                         @else
@@ -55,11 +55,11 @@
                         </li>
                         <li class="list-group-item d-flex justify-content-between px-0">
                             <span class="text-muted"><i class="ph-duotone ph-users me-2"></i>Jumlah Siswa</span>
-                            <span class="badge bg-primary">{{ $course->students->count() }}</span>
+                            <span class="badge badge-soft-primary">{{ $course->students->count() }}</span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between px-0">
                             <span class="text-muted"><i class="ph-duotone ph-exam me-2"></i>Jumlah Ujian</span>
-                            <span class="badge bg-info">{{ $course->exams->count() }}</span>
+                            <span class="badge badge-soft-info">{{ $course->exams->count() }}</span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between px-0">
                             <span class="text-muted"><i class="ph-duotone ph-calendar me-2"></i>Dibuat</span>

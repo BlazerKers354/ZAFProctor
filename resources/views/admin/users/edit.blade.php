@@ -164,7 +164,7 @@
                             <span class="text-white fw-bold fs-2">{{ strtoupper(substr($user->name, 0, 1)) }}</span>
                         </div>
                         <h5 class="mb-1">{{ $user->name }}</h5>
-                        <span class="badge bg-light-{{ $user->role->name == 'admin' ? 'danger' : ($user->role->name == 'teacher' ? 'warning' : 'primary') }}">
+                        <span class="badge bg-light-{{ $user->role->name == 'admin' ? 'danger' : ($user->role->name == 'teacher' ? 'success' : 'primary') }}">
                             {{ ucfirst($user->role->name) }}
                         </span>
                     </div>

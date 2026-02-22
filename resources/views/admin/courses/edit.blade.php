@@ -117,11 +117,11 @@
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item d-flex justify-content-between px-0">
                             <span class="text-muted">Jumlah Siswa</span>
-                            <span class="badge bg-primary">{{ $course->students()->count() }}</span>
+                            <span class="badge badge-soft-primary">{{ $course->students()->count() }}</span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between px-0">
                             <span class="text-muted">Jumlah Ujian</span>
-                            <span class="badge bg-info">{{ $course->exams()->count() }}</span>
+                            <span class="badge badge-soft-info">{{ $course->exams()->count() }}</span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between px-0">
                             <span class="text-muted">Dibuat</span>

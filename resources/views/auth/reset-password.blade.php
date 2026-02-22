@@ -32,7 +32,7 @@
         }
 
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #0f172a;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -106,9 +106,9 @@
         }
 
         .form-section input:focus {
-            border-color: #667eea;
+            border-color: #3b82f6;
             background-color: #fff;
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
         }
 
         .form-section input.error {
@@ -145,11 +145,11 @@
         }
 
         .toggle-password:hover {
-            color: #667eea;
+            color: #3b82f6;
         }
 
         .form-section button[type="submit"] {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
             color: #fff;
             font-size: 12px;
             padding: 14px 50px;
@@ -161,17 +161,17 @@
             margin-top: 15px;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
             width: 100%;
         }
 
         .form-section button[type="submit"]:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
         }
 
         .form-section a {
-            color: #512da8;
+            color: #3b82f6;
             font-size: 13px;
             text-decoration: none;
             margin-top: 15px;
@@ -180,7 +180,7 @@
         }
 
         .form-section a:hover {
-            color: #764ba2;
+            color: #8b5cf6;
             text-decoration: underline;
         }
 
@@ -208,7 +208,7 @@
 
         .info-section {
             width: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -301,7 +301,20 @@
 <body>
     <!-- Brand -->
     <div class="brand">
-        <h1>📝 ZAFProctor</h1>
+        <h1>
+            <svg width="40" height="40" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M30 5L52 17V43L30 55L8 43V17L30 5Z" fill="url(#rp_g1)" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>
+                <path d="M30 5L52 17L30 29L8 17L30 5Z" fill="url(#rp_g2)" opacity="0.9"/>
+                <path d="M30 29V55L8 43V17L30 29Z" fill="url(#rp_g3)" opacity="0.7"/>
+                <path d="M30 20L40 26V38L30 44L20 38V26L30 20Z" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+                <defs>
+                    <linearGradient id="rp_g1" x1="8" y1="5" x2="52" y2="55"><stop stop-color="#3b82f6"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient>
+                    <linearGradient id="rp_g2" x1="8" y1="5" x2="52" y2="29"><stop stop-color="#60a5fa"/><stop offset="1" stop-color="#a78bfa"/></linearGradient>
+                    <linearGradient id="rp_g3" x1="8" y1="17" x2="30" y2="55"><stop stop-color="#2563eb"/><stop offset="1" stop-color="#7c3aed"/></linearGradient>
+                </defs>
+            </svg>
+            ZAFProctor
+        </h1>
         <p>Sistem Ujian Online dengan Camera Proctoring</p>
     </div>
 

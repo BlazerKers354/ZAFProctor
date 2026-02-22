@@ -5,33 +5,37 @@
 
 @section('content')
     <!-- Welcome Banner -->
-    <div class="card bg-primary text-white mb-4">
-        <div class="card-body p-4">
+    <div class="card mb-4" style="background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 60%, #c4b5fd 100%); border: none; overflow: hidden; position: relative;">
+        <div class="card-body p-4" style="position: relative; z-index: 1;">
             <div class="row align-items-center">
                 <div class="col-md-8">
                     <div class="d-flex align-items-center gap-3">
-                        <div class="bg-white bg-opacity-25 rounded-3 p-3">
-                            <i class="ph ph-student f-36"></i>
+                        <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1);" class="rounded-3 p-3">
+                            <i class="ph ph-student f-36 text-white"></i>
                         </div>
                         <div>
-                            <p class="text-white-50 mb-1 f-14">Selamat datang kembali,</p>
+                            <p class="mb-1 f-14" style="color: rgba(255,255,255,0.7);">Selamat datang kembali,</p>
                             <h3 class="mb-1 text-white f-w-600">{{ auth()->user()->name }}</h3>
-                            <p class="text-white-50 mb-0 f-14">Semoga harimu menyenangkan! 🎉</p>
+                            <p class="mb-0 f-14" style="color: rgba(255,255,255,0.6);">Semoga harimu menyenangkan!</p>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-4 text-md-end mt-3 mt-md-0">
                     <div class="d-inline-flex gap-2">
-                        <span class="badge bg-white bg-opacity-25 px-3 py-2">
+                        <span class="badge px-3 py-2" style="background: rgba(255,255,255,0.12); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.08);">
                             <i class="ph ph-graduation-cap me-1"></i>{{ $stats['class_name'] }}
                         </span>
-                        <span class="badge bg-white bg-opacity-25 px-3 py-2">
+                        <span class="badge px-3 py-2" style="background: rgba(255,255,255,0.12); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.08);">
                             <i class="ph ph-calendar me-1"></i>{{ now()->locale('id')->translatedFormat('d M Y') }}
                         </span>
                     </div>
                 </div>
             </div>
         </div>
+        <!-- Decorative shapes -->
+        <div style="position: absolute; top: -20px; right: -20px; width: 140px; height: 140px; border-radius: 50%; background: rgba(255,255,255,0.06);"></div>
+        <div style="position: absolute; bottom: -30px; right: 80px; width: 100px; height: 100px; border-radius: 50%; background: rgba(255,255,255,0.04);"></div>
+        <div style="position: absolute; top: 10px; right: 160px; width: 60px; height: 60px; border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; background: rgba(255,255,255,0.05);"></div>
     </div>
 
     <!-- Statistics Cards -->
@@ -117,15 +121,15 @@
         <!-- Active Exams Section -->
         <div class="col-xl-8">
             <div class="card">
-                <div class="card-header bg-primary text-white py-3">
+                <div class="card-header py-3" style="background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%); border-radius: 16px 16px 0 0 !important;">
                     <div class="d-flex align-items-center justify-content-between">
                         <div class="d-flex align-items-center gap-3">
-                            <div class="bg-white bg-opacity-25 rounded-3 p-2">
-                                <i class="ph ph-lightning f-20"></i>
+                            <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.1);" class="rounded-3 p-2">
+                                <i class="ph ph-lightning f-20 text-white"></i>
                             </div>
                             <div>
                                 <h5 class="mb-0 text-white f-w-600">Ujian Tersedia</h5>
-                                <small class="text-white-50">Ujian yang dapat Anda kerjakan sekarang</small>
+                                <small style="color: rgba(255,255,255,0.6);">Ujian yang dapat Anda kerjakan sekarang</small>
                             </div>
                         </div>
                         <a href="{{ route('student.exams.index') }}" class="btn btn-light btn-sm">
@@ -137,7 +141,7 @@
                     @forelse($activeExams as $exam)
                         <div class="exam-item p-4 border-bottom">
                             <div class="d-flex align-items-center gap-3">
-                                <div class="exam-icon bg-primary bg-opacity-10 text-primary">
+                                <div class="exam-icon" style="background: rgba(124, 58, 237, 0.1); color: #7c3aed;">
                                     <i class="ph ph-file-text f-24"></i>
                                 </div>
                                 <div class="flex-grow-1">
@@ -178,14 +182,14 @@
         <!-- Upcoming Exams Sidebar -->
         <div class="col-xl-4">
             <div class="card h-100">
-                <div class="card-header bg-warning text-white py-3">
+                <div class="card-header py-3" style="background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); border-radius: 16px 16px 0 0 !important;">
                     <div class="d-flex align-items-center gap-3">
-                        <div class="bg-white bg-opacity-25 rounded-3 p-2">
-                            <i class="ph ph-calendar f-20"></i>
+                        <div style="background: rgba(255,255,255,0.2); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.15);" class="rounded-3 p-2">
+                            <i class="ph ph-calendar f-20 text-white"></i>
                         </div>
                         <div>
                             <h5 class="mb-0 text-white f-w-600">Jadwal Ujian</h5>
-                            <small class="text-white-50">Ujian mendatang</small>
+                            <small style="color: rgba(255,255,255,0.7);">Ujian mendatang</small>
                         </div>
                     </div>
                 </div>
@@ -224,7 +228,7 @@
 
     <!-- Recent Results Section -->
     <div class="card table-card mt-4">
-        <div class="card-header bg-success text-white py-3">
+        <div class="card-header text-white py-3" style="background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);">
             <div class="d-flex align-items-center gap-3">
                 <div class="bg-white bg-opacity-25 rounded-3 p-2">
                     <i class="ph ph-chart-bar f-20"></i>

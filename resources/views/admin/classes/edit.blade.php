@@ -119,7 +119,7 @@
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item d-flex justify-content-between px-0">
                             <span class="text-muted">Jumlah Siswa</span>
-                            <span class="badge bg-primary">{{ $class->students_count ?? $class->students->count() }}</span>
+                            <span class="badge badge-soft-primary">{{ $class->students_count ?? $class->students->count() }}</span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between px-0">
                             <span class="text-muted">Dibuat</span>

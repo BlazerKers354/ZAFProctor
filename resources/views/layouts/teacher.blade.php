@@ -22,11 +22,11 @@
 
     <style>
         :root {
-            --pc-sidebar-width: 280px;
-            --pc-header-height: 74px;
-            --bs-body-bg: #f8fafc;
-            --pc-sidebar-background: linear-gradient(180deg, #065f46 0%, #064e3b 100%);
-            --pc-sidebar-color: rgba(255,255,255,0.7);
+            --pc-sidebar-width: 272px;
+            --pc-header-height: 70px;
+            --bs-body-bg: #f5f7f5;
+            --pc-sidebar-background: #082f1a;
+            --pc-sidebar-color: rgba(255,255,255,0.6);
             --pc-sidebar-color-active: #ffffff;
             --pc-brand-color-1: #10b981;
             --pc-brand-color-2: #059669;
@@ -51,7 +51,36 @@
             z-index: 1025;
             background: var(--pc-sidebar-background);
             transition: all 0.3s ease;
-            box-shadow: 0 0 30px rgba(0,0,0,0.15);
+            border-right: 1px solid rgba(255,255,255,0.04);
+        }
+
+        .pc-sidebar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(ellipse at 0% 100%, rgba(16, 185, 129, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 100% 0%, rgba(52, 211, 153, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .pc-sidebar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px);
+            background-size: 28px 28px;
+            pointer-events: none;
+            z-index: 0;
         }
 
         .pc-sidebar .navbar-wrapper {
@@ -59,14 +88,16 @@
             height: 100%;
             display: flex;
             flex-direction: column;
+            position: relative;
+            z-index: 1;
         }
 
         .pc-sidebar .m-header {
             height: var(--pc-header-height);
             display: flex;
             align-items: center;
-            padding: 16px 24px;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
         }
 
         .pc-sidebar .m-header .b-brand {
@@ -80,14 +111,14 @@
         }
 
         .pc-sidebar .m-header .logo-icon {
-            width: 42px;
-            height: 42px;
-            background: linear-gradient(135deg, var(--pc-brand-color-1) 0%, var(--pc-brand-color-2) 100%);
-            border-radius: 12px;
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, var(--pc-brand-color-1) 0%, #34d399 100%);
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
         }
 
         .pc-sidebar .navbar-content {
@@ -145,10 +176,11 @@
         }
 
         .pc-sidebar .pc-item.active .pc-link {
-            background: linear-gradient(135deg, var(--pc-brand-color-1) 0%, var(--pc-brand-color-2) 100%);
+            background: rgba(16, 185, 129, 0.12);
             color: var(--pc-sidebar-color-active);
             font-weight: 600;
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+            border-left: 3px solid var(--pc-brand-color-1);
+            padding-left: 13px;
         }
 
         .pc-sidebar .pc-micon {
@@ -198,6 +230,21 @@
             height: var(--pc-header-height);
             background: #ffffff;
             z-index: 1024;
+            box-shadow: 0 1px 0 rgba(0,0,0,0.04);
+            transition: all 0.3s ease;
+            border-bottom: 1px solid #e8eaed;
+        }
+
+        .pc-header::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--pc-brand-color-1), #34d399, #6ee7b7);
+            opacity: 0.6;
+        }
             box-shadow: 0 1px 0 rgba(0,0,0,0.05);
             transition: all 0.3s ease;
         }
@@ -302,8 +349,13 @@
         .card {
             border: none;
             border-radius: 16px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03);
             margin-bottom: 24px;
+            transition: box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
         }
 
         .card-header {
@@ -430,15 +482,35 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--pc-brand-color-1) 0%, var(--pc-brand-color-2) 100%);
+            background: linear-gradient(135deg, var(--pc-brand-color-1) 0%, #34d399 100%);
             border: none;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .text-primary { color: var(--pc-brand-color-1) !important; }
+        .bg-primary { background-color: var(--pc-brand-color-1) !important; }
+
+        .btn-primary::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-primary:hover::after {
+            left: 100%;
         }
 
         .btn-primary:hover {
             transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
-            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
         }
 
         .btn-outline-primary {
@@ -767,7 +839,9 @@
             <div class="m-header">
                 <a href="{{ route('dashboard') }}" class="b-brand">
                     <span class="logo-icon">
-                        <i class="ph ph-chalkboard-teacher text-white f-22"></i>
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="white" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2L3 7v10l9 5 9-5V7l-9-5zm0 2.18l6.2 3.45v2.3L12 13.36 5.8 9.93v-2.3L12 4.18zM5.8 11.64L12 15.05l6.2-3.41v4.73L12 19.82l-6.2-3.45v-4.73z"/>
+                        </svg>
                     </span>
                     <span class="logo-text">ZAFProctor</span>
                 </a>
