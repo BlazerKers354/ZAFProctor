@@ -23,8 +23,8 @@ class CourseController extends Controller
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
-                $q->where('name', 'ilike', "%{$search}%")
-                    ->orWhere('code', 'ilike', "%{$search}%");
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('code', 'like', "%{$search}%");
             });
         }
 
@@ -113,7 +113,7 @@ class CourseController extends Controller
             'code' => ['required', 'string', 'max:20', 'unique:courses,code,' . $course->id],
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
-            'teacher_id' => ['required', 'exists:users,id'],
+            'teacher_id' => ['nullable', 'exists:users,id'],
             'is_active' => ['boolean'],
         ]);
 
@@ -134,20 +134,6 @@ class CourseController extends Controller
 
         return redirect()->route('admin.courses.index')
             ->with('success', 'Mata pelajaran berhasil dihapus.');
-    }
-
-    /**
-     * Manage students in a course.
-     */
-    public function students(Course $course): View
-    {
-        $course->load('students');
-        $availableStudents = User::byRole(Role::STUDENT)
-            ->active()
-            ->whereNotIn('id', $course->students->pluck('id'))
-            ->get();
-
-        return view('admin.courses.students', compact('course', 'availableStudents'));
     }
 
     /**

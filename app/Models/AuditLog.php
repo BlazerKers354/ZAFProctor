@@ -48,14 +48,11 @@ class AuditLog extends Model
     }
 
     /**
-     * Get the related model
+     * Get the related model (polymorphic)
      */
-    public function model()
+    public function auditable()
     {
-        if ($this->model_type && $this->model_id) {
-            return $this->model_type::find($this->model_id);
-        }
-        return null;
+        return $this->morphTo('model', 'model_type', 'model_id');
     }
 
     /**

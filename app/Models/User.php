@@ -80,6 +80,14 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Alias for class() relationship
+     */
+    public function schoolClass(): BelongsTo
+    {
+        return $this->belongsTo(SchoolClass::class, 'class_id');
+    }
+
+    /**
      * Get the user who approved this user
      */
     public function approver(): BelongsTo

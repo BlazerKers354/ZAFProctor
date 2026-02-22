@@ -158,7 +158,7 @@ class DashboardController extends Controller
             'upcoming_exams' => $upcomingExams->count(),
             'active_exams' => $activeExams->count(),
             'completed_exams' => $user->examAttempts()->submitted()->count(),
-            'average_score' => $user->examAttempts()->graded()->avg('score') ?? 0,
+            'average_score' => $user->examAttempts()->submitted()->whereNotNull('score')->avg('percentage') ?? 0,
         ];
 
         return view('student.dashboard', compact(

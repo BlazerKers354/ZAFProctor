@@ -106,6 +106,11 @@ class Exam extends Model
             'passing_score' => 60,
             'detect_face' => true,
             'detect_multiple_faces' => true,
+            'detect_tab_switch' => true,
+            'detect_fullscreen_exit' => true,
+            'detect_copy_paste' => true,
+            'detect_right_click' => true,
+            'block_keyboard_shortcuts' => true,
             'warning_threshold' => 3,
             'auto_submit_threshold' => 5,
         ]);

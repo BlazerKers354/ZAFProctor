@@ -94,7 +94,7 @@ class ExamController extends Controller
     /**
      * Show pre-exam check page for camera and face verification.
      */
-    public function preCheck(Exam $exam): View
+    public function preCheck(Exam $exam): View|RedirectResponse
     {
         $this->authorize('view', $exam);
 

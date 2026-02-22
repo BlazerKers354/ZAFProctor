@@ -189,6 +189,23 @@ class MonitorController extends Controller
     }
 
     /**
+     * Terminate a student's exam attempt.
+     */
+    public function terminate(Request $request, Exam $exam, ExamAttempt $attempt): RedirectResponse
+    {
+        $this->authorize('monitor', $exam);
+
+        if (!$attempt->isInProgress()) {
+            return back()->with('error', 'Attempt ini sudah tidak berlangsung.');
+        }
+
+        // Use ExamService to submit the exam
+        $this->examService->submitExam($attempt, true);
+
+        return back()->with('success', 'Ujian peserta berhasil dihentikan.');
+    }
+
+    /**
      * Export results to CSV.
      */
     public function exportResults(Exam $exam)

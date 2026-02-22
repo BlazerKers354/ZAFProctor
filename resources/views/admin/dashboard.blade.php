@@ -254,7 +254,7 @@
                     <h5 class="card-title mb-0">
                         <i class="ph-duotone ph-exam me-2"></i>Ujian Terbaru
                     </h5>
-                    <a href="{{ route('teacher.exams.index') }}" class="btn btn-light-primary btn-sm">
+                    <a href="#" class="btn btn-light-primary btn-sm">
                         Lihat Semua <i class="ph ph-arrow-right ms-1"></i>
                     </a>
                 </div>

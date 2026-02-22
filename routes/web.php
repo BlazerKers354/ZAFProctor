@@ -16,6 +16,7 @@ use App\Http\Controllers\Teacher\QuestionController;
 use App\Http\Controllers\Teacher\MonitorController;
 use App\Http\Controllers\Student\ExamController as StudentExamController;
 use App\Http\Controllers\Student\ProctoringController;
+use App\Http\Controllers\GuideController;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,6 +31,9 @@ Route::get('/', function () {
     }
     return view('landing');
 })->name('home');
+
+// Download Panduan Pengguna PDF
+Route::get('/panduan-pengguna/download', [GuideController::class, 'download'])->name('guide.download');
 
 // Guest Routes (Auth)
 Route::middleware('guest')->group(function () {

@@ -510,7 +510,7 @@ class QuestionController extends Controller
             ];
 
             if ($question->type === Question::TYPE_MULTIPLE_CHOICE) {
-                $options = $question->options->sortBy('order');
+                $options = $question->options->sortBy('order')->values();
                 $correctAnswer = '';
                 
                 for ($i = 0; $i < 5; $i++) {
@@ -631,9 +631,8 @@ class QuestionController extends Controller
 
             fclose($handle);
 
-            DB::commit();
-
             if ($imported > 0) {
+                DB::commit();
                 $message = "$imported soal berhasil diimport.";
                 if (count($errors) > 0) {
                     $message .= " " . count($errors) . " baris gagal diimport.";

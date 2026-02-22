@@ -232,7 +232,7 @@ class ExamService
     public function getExamStatistics(Exam $exam): array
     {
         $allAttempts = $exam->attempts()->get();
-        $submittedAttempts = $exam->attempts()->whereIn('status', ['completed', 'submitted'])->get();
+        $submittedAttempts = $exam->attempts()->whereIn('status', ['graded', 'submitted'])->get();
 
         if ($submittedAttempts->isEmpty()) {
             return [

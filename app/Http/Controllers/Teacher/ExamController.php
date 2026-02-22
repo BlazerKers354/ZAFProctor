@@ -36,7 +36,7 @@ class ExamController extends Controller
         // Search by title
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where('title', 'ilike', "%{$search}%");
+            $query->where('title', 'like', "%{$search}%");
         }
 
         // Filter by course
@@ -381,15 +381,15 @@ class ExamController extends Controller
     {
         $this->authorize('view', $exam);
 
-        $exam->load(['course', 'questions.options', 'attempts.student', 'attempts.answers']);
+        $exam->load(['course', 'questions.options', 'attempts.student.class', 'attempts.answers']);
         
         $data = [];
         
         foreach ($exam->attempts as $attempt) {
             $row = [
                 'Nama Siswa' => $attempt->student->name,
-                'NIS' => $attempt->student->nis ?? '-',
-                'Kelas' => $attempt->student->schoolClass?->name ?? '-',
+                'NIS' => $attempt->student->student_id ?? '-',
+                'Kelas' => $attempt->student->class?->name ?? '-',
                 'Waktu Mulai' => $attempt->started_at?->format('d/m/Y H:i:s') ?? '-',
                 'Waktu Selesai' => $attempt->finished_at?->format('d/m/Y H:i:s') ?? '-',
                 'Durasi (menit)' => $attempt->started_at && $attempt->finished_at 

@@ -45,15 +45,14 @@ class LoginController extends Controller
 
         RateLimiter::clear($this->throttleKey($request));
 
-        $request->session()->regenerate();
-
-        // Update last login info
+        // Get user and check status before proceeding
         $user = Auth::user();
-        $user->updateLastLogin();
 
         // Check if user is active
         if (!$user->is_active) {
             Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
             throw ValidationException::withMessages([
                 'email' => 'Akun Anda tidak aktif. Silakan hubungi administrator.',
             ]);
@@ -62,10 +61,17 @@ class LoginController extends Controller
         // Check if user is approved (for teachers)
         if (!$user->is_approved) {
             Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
             throw ValidationException::withMessages([
                 'email' => 'Akun Anda masih menunggu persetujuan dari administrator. Silakan tunggu konfirmasi melalui email.',
             ]);
         }
+
+        $request->session()->regenerate();
+
+        // Update last login info
+        $user->updateLastLogin();
 
         // Log the login
         AuditLog::log(AuditLog::ACTION_LOGIN, 'User logged in');
