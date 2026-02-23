@@ -37,8 +37,8 @@
             align-items: center;
             justify-content: center;
             flex-direction: column;
-            min-height: 100vh;
-            padding: 20px;
+            height: 100vh;
+            padding: 16px 20px;
             position: relative;
             overflow: hidden;
         }
@@ -161,8 +161,11 @@
         }
 
         .brand {
-            text-align: center;
-            margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            margin-bottom: 16px;
             color: #fff;
             position: relative;
             z-index: 1;
@@ -172,36 +175,78 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 56px;
-            height: 56px;
+            width: 42px;
+            height: 42px;
             background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-            border-radius: 16px;
-            margin-bottom: 16px;
-            box-shadow: 0 8px 32px rgba(59, 130, 246, 0.3);
+            border-radius: 12px;
+            box-shadow: 0 6px 24px rgba(59, 130, 246, 0.3);
+            flex-shrink: 0;
         }
 
         .brand-logo svg {
-            width: 28px;
-            height: 28px;
+            width: 20px;
+            height: 20px;
             fill: white;
         }
 
+        .brand-text {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
         .brand h1 {
-            font-size: 2rem;
+            font-size: 1.35rem;
             font-weight: 700;
-            margin-bottom: 6px;
+            margin: 0;
             letter-spacing: -0.5px;
             background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.8) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            line-height: 1.2;
+        }
+
+        .brand-sub {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 2px;
         }
 
         .brand p {
-            font-size: 0.85rem;
-            opacity: 0.6;
+            font-size: 0.72rem;
+            opacity: 0.5;
             font-weight: 400;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.3px;
+            margin: 0;
+        }
+
+        .brand-dot {
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.25);
+            flex-shrink: 0;
+        }
+
+        .brand-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 20px;
+            padding: 2px 10px;
+            font-size: 10px;
+            color: rgba(255,255,255,0.6);
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+        }
+
+        .brand-badge i {
+            color: #34d399;
+            font-size: 8px;
         }
 
         .container {
@@ -214,15 +259,16 @@
             overflow: hidden;
             width: 880px;
             max-width: 100%;
-            min-height: 560px;
+            min-height: 480px;
+            max-height: calc(100vh - 120px);
             z-index: 1;
         }
 
         .container p {
-            font-size: 14px;
-            line-height: 20px;
+            font-size: 13px;
+            line-height: 18px;
             letter-spacing: 0.3px;
-            margin: 20px 0;
+            margin: 10px 0;
         }
 
         .container span {
@@ -234,7 +280,7 @@
             color: #3b82f6;
             font-size: 13px;
             text-decoration: none;
-            margin: 15px 0 10px;
+            margin: 8px 0 6px;
             transition: color 0.3s;
             font-weight: 500;
         }
@@ -248,18 +294,28 @@
             background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
             color: #fff;
             font-size: 13px;
-            padding: 13px 50px;
+            padding: 11px 40px;
             border: 1px solid transparent;
-            border-radius: 12px;
+            border-radius: 10px;
             font-weight: 600;
             letter-spacing: 0.3px;
             text-transform: none;
-            margin-top: 10px;
+            margin-top: 8px;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 4px 15px rgba(59, 130, 246, 0.35);
             position: relative;
             overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 12px 20px !important;
+            margin-top: 8px !important;
+            font-size: 14px !important;
+            border-radius: 10px !important;
+            flex-shrink: 0;
         }
 
         .container button::after {
@@ -305,25 +361,36 @@
             align-items: center;
             justify-content: center;
             flex-direction: column;
-            padding: 0 50px;
+            padding: 0 40px;
             height: 100%;
         }
 
         .container form h1,
         .sign-up-content h1 {
             color: #1e293b;
-            margin-bottom: 10px;
+            margin-bottom: 6px;
             font-weight: 700;
             letter-spacing: -0.3px;
+            font-size: 1.4rem;
+        }
+
+        .container form h1::after {
+            content: '';
+            display: block;
+            width: 36px;
+            height: 3px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            border-radius: 2px;
+            margin: 8px auto 0;
         }
 
         .container input {
             background-color: #f8fafc;
             border: 1.5px solid #e2e8f0;
-            margin: 6px 0;
-            padding: 12px 16px;
+            margin: 4px 0;
+            padding: 10px 14px;
             font-size: 13px;
-            border-radius: 12px;
+            border-radius: 10px;
             width: 100%;
             outline: none;
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -337,7 +404,13 @@
         .container input:focus {
             border-color: #3b82f6;
             background-color: #fff;
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.08);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .container input:hover:not(:focus) {
+            border-color: #cbd5e1;
+            background-color: #f1f5f9;
         }
 
         .container input.error {
@@ -496,14 +569,14 @@
         }
 
         .toggle-panel h1 {
-            font-size: 1.8rem;
-            margin-bottom: 10px;
+            font-size: 1.5rem;
+            margin-bottom: 6px;
         }
 
         .toggle-panel p {
-            font-size: 14px;
-            line-height: 1.6;
-            margin-bottom: 25px;
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 14px;
         }
 
         .toggle-panel {
@@ -511,20 +584,106 @@
         }
 
         .toggle-panel .icon-box {
-            width: 80px;
-            height: 80px;
+            width: 60px;
+            height: 60px;
             background: linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(139, 92, 246, 0.3) 100%);
-            border-radius: 20px;
+            border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 20px;
+            margin-bottom: 14px;
             border: 1px solid rgba(255,255,255,0.1);
             backdrop-filter: blur(8px);
+            animation: iconPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes iconPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.2); }
+            50% { box-shadow: 0 0 20px 5px rgba(59, 130, 246, 0.15); }
         }
 
         .toggle-panel .icon-box i {
-            font-size: 35px;
+            font-size: 26px;
+        }
+
+        .toggle-features {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0 14px;
+            width: 100%;
+            max-width: 260px;
+        }
+
+        .toggle-features li {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: rgba(255,255,255,0.75);
+            margin-bottom: 8px;
+            text-align: left;
+        }
+
+        .toggle-features li i {
+            color: #34d399;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .toggle-stats {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+        }
+
+        .toggle-stat {
+            text-align: center;
+        }
+
+        .toggle-stat .stat-number {
+            font-size: 22px;
+            font-weight: 700;
+            color: #fff;
+            display: block;
+            line-height: 1;
+        }
+
+        .toggle-stat .stat-label {
+            font-size: 11px;
+            color: rgba(255,255,255,0.5);
+            margin-top: 4px;
+            display: block;
+        }
+
+        .toggle-decoration {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 6px;
+        }
+
+        .toggle-decoration .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.15);
+        }
+
+        .toggle-decoration .dot:nth-child(2) {
+            background: rgba(59, 130, 246, 0.5);
+            animation: dotGlow 2s ease-in-out infinite;
+        }
+
+        .toggle-decoration .dot:nth-child(4) {
+            background: rgba(139, 92, 246, 0.5);
+            animation: dotGlow 2s ease-in-out 0.5s infinite;
+        }
+
+        @keyframes dotGlow {
+            0%, 100% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.4); }
         }
 
         .toggle-left {
@@ -602,7 +761,7 @@
             display: flex;
             align-items: center;
             width: 100%;
-            margin: 10px 0;
+            margin: 6px 0;
         }
 
         .checkbox-group input[type="checkbox"] {
@@ -634,18 +793,18 @@
             align-items: center;
             justify-content: center;
             height: 100%;
-            padding: 40px 50px;
+            padding: 30px 40px;
             text-align: center;
         }
 
         .sign-up-content h1 {
             color: #333;
-            margin-bottom: 10px;
+            margin-bottom: 6px;
         }
 
         .sign-up-content p {
             color: #666;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
 
         .register-btn {
@@ -654,13 +813,13 @@
             justify-content: center;
             gap: 10px;
             width: 100%;
-            padding: 15px 25px;
+            padding: 13px 25px;
             color: white !important;
             text-decoration: none !important;
-            border-radius: 14px;
+            border-radius: 12px;
             font-weight: 600;
             font-size: 14px;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 4px 15px rgba(0,0,0,0.15);
             border: none;
@@ -695,11 +854,19 @@
         }
 
         .student-btn {
-            background: linear-gradient(135deg, #10b981, #059669);
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+        }
+
+        .student-btn:hover {
+            box-shadow: 0 8px 30px rgba(59, 130, 246, 0.35);
         }
 
         .teacher-btn {
             background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        .teacher-btn:hover {
+            box-shadow: 0 8px 30px rgba(16, 185, 129, 0.35);
         }
 
         /* Registration Form Styles */
@@ -707,31 +874,32 @@
             width: 100%;
             height: 100%;
             display: flex;
-            align-items: center;
-            justify-content: center;
+            flex-direction: column;
         }
 
         .register-form form {
             background-color: #fff;
             display: flex;
             align-items: center;
-            justify-content: flex-start;
             flex-direction: column;
-            padding: 20px 50px;
+            padding: 12px 36px 16px;
             height: 100%;
             width: 100%;
             overflow-y: auto;
+            justify-content: center;
         }
 
         .register-form form h1 {
             color: #333;
-            margin-bottom: 5px;
+            margin-bottom: 2px;
+            font-size: 1.2rem;
         }
 
         .register-form form p {
             color: #666;
-            margin-bottom: 15px;
-            font-size: 13px;
+            margin-bottom: 6px;
+            font-size: 12px;
+            margin-top: 4px;
         }
 
         .back-btn {
@@ -740,26 +908,39 @@
             border: none !important;
             color: #3b82f6 !important;
             font-size: 13px !important;
-            padding: 5px 0 !important;
-            margin-bottom: 10px !important;
+            padding: 6px 10px !important;
+            margin: 0 0 4px 0 !important;
             cursor: pointer;
             box-shadow: none !important;
             text-transform: none !important;
+            position: relative;
+            z-index: 10;
+            white-space: nowrap;
+            display: inline-flex !important;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        .back-btn::after {
+            display: none !important;
         }
 
         .back-btn:hover {
             color: #8b5cf6 !important;
             transform: none !important;
             box-shadow: none !important;
+            background: #f1f5f9 !important;
+            border-radius: 8px !important;
         }
 
         .select-input {
             background-color: #f8fafc;
             border: 1.5px solid #e2e8f0;
-            margin: 6px 0;
-            padding: 12px 16px;
+            margin: 4px 0;
+            padding: 10px 14px;
             font-size: 13px;
-            border-radius: 12px;
+            border-radius: 10px;
             width: 100%;
             outline: none;
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -777,23 +958,25 @@
         .info-box {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             background: #fef3c7;
             border: 1px solid #f59e0b;
             border-radius: 8px;
-            padding: 10px 15px;
-            margin: 10px 0;
+            padding: 8px 12px;
+            margin: 6px 0;
             width: 100%;
         }
 
         .info-box i {
             color: #f59e0b;
-            font-size: 16px;
+            font-size: 14px;
+            flex-shrink: 0;
         }
 
         .info-box span {
             color: #92400e;
-            font-size: 12px;
+            font-size: 11px;
+            line-height: 1.4;
         }
 
         /* Animations */
@@ -912,8 +1095,16 @@
                 <path d="M12 2L3 7v10l9 5 9-5V7l-9-5zm0 2.18l6.2 3.45v2.3L12 13.36 5.8 9.93v-2.3L12 4.18zM5.8 11.64L12 15.05l6.2-3.41v4.73L12 19.82l-6.2-3.45v-4.73z"/>
             </svg>
         </div>
-        <h1>ZAFProctor</h1>
-        <p>Sistem Ujian Online dengan AI Proctoring</p>
+        <div class="brand-text">
+            <h1>ZAFProctor</h1>
+            <div class="brand-sub">
+                <p>Sistem Ujian Online dengan AI Proctoring</p>
+                <span class="brand-dot"></span>
+                <div class="brand-badge">
+                    <i class="fa-solid fa-circle"></i> Secure &bull; Reliable &bull; Smart
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="container" id="container">
@@ -990,7 +1181,7 @@
                         </button>
                     </div>
 
-                    <button type="submit">Daftar Sekarang</button>
+                    <button type="submit" class="submit-btn">Daftar Sekarang</button>
                     
                     <div class="mobile-toggle">
                         <span>Sudah punya akun? </span>
@@ -1045,7 +1236,7 @@
                         <span>Akun guru memerlukan persetujuan admin sebelum dapat digunakan.</span>
                     </div>
 
-                    <button type="submit">Daftar Sekarang</button>
+                    <button type="submit" class="submit-btn">Daftar Sekarang</button>
                     
                     <div class="mobile-toggle">
                         <span>Sudah punya akun? </span>
@@ -1137,19 +1328,42 @@
                         <i class="fa-solid fa-graduation-cap"></i>
                     </div>
                     <h1>Selamat Datang!</h1>
-                    <p>Sudah punya akun? Masuk untuk mengakses ujian dan melihat hasil</p>
+                    <p>Sudah punya akun? Masuk untuk melanjutkan</p>
+                    <ul class="toggle-features">
+                        <li><i class="fa-solid fa-check-circle"></i> Akses ujian kapan saja</li>
+                        <li><i class="fa-solid fa-check-circle"></i> Lihat hasil & analisis nilai</li>
+                        <li><i class="fa-solid fa-check-circle"></i> Pantau progress belajar</li>
+                    </ul>
                     <button class="hidden" id="login" type="button">Masuk</button>
+                    <div class="toggle-decoration">
+                        <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    </div>
                 </div>
                 <div class="toggle-panel toggle-right">
                     <div class="icon-box">
-                        <i class="fa-solid fa-user-plus"></i>
+                        <i class="fa-solid fa-shield-halved"></i>
                     </div>
                     <h1>Halo, Teman!</h1>
-                    <p>Daftar sekarang untuk mulai mengikuti ujian online dengan proctoring</p>
+                    <p>Bergabung dan rasakan pengalaman ujian online yang aman</p>
+                    <ul class="toggle-features">
+                        <li><i class="fa-solid fa-check-circle"></i> AI Proctoring otomatis</li>
+                        <li><i class="fa-solid fa-check-circle"></i> Ujian aman & terpercaya</li>
+                        <li><i class="fa-solid fa-check-circle"></i> Gratis untuk siswa & guru</li>
+                    </ul>
                     <button class="hidden" id="register" type="button">Daftar</button>
+                    <div class="toggle-decoration">
+                        <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Footer -->
+    <div style="position: relative; z-index: 1; margin-top: 12px; text-align: center;">
+        <p style="color: rgba(255,255,255,0.25); font-size: 11px; letter-spacing: 0.3px; margin: 0;">
+            &copy; {{ date('Y') }} ZAFProctor
+        </p>
     </div>
 
     <script>
