@@ -13,7 +13,7 @@
                         <h5 class="m-b-10">Detail Mata Pelajaran: {{ $course->name }}</h5>
                     </div>
                     <ul class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="ph-duotone ph-house"></i></a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="ph ph-house"></i></a></li>
                         <li class="breadcrumb-item"><a href="{{ route('admin.courses.index') }}">Mata Pelajaran</a></li>
                         <li class="breadcrumb-item active" aria-current="page">{{ $course->name }}</li>
                     </ul>
@@ -28,10 +28,10 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">
-                        <i class="ph-duotone ph-info me-2"></i>Informasi
+                        <i class="ph ph-info me-2"></i>Informasi
                     </h5>
                     <a href="{{ route('admin.courses.edit', $course) }}" class="btn btn-sm btn-outline-primary">
-                        <i class="ph-duotone ph-pencil-simple me-1"></i>Edit
+                        <i class="ph ph-pencil-simple me-1"></i>Edit
                     </a>
                 </div>
                 <div class="card-body">
@@ -50,19 +50,19 @@
                     
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item d-flex justify-content-between px-0">
-                            <span class="text-muted"><i class="ph-duotone ph-user me-2"></i>Pengajar</span>
+                            <span class="text-muted"><i class="ph ph-user me-2"></i>Pengajar</span>
                             <span class="fw-medium">{{ $course->teacher->name ?? '-' }}</span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between px-0">
-                            <span class="text-muted"><i class="ph-duotone ph-users me-2"></i>Jumlah Siswa</span>
+                            <span class="text-muted"><i class="ph ph-users me-2"></i>Jumlah Siswa</span>
                             <span class="badge badge-soft-primary">{{ $course->students->count() }}</span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between px-0">
-                            <span class="text-muted"><i class="ph-duotone ph-exam me-2"></i>Jumlah Ujian</span>
+                            <span class="text-muted"><i class="ph ph-file-text me-2"></i>Jumlah Ujian</span>
                             <span class="badge badge-soft-info">{{ $course->exams->count() }}</span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between px-0">
-                            <span class="text-muted"><i class="ph-duotone ph-calendar me-2"></i>Dibuat</span>
+                            <span class="text-muted"><i class="ph ph-calendar-dots me-2"></i>Dibuat</span>
                             <span>{{ $course->created_at->format('d M Y') }}</span>
                         </li>
                     </ul>
@@ -79,7 +79,7 @@
             <div class="card">
                 <div class="card-body">
                     <a href="{{ route('admin.courses.index') }}" class="btn btn-outline-secondary w-100">
-                        <i class="ph-duotone ph-arrow-left me-2"></i>Kembali ke Daftar
+                        <i class="ph ph-arrow-left me-2"></i>Kembali ke Daftar
                     </a>
                 </div>
             </div>
@@ -90,10 +90,10 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">
-                        <i class="ph-duotone ph-users me-2"></i>Daftar Siswa ({{ $course->students->count() }})
+                        <i class="ph ph-users me-2"></i>Daftar Siswa ({{ $course->students->count() }})
                     </h5>
                     <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addStudentModal">
-                        <i class="ph-duotone ph-plus me-1"></i>Tambah Siswa
+                        <i class="ph ph-plus me-1"></i>Tambah Siswa
                     </button>
                 </div>
                 <div class="card-body p-0">
@@ -133,7 +133,7 @@
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-sm btn-outline-danger">
-                                                        <i class="ph-duotone ph-trash"></i>
+                                                        <i class="ph ph-trash"></i>
                                                     </button>
                                                 </form>
                                             </td>
@@ -144,7 +144,7 @@
                         </div>
                     @else
                         <div class="text-center py-5">
-                            <i class="ph-duotone ph-users text-muted" style="font-size: 4rem;"></i>
+                            <i class="ph ph-users text-muted" style="font-size: 4rem;"></i>
                             <h5 class="mt-3 mb-1">Belum ada siswa</h5>
                             <p class="text-muted mb-0">Tambahkan siswa ke mata pelajaran ini.</p>
                         </div>
@@ -156,7 +156,7 @@
             <div class="card">
                 <div class="card-header">
                     <h5 class="card-title mb-0">
-                        <i class="ph-duotone ph-exam me-2"></i>Daftar Ujian ({{ $course->exams->count() }})
+                        <i class="ph ph-file-text me-2"></i>Daftar Ujian ({{ $course->exams->count() }})
                     </h5>
                 </div>
                 <div class="card-body p-0">
@@ -199,7 +199,7 @@
                         </div>
                     @else
                         <div class="text-center py-5">
-                            <i class="ph-duotone ph-exam text-muted" style="font-size: 4rem;"></i>
+                            <i class="ph ph-file-text text-muted" style="font-size: 4rem;"></i>
                             <h5 class="mt-3 mb-1">Belum ada ujian</h5>
                             <p class="text-muted mb-0">Belum ada ujian yang dibuat untuk mata pelajaran ini.</p>
                         </div>
@@ -217,7 +217,7 @@
                     @csrf
                     <div class="modal-header">
                         <h5 class="modal-title" id="addStudentModalLabel">
-                            <i class="ph-duotone ph-user-plus me-2"></i>Tambah Siswa ke Mata Pelajaran
+                            <i class="ph ph-user-plus me-2"></i>Tambah Siswa ke Mata Pelajaran
                         </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
@@ -250,7 +250,7 @@
                             </div>
                         @else
                             <div class="text-center py-4">
-                                <i class="ph-duotone ph-user-check text-muted" style="font-size: 3rem;"></i>
+                                <i class="ph ph-user-check text-muted" style="font-size: 3rem;"></i>
                                 <p class="text-muted mt-3 mb-0">Tidak ada siswa yang tersedia untuk ditambahkan.</p>
                             </div>
                         @endif
@@ -259,7 +259,7 @@
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
                         @if($availableStudents->count() > 0)
                             <button type="submit" class="btn btn-primary">
-                                <i class="ph-duotone ph-plus me-1"></i>Tambahkan
+                                <i class="ph ph-plus me-1"></i>Tambahkan
                             </button>
                         @endif
                     </div>

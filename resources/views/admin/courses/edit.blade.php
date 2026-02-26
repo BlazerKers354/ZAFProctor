@@ -13,7 +13,7 @@
                         <h5 class="m-b-10">Edit Mata Pelajaran: {{ $course->name }}</h5>
                     </div>
                     <ul class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="ph-duotone ph-house"></i></a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="ph ph-house"></i></a></li>
                         <li class="breadcrumb-item"><a href="{{ route('admin.courses.index') }}">Mata Pelajaran</a></li>
                         <li class="breadcrumb-item active" aria-current="page">Edit</li>
                     </ul>
@@ -31,7 +31,7 @@
                 <div class="card">
                     <div class="card-header">
                         <h5 class="card-title mb-0">
-                            <i class="ph-duotone ph-pencil-simple me-2"></i>Edit Informasi Mata Pelajaran
+                            <i class="ph ph-pencil-simple me-2"></i>Edit Informasi Mata Pelajaran
                         </h5>
                     </div>
                     <div class="card-body">
@@ -96,10 +96,10 @@
                     </div>
                     <div class="card-footer text-end">
                         <a href="{{ route('admin.courses.index') }}" class="btn btn-outline-secondary me-2">
-                            <i class="ph-duotone ph-x me-1"></i>Batal
+                            <i class="ph ph-x me-1"></i>Batal
                         </a>
                         <button type="submit" class="btn btn-primary">
-                            <i class="ph-duotone ph-floppy-disk me-1"></i>Update
+                            <i class="ph ph-floppy-disk me-1"></i>Update
                         </button>
                     </div>
                 </div>
@@ -110,7 +110,7 @@
             <div class="card">
                 <div class="card-header">
                     <h5 class="card-title mb-0">
-                        <i class="ph-duotone ph-info me-2"></i>Informasi
+                        <i class="ph ph-info me-2"></i>Informasi
                     </h5>
                 </div>
                 <div class="card-body">
@@ -134,7 +134,7 @@
             <div class="card border-danger">
                 <div class="card-header bg-danger text-white">
                     <h5 class="card-title mb-0">
-                        <i class="ph-duotone ph-warning me-2"></i>Zona Berbahaya
+                        <i class="ph ph-warning me-2"></i>Zona Berbahaya
                     </h5>
                 </div>
                 <div class="card-body">
@@ -143,7 +143,7 @@
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="btn btn-outline-danger w-100">
-                            <i class="ph-duotone ph-trash me-1"></i>Hapus Mata Pelajaran
+                            <i class="ph ph-trash me-1"></i>Hapus Mata Pelajaran
                         </button>
                     </form>
                 </div>

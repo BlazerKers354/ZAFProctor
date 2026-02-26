@@ -98,6 +98,59 @@ class MonitorController extends Controller
     }
 
     /**
+     * Live AJAX data for monitoring dashboard (no full reload).
+     */
+    public function liveData(Exam $exam): \Illuminate\Http\JsonResponse
+    {
+        $this->authorize('monitor', $exam);
+
+        $exam->load('questions');
+
+        $attempts = ExamAttempt::where('exam_id', $exam->id)
+            ->with(['user', 'proctoringLogs' => fn($q) => $q->latest()->take(5)])
+            ->withCount('answers')
+            ->get();
+
+        $activeAttempts = $attempts->where('status', ExamAttempt::STATUS_IN_PROGRESS)->values();
+        $questionCount = $exam->questions->count();
+
+        $recentViolations = \App\Models\ProctoringLog::whereIn('attempt_id', $attempts->pluck('id'))
+            ->with('attempt.user')
+            ->latest()
+            ->take(10)
+            ->get();
+
+        return response()->json([
+            'stats' => [
+                'total' => $attempts->count(),
+                'in_progress' => $attempts->where('status', ExamAttempt::STATUS_IN_PROGRESS)->count(),
+                'submitted' => $attempts->whereIn('status', [ExamAttempt::STATUS_SUBMITTED, ExamAttempt::STATUS_GRADED])->count(),
+                'violations' => $attempts->sum('violation_count'),
+            ],
+            'active_attempts' => $activeAttempts->map(fn($a) => [
+                'id' => $a->id,
+                'name' => $a->user->name,
+                'email' => $a->user->email,
+                'violation_count' => $a->violation_count,
+                'camera_enabled' => $a->camera_enabled,
+                'answers_count' => $a->answers_count,
+                'question_count' => $questionCount,
+                'remaining_time' => $a->remaining_time,
+                'monitor_url' => route('teacher.monitor.attempt', [$exam, $a]),
+                'logs_url' => route('teacher.monitor.logs', [$exam, $a]),
+            ]),
+            'violations' => $recentViolations->map(fn($v) => [
+                'id' => $v->id,
+                'type' => $v->violation_type,
+                'description' => $v->description,
+                'user_name' => $v->attempt?->user?->name ?? '-',
+                'time_ago' => $v->created_at->diffForHumans(),
+                'snapshot_url' => $v->snapshot_path ? route('proctoring.snapshot.view', $v->id) : null,
+            ]),
+        ]);
+    }
+
+    /**
      * View a specific attempt's details.
      */
     public function attempt(Exam $exam, ExamAttempt $attempt): View

@@ -13,7 +13,7 @@
                         <h5 class="m-b-10">Tambah Mata Pelajaran Baru</h5>
                     </div>
                     <ul class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="ph-duotone ph-house"></i></a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="ph ph-house"></i></a></li>
                         <li class="breadcrumb-item"><a href="{{ route('admin.courses.index') }}">Mata Pelajaran</a></li>
                         <li class="breadcrumb-item active" aria-current="page">Tambah</li>
                     </ul>
@@ -30,7 +30,7 @@
                 <div class="card">
                     <div class="card-header">
                         <h5 class="card-title mb-0">
-                            <i class="ph-duotone ph-book-bookmark me-2"></i>Informasi Mata Pelajaran
+                            <i class="ph ph-book-bookmark me-2"></i>Informasi Mata Pelajaran
                         </h5>
                     </div>
                     <div class="card-body">
@@ -90,7 +90,7 @@
                 <div class="card">
                     <div class="card-header">
                         <h5 class="card-title mb-0">
-                            <i class="ph-duotone ph-users me-2"></i>Siswa Peserta
+                            <i class="ph ph-users me-2"></i>Siswa Peserta
                         </h5>
                     </div>
                     <div class="card-body p-0">
@@ -111,7 +111,7 @@
                             </div>
                         @else
                             <div class="p-4 text-center text-muted">
-                                <i class="ph-duotone ph-user-plus fs-1 d-block mb-2 opacity-50"></i>
+                                <i class="ph ph-user-plus fs-1 d-block mb-2 opacity-50"></i>
                                 <p class="mb-0">Belum ada siswa terdaftar</p>
                             </div>
                         @endif
@@ -126,7 +126,7 @@
                 <div class="card">
                     <div class="card-header">
                         <h5 class="card-title mb-0">
-                            <i class="ph-duotone ph-info me-2"></i>Informasi
+                            <i class="ph ph-info me-2"></i>Informasi
                         </h5>
                     </div>
                     <div class="card-body">
@@ -143,10 +143,10 @@
                     <div class="card-body">
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-primary">
-                                <i class="ph-duotone ph-floppy-disk me-1"></i>Simpan Mata Pelajaran
+                                <i class="ph ph-floppy-disk me-1"></i>Simpan Mata Pelajaran
                             </button>
                             <a href="{{ route('admin.courses.index') }}" class="btn btn-outline-secondary">
-                                <i class="ph-duotone ph-x me-1"></i>Batal
+                                <i class="ph ph-x me-1"></i>Batal
                             </a>
                         </div>
                     </div>

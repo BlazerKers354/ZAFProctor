@@ -12,8 +12,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- Phosphor Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
 
     <style>
         /* Hide browser's default password reveal button */
@@ -322,12 +322,12 @@
     <div class="container">
         <!-- Form Section -->
         <div class="form-section">
-            <h1><i class="fa-solid fa-key"></i> Reset Password</h1>
+            <h1><i class="ph ph-key"></i> Reset Password</h1>
             <p>Masukkan password baru Anda untuk mengakses akun kembali.</p>
 
             @if ($errors->any())
                 <div class="alert alert-error">
-                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <i class="ph ph-warning-circle"></i>
                     <span>{{ $errors->first() }}</span>
                 </div>
             @endif
@@ -347,7 +347,7 @@
                            placeholder="Password Baru" required autofocus
                            class="{{ $errors->has('password') ? 'error' : '' }}">
                     <button type="button" class="toggle-password" onclick="togglePassword('password', this)">
-                        <i class="fa-solid fa-eye"></i>
+                        <i class="ph ph-eye"></i>
                     </button>
                 </div>
 
@@ -356,16 +356,16 @@
                     <input type="password" name="password_confirmation" id="password_confirmation" 
                            placeholder="Konfirmasi Password Baru" required>
                     <button type="button" class="toggle-password" onclick="togglePassword('password_confirmation', this)">
-                        <i class="fa-solid fa-eye"></i>
+                        <i class="ph ph-eye"></i>
                     </button>
                 </div>
 
                 <button type="submit">
-                    <i class="fa-solid fa-check"></i> Reset Password
+                    <i class="ph ph-check"></i> Reset Password
                 </button>
 
                 <a href="{{ route('login') }}">
-                    <i class="fa-solid fa-arrow-left"></i> Kembali ke Login
+                    <i class="ph ph-arrow-left"></i> Kembali ke Login
                 </a>
             </form>
         </div>
@@ -373,12 +373,12 @@
         <!-- Info Section -->
         <div class="info-section">
             <div class="icon-box">
-                <i class="fa-solid fa-shield-halved"></i>
+                <i class="ph ph-shield-check"></i>
             </div>
             <h1>Keamanan Akun</h1>
             <p>Pastikan password baru Anda kuat dan mudah diingat. Gunakan kombinasi huruf besar, huruf kecil, angka, dan simbol.</p>
             <a href="{{ route('login') }}">
-                <i class="fa-solid fa-arrow-right"></i> Ke Halaman Login
+                <i class="ph ph-arrow-right"></i> Ke Halaman Login
             </a>
         </div>
     </div>

@@ -20,7 +20,7 @@
                         <h5 class="m-b-10">Edit Profil</h5>
                     </div>
                     <ul class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="ph-duotone ph-house"></i></a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="ph ph-house"></i></a></li>
                         <li class="breadcrumb-item" aria-current="page">Edit Profil</li>
                     </ul>
                 </div>
@@ -55,7 +55,7 @@
             <div class="card">
                 <div class="card-header">
                     <h5 class="card-title mb-0">
-                        <i class="ph-duotone ph-info me-2"></i>Informasi Akun
+                        <i class="ph ph-info me-2"></i>Informasi Akun
                     </h5>
                 </div>
                 <div class="card-body">
@@ -90,7 +90,7 @@
             <div class="card">
                 <div class="card-header">
                     <h5 class="card-title mb-0">
-                        <i class="ph-duotone ph-user me-2"></i>Informasi Profil
+                        <i class="ph ph-user me-2"></i>Informasi Profil
                     </h5>
                     <p class="text-muted mb-0 mt-1 small">Perbarui informasi profil dan alamat email Anda.</p>
                 </div>
@@ -121,7 +121,7 @@
                         
                         <div class="text-end">
                             <button type="submit" class="btn btn-primary">
-                                <i class="ph-duotone ph-floppy-disk me-1"></i>Simpan Perubahan
+                                <i class="ph ph-floppy-disk me-1"></i>Simpan Perubahan
                             </button>
                         </div>
                     </form>
@@ -132,7 +132,7 @@
             <div class="card">
                 <div class="card-header">
                     <h5 class="card-title mb-0">
-                        <i class="ph-duotone ph-lock-key me-2"></i>Ubah Password
+                        <i class="ph ph-key me-2"></i>Ubah Password
                     </h5>
                     <p class="text-muted mb-0 mt-1 small">Pastikan menggunakan password yang kuat dan unik.</p>
                 </div>
@@ -170,7 +170,7 @@
                         
                         <div class="text-end">
                             <button type="submit" class="btn btn-primary">
-                                <i class="ph-duotone ph-key me-1"></i>Ubah Password
+                                <i class="ph ph-key me-1"></i>Ubah Password
                             </button>
                         </div>
                     </form>

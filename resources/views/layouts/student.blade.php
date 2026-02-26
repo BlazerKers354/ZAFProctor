@@ -11,13 +11,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     
     <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     
     <!-- Phosphor Icons -->
-    <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.0.3/src/regular/style.css">
-    
-    <!-- Tabler Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
 
     <style>
         :root {
@@ -448,7 +445,7 @@
 
         .badge-soft-warning {
             background: rgba(255, 193, 7, 0.15);
-            color: #cc9a00;
+            color: #b45309;
         }
 
         .badge-soft-danger {
@@ -463,10 +460,17 @@
 
         .badge-soft-info {
             background: rgba(13, 202, 240, 0.1);
-            color: #0dcaf0;
+            color: #0891b2;
+        }
+
+        .badge-soft-secondary {
+            background: rgba(100, 116, 139, 0.1);
+            color: #64748b;
         }
 
         /* Utility Classes */
+        .arrow-none::after { display: none; }
+
         .f-w-300 { font-weight: 300; }
         .f-w-400 { font-weight: 400; }
         .f-w-500 { font-weight: 500; }
@@ -506,6 +510,41 @@
             width: 40px;
             height: 40px;
             border-radius: 50%;
+            object-fit: cover;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .avatar i {
+            font-size: 20px;
+        }
+
+        .avatar-sm {
+            width: 36px;
+            height: 36px;
+        }
+
+        .avatar-sm i {
+            font-size: 16px;
+        }
+
+        .avatar-md {
+            width: 48px;
+            height: 48px;
+        }
+
+        .avatar-md i {
+            font-size: 24px;
+        }
+
+        .avatar-lg {
+            width: 64px;
+            height: 64px;
+        }
+
+        .avatar-lg i {
+            font-size: 30px;
         }
 
         /* Dropdown Styles */
@@ -568,6 +607,39 @@
         .btn-light-primary:hover {
             background: var(--pc-brand-color-1);
             color: #fff;
+        }
+
+        .btn-light-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: #d97706;
+            border: none;
+        }
+
+        .btn-light-warning:hover {
+            background: rgba(245, 158, 11, 0.2);
+            color: #b45309;
+        }
+
+        .btn-light-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: #dc2626;
+            border: none;
+        }
+
+        .btn-light-danger:hover {
+            background: rgba(239, 68, 68, 0.2);
+            color: #b91c1c;
+        }
+
+        .btn-light-info {
+            background: rgba(59, 130, 246, 0.1);
+            color: #2563eb;
+            border: none;
+        }
+
+        .btn-light-info:hover {
+            background: rgba(59, 130, 246, 0.2);
+            color: #1d4ed8;
         }
 
         /* Mobile Responsive */
@@ -688,7 +760,7 @@
                     <!-- Dashboard -->
                     <li class="pc-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                         <a href="{{ route('dashboard') }}" class="pc-link">
-                            <span class="pc-micon"><i class="ph ph-house-line"></i></span>
+                            <span class="pc-micon"><i class="ph ph-house"></i></span>
                             <span class="pc-mtext">Dashboard</span>
                         </a>
                     </li>
@@ -762,7 +834,7 @@
                     <!-- Date Display -->
                     <li class="pc-h-item d-none d-md-block me-2">
                         <span class="badge bg-light text-dark px-3 py-2 f-14">
-                            <i class="ph ph-calendar me-1"></i>
+                            <i class="ph ph-calendar-dots me-1"></i>
                             {{ now()->locale('id')->translatedFormat('l, d M Y') }}
                         </span>
                     </li>
@@ -839,7 +911,7 @@
     </footer>
 
     <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
 
     <script>
         // Mobile sidebar toggle

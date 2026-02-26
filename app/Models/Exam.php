@@ -53,6 +53,32 @@ class Exam extends Model
                 $exam->access_token = Str::random(32);
             }
         });
+
+        // Cascade soft deletes to related models
+        static::deleting(function ($exam) {
+            if ($exam->isForceDeleting()) {
+                return; // Let DB cascade handle hard deletes
+            }
+            // Soft delete: manually clean up related records
+            $exam->questions()->each(function ($question) {
+                $question->options()->delete();
+                $question->answers()->delete();
+                $question->delete();
+            });
+            $exam->attempts()->each(function ($attempt) {
+                $attempt->answers()->delete();
+                $attempt->proctoringLogs()->delete();
+                $attempt->delete();
+            });
+            $exam->settings()->delete();
+        });
+
+        // Restore cascaded records when exam is restored
+        static::restoring(function ($exam) {
+            // Note: Cascaded records cannot be automatically restored
+            // since child models don't use SoftDeletes.
+            // Consider using SoftDeletes on Question/ExamAttempt if restore is needed.
+        });
     }
 
     /**
@@ -92,28 +118,9 @@ class Exam extends Model
      */
     public function settings(): HasOne
     {
-        return $this->hasOne(ExamSetting::class)->withDefault([
-            'webcam_enabled' => true,
-            'screen_capture_enabled' => true,
-            'browser_lock_enabled' => true,
-            'tab_switch_detection' => true,
-            'max_tab_switches' => 5,
-            'snapshot_interval' => 30,
-            'shuffle_questions' => false,
-            'shuffle_options' => false,
-            'show_correct_answers' => false,
-            'show_score' => true,
-            'passing_score' => 60,
-            'detect_face' => true,
-            'detect_multiple_faces' => true,
-            'detect_tab_switch' => true,
-            'detect_fullscreen_exit' => true,
-            'detect_copy_paste' => true,
-            'detect_right_click' => true,
-            'block_keyboard_shortcuts' => true,
-            'warning_threshold' => 3,
-            'auto_submit_threshold' => 5,
-        ]);
+        return $this->hasOne(ExamSetting::class)->withDefault(
+            ExamSetting::getDefaults()
+        );
     }
 
     /**

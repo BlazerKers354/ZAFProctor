@@ -15,7 +15,7 @@
                                 <h5 class="m-b-10">Edit Soal #{{ $question->order }}</h5>
                             </div>
                             <ul class="breadcrumb">
-                                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="ph-duotone ph-house"></i></a></li>
+                                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="ph ph-house"></i></a></li>
                                 <li class="breadcrumb-item"><a href="{{ route('teacher.exams.index') }}">Ujian</a></li>
                                 <li class="breadcrumb-item"><a href="{{ route('teacher.questions.index', $exam) }}">{{ Str::limit($exam->title, 15) }}</a></li>
                                 <li class="breadcrumb-item active" aria-current="page">Edit Soal</li>
@@ -54,13 +54,13 @@
                 <div class="card mb-4">
                     <div class="card-header">
                         <h5 class="card-title mb-0">
-                            <i class="ph-duotone ph-list-checks text-primary me-2"></i>Tipe Soal
+                            <i class="ph ph-list-checks text-primary me-2"></i>Tipe Soal
                         </h5>
                     </div>
                     <div class="card-body">
                         @if($question->type === 'multiple_choice')
                             <div class="d-flex align-items-center p-3 bg-light-success rounded">
-                                <i class="ph-duotone ph-check-square text-success me-3" style="font-size: 32px;"></i>
+                                <i class="ph ph-check-square text-success me-3" style="font-size: 32px;"></i>
                                 <div>
                                     <h6 class="mb-0">Pilihan Ganda</h6>
                                     <small class="text-muted">Jawaban otomatis dinilai oleh sistem</small>
@@ -68,7 +68,7 @@
                             </div>
                         @else
                             <div class="d-flex align-items-center p-3 bg-light-info rounded">
-                                <i class="ph-duotone ph-text-aa text-info me-3" style="font-size: 32px;"></i>
+                                <i class="ph ph-text-aa text-info me-3" style="font-size: 32px;"></i>
                                 <div>
                                     <h6 class="mb-0">Essay</h6>
                                     <small class="text-muted">Perlu dinilai manual oleh guru</small>
@@ -85,7 +85,7 @@
                 <div class="card mb-4">
                     <div class="card-header">
                         <h5 class="card-title mb-0">
-                            <i class="ph-duotone ph-question text-info me-2"></i>Pertanyaan <span class="text-danger">*</span>
+                            <i class="ph ph-question text-info me-2"></i>Pertanyaan <span class="text-danger">*</span>
                         </h5>
                     </div>
                     <div class="card-body">
@@ -103,7 +103,7 @@
                 <div class="card mb-4">
                     <div class="card-header">
                         <h5 class="card-title mb-0">
-                            <i class="ph-duotone ph-image text-success me-2"></i>Gambar (Opsional)
+                            <i class="ph ph-image text-success me-2"></i>Gambar (Opsional)
                         </h5>
                     </div>
                     <div class="card-body">
@@ -131,10 +131,10 @@
                              :class="{'border-primary bg-light-primary': dragover}">
                             <template x-if="!imagePreview">
                                 <div>
-                                    <i class="ph-duotone ph-image mb-2" style="font-size: 48px; color: #ccc;"></i>
+                                    <i class="ph ph-image mb-2" style="font-size: 48px; color: #ccc;"></i>
                                     <div class="mb-2">
                                         <label for="question_image" class="btn btn-sm btn-outline-primary">
-                                            <i class="ph ph-upload me-1"></i>Pilih Gambar Baru
+                                            <i class="ph ph-upload-simple me-1"></i>Pilih Gambar Baru
                                         </label>
                                         <input id="question_image" name="question_image" type="file" class="d-none" 
                                                accept="image/jpeg,image/png,image/jpg,image/gif" @change="previewImage($event)">
@@ -165,7 +165,7 @@
                         <div class="card-header">
                             <div class="d-flex justify-content-between align-items-center">
                                 <h5 class="card-title mb-0">
-                                    <i class="ph-duotone ph-list-bullets text-warning me-2"></i>Pilihan Jawaban <span class="text-danger">*</span>
+                                    <i class="ph ph-list-dashes text-warning me-2"></i>Pilihan Jawaban <span class="text-danger">*</span>
                                 </h5>
                                 <span class="badge bg-light-info">
                                     <span x-text="options.filter(o => o.text.trim()).length"></span> pilihan aktif
@@ -242,7 +242,7 @@
                 <div class="card mb-4">
                     <div class="card-header">
                         <h5 class="card-title mb-0">
-                            <i class="ph-duotone ph-lightbulb text-warning me-2"></i>Penjelasan / Pembahasan (Opsional)
+                            <i class="ph ph-lightbulb text-warning me-2"></i>Penjelasan / Pembahasan (Opsional)
                         </h5>
                     </div>
                     <div class="card-body">
@@ -261,7 +261,7 @@
                 <div class="card mb-4">
                     <div class="card-header">
                         <h5 class="card-title mb-0">
-                            <i class="ph-duotone ph-star text-warning me-2"></i>Poin Soal <span class="text-danger">*</span>
+                            <i class="ph ph-star text-warning me-2"></i>Poin Soal <span class="text-danger">*</span>
                         </h5>
                     </div>
                     <div class="card-body">
@@ -295,7 +295,7 @@
                     <div class="card-body">
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="ph-duotone ph-floppy-disk me-2"></i>Simpan Perubahan
+                                <i class="ph ph-floppy-disk me-2"></i>Simpan Perubahan
                             </button>
                             <a href="{{ route('teacher.questions.index', $exam) }}"
                                class="btn btn-outline-secondary">

@@ -15,7 +15,7 @@
                                 <h5 class="m-b-10">Edit Ujian</h5>
                             </div>
                             <ul class="breadcrumb">
-                                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="ph-duotone ph-house"></i></a></li>
+                                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="ph ph-house"></i></a></li>
                                 <li class="breadcrumb-item"><a href="{{ route('teacher.exams.index') }}">Ujian</a></li>
                                 <li class="breadcrumb-item"><a href="{{ route('teacher.exams.show', $exam) }}">{{ Str::limit($exam->title, 20) }}</a></li>
                                 <li class="breadcrumb-item active" aria-current="page">Edit</li>
@@ -42,7 +42,7 @@
                 <div class="card mb-4">
                     <div class="card-header">
                         <h5 class="card-title mb-0">
-                            <i class="ph-duotone ph-info text-primary me-2"></i>Informasi Dasar
+                            <i class="ph ph-info text-primary me-2"></i>Informasi Dasar
                         </h5>
                     </div>
                     <div class="card-body">
@@ -89,7 +89,7 @@
                 <div class="card mb-4">
                     <div class="card-header">
                         <h5 class="card-title mb-0">
-                            <i class="ph-duotone ph-calendar text-info me-2"></i>Jadwal Ujian
+                            <i class="ph ph-calendar-dots text-info me-2"></i>Jadwal Ujian
                         </h5>
                     </div>
                     <div class="card-body">
@@ -102,7 +102,7 @@
                                            class="form-check-input"
                                            onchange="toggleSchedule(true)">
                                     <label for="type_scheduled" class="form-check-label">
-                                        <i class="ph ph-calendar me-1"></i>Terjadwal
+                                        <i class="ph ph-calendar-dots me-1"></i>Terjadwal
                                     </label>
                                 </div>
                                 <div class="form-check">
@@ -170,7 +170,7 @@
                 <div class="card mb-4">
                     <div class="card-header">
                         <h5 class="card-title mb-0">
-                            <i class="ph-duotone ph-shield-check text-success me-2"></i>Pengaturan Proctoring
+                            <i class="ph ph-shield-check text-success me-2"></i>Pengaturan Proctoring
                         </h5>
                     </div>
                     <div class="card-body">
@@ -183,16 +183,6 @@
                                     <label for="webcam_enabled" class="form-check-label fw-medium">Monitor Webcam</label>
                                 </div>
                                 <small class="text-muted">Rekam aktivitas peserta via webcam</small>
-                            </div>
-                            
-                            <div class="col-md-6">
-                                <div class="form-check form-switch mb-3">
-                                    <input type="checkbox" name="screen_capture_enabled" id="screen_capture_enabled" value="1"
-                                           {{ old('screen_capture_enabled', $exam->settings?->screen_capture_enabled ?? true) ? 'checked' : '' }}
-                                           class="form-check-input">
-                                    <label for="screen_capture_enabled" class="form-check-label fw-medium">Screen Capture</label>
-                                </div>
-                                <small class="text-muted">Tangkap screenshot layar secara berkala</small>
                             </div>
                             
                             <div class="col-md-6">
@@ -231,7 +221,7 @@
                 <div class="card mb-4">
                     <div class="card-header">
                         <h5 class="card-title mb-0">
-                            <i class="ph-duotone ph-eye text-info me-2"></i>Pengaturan Tampilan
+                            <i class="ph ph-eye text-info me-2"></i>Pengaturan Tampilan
                         </h5>
                     </div>
                     <div class="card-body">
@@ -283,7 +273,7 @@
                 <div class="card mb-4">
                     <div class="card-header">
                         <h5 class="card-title mb-0">
-                            <i class="ph-duotone ph-repeat text-warning me-2"></i>Pengaturan Percobaan
+                            <i class="ph ph-repeat text-warning me-2"></i>Pengaturan Percobaan
                         </h5>
                     </div>
                     <div class="card-body">
@@ -322,7 +312,7 @@
                 <div class="card mb-4">
                     <div class="card-header">
                         <h5 class="card-title mb-0">
-                            <i class="ph-duotone ph-key text-warning me-2"></i>Token Akses
+                            <i class="ph ph-key text-warning me-2"></i>Token Akses
                         </h5>
                     </div>
                     <div class="card-body">
@@ -351,7 +341,7 @@
                 <div class="card mb-4">
                     <div class="card-header">
                         <h5 class="card-title mb-0">
-                            <i class="ph-duotone ph-info text-primary me-2"></i>Status
+                            <i class="ph ph-info text-primary me-2"></i>Status
                         </h5>
                     </div>
                     <div class="card-body">
@@ -377,7 +367,7 @@
                     <div class="card-body">
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="ph-duotone ph-floppy-disk me-2"></i>Simpan Perubahan
+                                <i class="ph ph-floppy-disk me-2"></i>Simpan Perubahan
                             </button>
                             <a href="{{ route('teacher.exams.show', $exam) }}" class="btn btn-outline-secondary">
                                 <i class="ph ph-x me-2"></i>Batal
@@ -390,7 +380,7 @@
                 <div class="card">
                     <div class="card-header">
                         <h6 class="mb-0">
-                            <i class="ph ph-clock-clockwise me-2"></i>Informasi
+                            <i class="ph ph-clock-rotate-left me-2"></i>Informasi
                         </h6>
                     </div>
                     <div class="card-body">

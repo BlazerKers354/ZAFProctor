@@ -12,8 +12,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- Phosphor Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
 
     <style>
         /* Hide browser's default password reveal button */
@@ -1076,6 +1076,10 @@
                 display: none;
             }
         }
+
+        /* Phosphor spin animation */
+        .ph-spin { animation: ph-spin 1s linear infinite; }
+        @keyframes ph-spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -1101,7 +1105,7 @@
                 <p>Sistem Ujian Online dengan AI Proctoring</p>
                 <span class="brand-dot"></span>
                 <div class="brand-badge">
-                    <i class="fa-solid fa-circle"></i> Secure &bull; Reliable &bull; Smart
+                    <i class="ph ph-circle"></i> Secure &bull; Reliable &bull; Smart
                 </div>
             </div>
         </div>
@@ -1116,12 +1120,12 @@
                 <p>Pilih jenis akun yang ingin Anda daftarkan</p>
                 
                 <button type="button" class="register-btn student-btn" onclick="showRegisterForm('student')">
-                    <i class="fa-solid fa-graduation-cap"></i>
+                    <i class="ph ph-graduation-cap"></i>
                     Daftar sebagai Siswa
                 </button>
                 
                 <button type="button" class="register-btn teacher-btn" onclick="showRegisterForm('teacher')">
-                    <i class="fa-solid fa-chalkboard-teacher"></i>
+                    <i class="ph ph-chalkboard-teacher"></i>
                     Daftar sebagai Guru
                 </button>
                 
@@ -1137,14 +1141,14 @@
                     @csrf
                     <input type="hidden" name="_register" value="student">
                     <button type="button" class="back-btn" onclick="backToRoleSelection()">
-                        <i class="fa-solid fa-arrow-left"></i> Kembali
+                        <i class="ph ph-arrow-left"></i> Kembali
                     </button>
                     <h1>Daftar Siswa</h1>
                     <p>Isi data untuk mendaftar sebagai siswa</p>
 
                     @if ($errors->any() && old('_register') === 'student')
                         <div class="alert alert-error" style="width: 100%;">
-                            <i class="fa-solid fa-circle-exclamation"></i>
+                            <i class="ph ph-warning-circle"></i>
                             <ul style="margin: 0; padding-left: 20px; text-align: left;">
                                 @foreach ($errors->all() as $error)
                                     <li>{{ $error }}</li>
@@ -1170,14 +1174,14 @@
                     <div class="input-group">
                         <input type="password" name="password" id="student-password" placeholder="Password" required>
                         <button type="button" class="toggle-password" onclick="togglePassword('student-password', this)">
-                            <i class="fa-solid fa-eye"></i>
+                            <i class="ph ph-eye"></i>
                         </button>
                     </div>
 
                     <div class="input-group">
                         <input type="password" name="password_confirmation" id="student-password-confirm" placeholder="Konfirmasi Password" required>
                         <button type="button" class="toggle-password" onclick="togglePassword('student-password-confirm', this)">
-                            <i class="fa-solid fa-eye"></i>
+                            <i class="ph ph-eye"></i>
                         </button>
                     </div>
 
@@ -1196,14 +1200,14 @@
                     @csrf
                     <input type="hidden" name="_register" value="teacher">
                     <button type="button" class="back-btn" onclick="backToRoleSelection()">
-                        <i class="fa-solid fa-arrow-left"></i> Kembali
+                        <i class="ph ph-arrow-left"></i> Kembali
                     </button>
                     <h1>Daftar Guru</h1>
                     <p>Isi data untuk mendaftar sebagai guru</p>
 
                     @if ($errors->any() && old('_register') === 'teacher')
                         <div class="alert alert-error" style="width: 100%;">
-                            <i class="fa-solid fa-circle-exclamation"></i>
+                            <i class="ph ph-warning-circle"></i>
                             <ul style="margin: 0; padding-left: 20px; text-align: left;">
                                 @foreach ($errors->all() as $error)
                                     <li>{{ $error }}</li>
@@ -1220,19 +1224,19 @@
                     <div class="input-group">
                         <input type="password" name="password" id="teacher-password" placeholder="Password" required>
                         <button type="button" class="toggle-password" onclick="togglePassword('teacher-password', this)">
-                            <i class="fa-solid fa-eye"></i>
+                            <i class="ph ph-eye"></i>
                         </button>
                     </div>
 
                     <div class="input-group">
                         <input type="password" name="password_confirmation" id="teacher-password-confirm" placeholder="Konfirmasi Password" required>
                         <button type="button" class="toggle-password" onclick="togglePassword('teacher-password-confirm', this)">
-                            <i class="fa-solid fa-eye"></i>
+                            <i class="ph ph-eye"></i>
                         </button>
                     </div>
 
                     <div class="info-box">
-                        <i class="fa-solid fa-info-circle"></i>
+                        <i class="ph ph-info"></i>
                         <span>Akun guru memerlukan persetujuan admin sebelum dapat digunakan.</span>
                     </div>
 
@@ -1255,13 +1259,13 @@
 
                 @if (session('status'))
                     <div class="alert alert-success">
-                        <i class="fa-solid fa-circle-check"></i> {{ session('status') }}
+                        <i class="ph ph-check-circle"></i> {{ session('status') }}
                     </div>
                 @endif
 
                 @if ($errors->any() && !old('_register'))
                     <div class="alert alert-error">
-                        <i class="fa-solid fa-circle-exclamation"></i> Email atau password salah.
+                        <i class="ph ph-warning-circle"></i> Email atau password salah.
                     </div>
                 @endif
 
@@ -1272,7 +1276,7 @@
                     <input type="password" name="password" id="login-password" placeholder="Password" required
                            class="{{ $errors->has('password') && !old('_register') ? 'error' : '' }}">
                     <button type="button" class="toggle-password" onclick="togglePassword('login-password', this)">
-                        <i class="fa-solid fa-eye"></i>
+                        <i class="ph ph-eye"></i>
                     </button>
                 </div>
 
@@ -1296,11 +1300,11 @@
                 <h1>Lupa Password?</h1>
                 
                 <div id="forgot-alert-success" class="alert alert-success" style="display: none;">
-                    <i class="fa-solid fa-circle-check"></i> <span id="forgot-success-text"></span>
+                    <i class="ph ph-check-circle"></i> <span id="forgot-success-text"></span>
                 </div>
                 
                 <div id="forgot-alert-error" class="alert alert-error" style="display: none;">
-                    <i class="fa-solid fa-circle-exclamation"></i> <span id="forgot-error-text"></span>
+                    <i class="ph ph-warning-circle"></i> <span id="forgot-error-text"></span>
                 </div>
 
                 <p style="text-align: center; color: #666; margin-bottom: 20px;">
@@ -1311,11 +1315,11 @@
 
                 <button type="submit" id="forgot-submit-btn">
                     <span id="forgot-btn-text" style="color: white;">Kirim Link Reset</span>
-                    <i id="forgot-btn-spinner" class="fa-solid fa-spinner fa-spin" style="display: none; margin-left: 8px;"></i>
+                    <i id="forgot-btn-spinner" class="ph ph-spinner-gap ph-spin" style="display: none; margin-left: 8px;"></i>
                 </button>
 
                 <a href="#" onclick="showLoginForm(); return false;">
-                    <i class="fa-solid fa-arrow-left"></i> Kembali ke Login
+                    <i class="ph ph-arrow-left"></i> Kembali ke Login
                 </a>
             </form>
         </div>
@@ -1325,14 +1329,14 @@
             <div class="toggle">
                 <div class="toggle-panel toggle-left">
                     <div class="icon-box">
-                        <i class="fa-solid fa-graduation-cap"></i>
+                        <i class="ph ph-graduation-cap"></i>
                     </div>
                     <h1>Selamat Datang!</h1>
                     <p>Sudah punya akun? Masuk untuk melanjutkan</p>
                     <ul class="toggle-features">
-                        <li><i class="fa-solid fa-check-circle"></i> Akses ujian kapan saja</li>
-                        <li><i class="fa-solid fa-check-circle"></i> Lihat hasil & analisis nilai</li>
-                        <li><i class="fa-solid fa-check-circle"></i> Pantau progress belajar</li>
+                        <li><i class="ph ph-check-circle"></i> Akses ujian kapan saja</li>
+                        <li><i class="ph ph-check-circle"></i> Lihat hasil & analisis nilai</li>
+                        <li><i class="ph ph-check-circle"></i> Pantau progress belajar</li>
                     </ul>
                     <button class="hidden" id="login" type="button">Masuk</button>
                     <div class="toggle-decoration">
@@ -1341,14 +1345,14 @@
                 </div>
                 <div class="toggle-panel toggle-right">
                     <div class="icon-box">
-                        <i class="fa-solid fa-shield-halved"></i>
+                        <i class="ph ph-shield-check"></i>
                     </div>
                     <h1>Halo, Teman!</h1>
                     <p>Bergabung dan rasakan pengalaman ujian online yang aman</p>
                     <ul class="toggle-features">
-                        <li><i class="fa-solid fa-check-circle"></i> AI Proctoring otomatis</li>
-                        <li><i class="fa-solid fa-check-circle"></i> Ujian aman & terpercaya</li>
-                        <li><i class="fa-solid fa-check-circle"></i> Gratis untuk siswa & guru</li>
+                        <li><i class="ph ph-check-circle"></i> AI Proctoring otomatis</li>
+                        <li><i class="ph ph-check-circle"></i> Ujian aman & terpercaya</li>
+                        <li><i class="ph ph-check-circle"></i> Gratis untuk siswa & guru</li>
                     </ul>
                     <button class="hidden" id="register" type="button">Daftar</button>
                     <div class="toggle-decoration">

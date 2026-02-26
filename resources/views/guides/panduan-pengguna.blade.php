@@ -444,6 +444,7 @@
         <div class="toc-item">&nbsp;&nbsp;&nbsp;5.2 Mengerjakan Ujian</div>
         <div class="toc-item">&nbsp;&nbsp;&nbsp;5.3 Proctoring & Aturan</div>
         <div class="toc-item">&nbsp;&nbsp;&nbsp;5.4 Melihat Hasil</div>
+        <div class="toc-item">&nbsp;&nbsp;&nbsp;5.5 Profil & Pengaturan Akun</div>
         
         <div class="toc-item toc-section">6. FAQ & Troubleshooting</div>
     </div>
@@ -455,6 +456,9 @@
     <p>
         <strong>ZAFProctor</strong> adalah platform ujian online (Computer Based Test / CBT) yang dilengkapi dengan 
         fitur pengawasan kamera (webcam proctoring) untuk menjamin integritas dan keamanan pelaksanaan ujian secara daring.
+    </p>
+    <p>
+        Panduan ini dapat diunduh dalam format PDF melalui halaman utama ZAFProctor (landing page) tanpa perlu login terlebih dahulu.
     </p>
 
     <div class="illustration">
@@ -582,7 +586,7 @@
             <div style="background: #f1f5f9; border-radius: 6px; padding: 8px 12px; margin-bottom: 8px; text-align: left; font-size: 9pt; color: #94a3b8;">Nama Lengkap</div>
             <div style="background: #f1f5f9; border-radius: 6px; padding: 8px 12px; margin-bottom: 8px; text-align: left; font-size: 9pt; color: #94a3b8;">Email</div>
             <div style="background: #f1f5f9; border-radius: 6px; padding: 8px 12px; margin-bottom: 8px; text-align: left; font-size: 9pt; color: #94a3b8;">Password</div>
-            <div style="background: #f1f5f9; border-radius: 6px; padding: 8px 12px; margin-bottom: 15px; text-align: left; font-size: 9pt; color: #94a3b8;">Pilih Peran: Guru / Siswa</div>
+            <div style="background: #f1f5f9; border-radius: 6px; padding: 8px 12px; margin-bottom: 15px; text-align: left; font-size: 9pt; color: #94a3b8;">Konfirmasi Password</div>
             <div style="background: #3b82f6; color: white; border-radius: 6px; padding: 8px; font-size: 10pt; font-weight: bold;">Daftar</div>
         </div>
         <div class="caption">Tampilan form pendaftaran akun ZAFProctor</div>
@@ -600,7 +604,7 @@
             <div class="step-number">2</div>
             <div class="step-content">
                 <strong>Pilih Tipe Akun</strong>
-                <p>Pilih mendaftar sebagai <strong>Guru</strong> atau <strong>Siswa</strong>. Akun Admin dibuat oleh sistem.</p>
+                <p>Pilih mendaftar sebagai <strong>Guru</strong> atau <strong>Siswa</strong>. Masing-masing memiliki form pendaftaran terpisah. Akun Admin dibuat oleh sistem.</p>
             </div>
         </div>
         <div class="step">
@@ -613,8 +617,15 @@
         <div class="step">
             <div class="step-number">4</div>
             <div class="step-content">
-                <strong>Tunggu Persetujuan</strong>
-                <p>Akun baru memerlukan persetujuan Admin sebelum dapat digunakan.</p>
+                <strong>Verifikasi Email</strong>
+                <p>Setelah mendaftar, cek inbox email Anda dan klik link verifikasi yang dikirimkan oleh sistem.</p>
+            </div>
+        </div>
+        <div class="step">
+            <div class="step-number">5</div>
+            <div class="step-content">
+                <strong>Tunggu Persetujuan Admin</strong>
+                <p>Akun baru memerlukan persetujuan Admin sebelum dapat digunakan. Anda akan menerima notifikasi setelah akun disetujui.</p>
             </div>
         </div>
     </div>
@@ -765,55 +776,55 @@
     </div>
 
     <h3>3.3 Manajemen Kelas</h3>
-    <p>Admin dapat membuat dan mengelola kelas serta menambahkan siswa ke dalam kelas:</p>
+    <p>Admin dapat membuat dan mengelola kelas, menentukan wali kelas, serta menambahkan siswa ke dalam kelas:</p>
 
     <div class="step-container">
         <div class="step">
             <div class="step-number">1</div>
             <div class="step-content">
                 <strong>Buka Menu "Kelas"</strong>
-                <p>Navigasi ke halaman manajemen kelas.</p>
+                <p>Navigasi ke halaman manajemen kelas melalui sidebar.</p>
             </div>
         </div>
         <div class="step">
             <div class="step-number">2</div>
             <div class="step-content">
                 <strong>Buat Kelas Baru</strong>
-                <p>Klik "Tambah Kelas" dan isi nama kelas (contoh: X-IPA-1, XI-IPS-2).</p>
+                <p>Klik "Tambah Kelas", isi nama kelas (contoh: X-IPA-1, XI-IPS-2), dan tentukan wali kelas dari daftar guru yang tersedia.</p>
             </div>
         </div>
         <div class="step">
             <div class="step-number">3</div>
             <div class="step-content">
                 <strong>Tambahkan Siswa</strong>
-                <p>Pilih siswa yang akan dimasukkan ke dalam kelas tersebut.</p>
+                <p>Buka halaman detail kelas, lalu pilih dan tambahkan siswa yang akan dimasukkan ke dalam kelas tersebut.</p>
             </div>
         </div>
     </div>
 
     <h3>3.4 Manajemen Mata Pelajaran</h3>
-    <p>Admin dapat membuat mata pelajaran dan menugaskan guru pengampu:</p>
+    <p>Admin dapat membuat mata pelajaran, menugaskan guru pengampu, dan mendaftarkan siswa:</p>
 
     <div class="step-container">
         <div class="step">
             <div class="step-number">1</div>
             <div class="step-content">
                 <strong>Buka Menu "Mata Pelajaran"</strong>
-                <p>Navigasi ke halaman manajemen mata pelajaran.</p>
+                <p>Navigasi ke halaman manajemen mata pelajaran melalui sidebar.</p>
             </div>
         </div>
         <div class="step">
             <div class="step-number">2</div>
             <div class="step-content">
                 <strong>Buat Mata Pelajaran</strong>
-                <p>Isi nama mata pelajaran dan pilih guru pengampu.</p>
+                <p>Isi nama mata pelajaran dan pilih guru pengampu yang bertanggung jawab.</p>
             </div>
         </div>
         <div class="step">
             <div class="step-number">3</div>
             <div class="step-content">
-                <strong>Assign Kelas</strong>
-                <p>Tambahkan kelas-kelas yang mengambil mata pelajaran tersebut.</p>
+                <strong>Assign Siswa</strong>
+                <p>Buka halaman detail mata pelajaran, lalu tambahkan siswa-siswa yang mengikuti mata pelajaran tersebut.</p>
             </div>
         </div>
     </div>
@@ -872,7 +883,7 @@
         <div class="flow-arrow">&#8595;</div>
         <div class="flow-step"><strong>Atur Proctoring</strong> - Kamera & Deteksi</div>
         <div class="flow-arrow">&#8595;</div>
-        <div class="flow-step"><strong>Publish</strong> - Ujian siap dikerjakan</div>
+        <div class="flow-step"><strong>Publish</strong> - Ujian siap dikerjakan siswa</div>
     </div>
 
     <div class="step-container">
@@ -880,7 +891,7 @@
             <div class="step-number">1</div>
             <div class="step-content">
                 <strong>Klik "Buat Ujian Baru"</strong>
-                <p>Dari dashboard atau halaman daftar ujian, klik tombol untuk membuat ujian baru.</p>
+                <p>Dari halaman daftar ujian, klik tombol untuk membuat ujian baru.</p>
             </div>
         </div>
         <div class="step">
@@ -900,10 +911,26 @@
         <div class="step">
             <div class="step-number">4</div>
             <div class="step-content">
-                <strong>Simpan & Lanjutkan</strong>
+                <strong>Simpan & Tambah Soal</strong>
                 <p>Simpan ujian, lalu lanjutkan ke penambahan soal.</p>
             </div>
         </div>
+        <div class="step">
+            <div class="step-number">5</div>
+            <div class="step-content">
+                <strong>Publish Ujian</strong>
+                <p>Setelah soal ditambahkan, klik "Publish" agar ujian dapat diakses oleh siswa.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="info-box">
+        <div class="label">&#128161; Fitur Tambahan Ujian</div>
+        <ul style="margin: 5px 0 0; padding-left: 20px;">
+            <li><strong>Duplikasi Ujian</strong> - Salin ujian beserta pengaturannya untuk membuat ujian serupa dengan cepat</li>
+            <li><strong>Regenerate Token</strong> - Buat ulang kode akses ujian jika diperlukan untuk keamanan</li>
+            <li><strong>Tipe Ujian</strong> - Pilih antara <em>Scheduled</em> (terjadwal) atau <em>Flexible</em> (fleksibel)</li>
+        </ul>
     </div>
 
     <h3>4.3 Mengelola Soal</h3>
@@ -930,10 +957,11 @@
     <div class="success-box">
         <div class="label">&#10003; Fitur Canggih Pengelolaan Soal</div>
         <ul style="margin: 5px 0 0; padding-left: 20px;">
-            <li><strong>Import massal</strong> - Upload soal dari file template</li>
+            <li><strong>Import massal</strong> - Upload soal dari file template (template dapat didownload)</li>
             <li><strong>Export soal</strong> - Unduh bank soal dalam format file</li>
-            <li><strong>Duplikasi soal</strong> - Salin soal untuk ujian lain</li>
-            <li><strong>Reorder</strong> - Atur ulang urutan soal dengan drag & drop</li>
+            <li><strong>Duplikasi soal</strong> - Salin soal untuk digunakan kembali</li>
+            <li><strong>Hapus massal</strong> - Hapus beberapa soal sekaligus</li>
+            <li><strong>Reorder</strong> - Atur ulang urutan soal sesuai kebutuhan</li>
         </ul>
     </div>
 
@@ -1004,10 +1032,22 @@
         <div class="step">
             <div class="step-number">3</div>
             <div class="step-content">
+                <strong>Berikan Feedback</strong>
+                <p>Tambahkan catatan atau feedback pada hasil ujian siswa untuk membantu proses pembelajaran.</p>
+            </div>
+        </div>
+        <div class="step">
+            <div class="step-number">4</div>
+            <div class="step-content">
                 <strong>Export Hasil</strong>
                 <p>Download hasil ujian dalam format file untuk arsip dan pelaporan.</p>
             </div>
         </div>
+    </div>
+
+    <div class="info-box">
+        <div class="label">&#128161; Metode Penilaian</div>
+        Untuk ujian yang mengizinkan multiple attempt, guru dapat memilih metode penilaian: <strong>Nilai Tertinggi</strong>, <strong>Nilai Terakhir</strong>, atau <strong>Nilai Rata-rata</strong>.
     </div>
 
     <div class="page-break"></div>
@@ -1082,14 +1122,14 @@
             <div class="step-number">4</div>
             <div class="step-content">
                 <strong>Kerjakan Soal</strong>
-                <p>Jawab semua soal dengan teliti. Gunakan navigasi soal untuk berpindah antar soal.</p>
+                <p>Jawab semua soal dengan teliti. Gunakan navigasi soal untuk berpindah antar soal. Jawaban tersimpan otomatis (auto-save) setiap kali Anda berpindah soal.</p>
             </div>
         </div>
         <div class="step">
             <div class="step-number">5</div>
             <div class="step-content">
                 <strong>Submit Jawaban</strong>
-                <p>Setelah selesai, klik "Submit" untuk mengirimkan jawaban Anda.</p>
+                <p>Setelah selesai, klik "Submit" untuk mengirimkan jawaban Anda. Jika waktu habis, jawaban akan otomatis dikumpulkan oleh sistem.</p>
             </div>
         </div>
     </div>
@@ -1153,8 +1193,39 @@
     <ul>
         <li><strong>Nilai Total</strong> - Skor keseluruhan dari ujian</li>
         <li><strong>Detail Jawaban</strong> - Review jawaban yang benar dan salah (jika diizinkan guru)</li>
+        <li><strong>Feedback Guru</strong> - Catatan atau masukan dari guru mengenai hasil ujian</li>
         <li><strong>Log Pelanggaran</strong> - Ringkasan aktivitas mencurigakan yang tercatat</li>
     </ul>
+
+    <div class="page-break"></div>
+
+    <!-- ==================== PROFIL & PENGATURAN AKUN ==================== -->
+    <h2>5.5 Profil & Pengaturan Akun</h2>
+    <p>Semua pengguna (Admin, Guru, Siswa) dapat mengelola profil dan keamanan akun masing-masing:</p>
+
+    <div class="step-container">
+        <div class="step">
+            <div class="step-number">1</div>
+            <div class="step-content">
+                <strong>Buka Halaman Profil</strong>
+                <p>Klik menu profil di bagian atas halaman atau melalui dropdown navigasi.</p>
+            </div>
+        </div>
+        <div class="step">
+            <div class="step-number">2</div>
+            <div class="step-content">
+                <strong>Edit Informasi Profil</strong>
+                <p>Perbarui nama, email, dan data pribadi lainnya sesuai kebutuhan.</p>
+            </div>
+        </div>
+        <div class="step">
+            <div class="step-number">3</div>
+            <div class="step-content">
+                <strong>Ubah Password</strong>
+                <p>Untuk keamanan, ubah password secara berkala melalui form yang tersedia di halaman profil.</p>
+            </div>
+        </div>
+    </div>
 
     <div class="page-break"></div>
 
@@ -1179,13 +1250,19 @@
     <p><strong>A:</strong> Jawaban yang sudah disimpan tidak akan hilang. Setelah koneksi kembali, siswa dapat melanjutkan ujian selama waktu belum habis. Timer tetap berjalan di server.</p>
 
     <h4>Q: Bagaimana cara mereset password?</h4>
-    <p><strong>A:</strong> Klik "Lupa Password" di halaman login, masukkan email terdaftar, dan ikuti instruksi yang dikirim ke email Anda.</p>
+    <p><strong>A:</strong> Di halaman login, klik link "Lupa Password?", masukkan email terdaftar, dan ikuti instruksi yang dikirim ke email Anda untuk membuat password baru.</p>
 
     <h4>Q: Apakah ujian otomatis ter-submit saat waktu habis?</h4>
-    <p><strong>A:</strong> Ya, sistem akan otomatis mengumpulkan semua jawaban yang telah disimpan ketika waktu ujian berakhir.</p>
+    <p><strong>A:</strong> Ya, sistem akan otomatis mengumpulkan semua jawaban yang telah disimpan ketika waktu ujian berakhir. Timer berjalan di sisi server sehingga tidak dapat dimanipulasi.</p>
 
     <h4>Q: Bisakah guru melihat snapshot kamera siswa?</h4>
     <p><strong>A:</strong> Ya, guru dapat melihat snapshot yang diambil selama ujian melalui fitur monitoring dan review hasil ujian.</p>
+
+    <h4>Q: Bagaimana cara mengubah profil atau password?</h4>
+    <p><strong>A:</strong> Setelah login, klik menu profil di bagian atas halaman. Di halaman profil, Anda dapat mengubah nama, email, serta password akun Anda.</p>
+
+    <h4>Q: Di mana bisa mendapatkan panduan pengguna ini?</h4>
+    <p><strong>A:</strong> Panduan ini tersedia untuk diunduh dalam format PDF melalui halaman utama (landing page) ZAFProctor. Anda tidak perlu login untuk mengunduhnya.</p>
 
     <div class="success-box">
         <div class="label">&#128222; Butuh Bantuan?</div>

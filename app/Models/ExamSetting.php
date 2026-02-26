@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,11 +15,11 @@ class ExamSetting extends Model
         'exam_id',
         // Proctoring
         'webcam_enabled',
-        'screen_capture_enabled',
         'browser_lock_enabled',
         'tab_switch_detection',
         'max_tab_switches',
         'snapshot_interval',
+        'block_keyboard_shortcuts',
         // Display
         'shuffle_questions',
         'shuffle_options',
@@ -29,21 +30,12 @@ class ExamSetting extends Model
         'grade_method',
         // Additional
         'passing_score',
-        // Legacy fields (for backward compatibility)
-        'detect_face',
-        'detect_multiple_faces',
-        'detect_tab_switch',
-        'detect_fullscreen_exit',
-        'detect_copy_paste',
-        'detect_right_click',
-        'block_keyboard_shortcuts',
         'warning_threshold',
         'auto_submit_threshold',
     ];
 
     protected $casts = [
         'webcam_enabled' => 'boolean',
-        'screen_capture_enabled' => 'boolean',
         'browser_lock_enabled' => 'boolean',
         'tab_switch_detection' => 'boolean',
         'max_tab_switches' => 'integer',
@@ -56,15 +48,47 @@ class ExamSetting extends Model
         'passing_score' => 'integer',
         'warning_threshold' => 'integer',
         'auto_submit_threshold' => 'integer',
-        // Legacy
-        'detect_face' => 'boolean',
-        'detect_multiple_faces' => 'boolean',
-        'detect_tab_switch' => 'boolean',
-        'detect_fullscreen_exit' => 'boolean',
-        'detect_copy_paste' => 'boolean',
-        'detect_right_click' => 'boolean',
         'block_keyboard_shortcuts' => 'boolean',
     ];
+
+    // ── Backward-compatible accessors ──────────────────────────
+    // Legacy detect_* fields now map to consolidated settings.
+    // Blade views and ProctoringController can still read these.
+
+    protected function detectFace(): Attribute
+    {
+        return Attribute::get(fn () => $this->webcam_enabled ?? true);
+    }
+
+    protected function detectMultipleFaces(): Attribute
+    {
+        return Attribute::get(fn () => $this->webcam_enabled ?? true);
+    }
+
+    protected function detectTabSwitch(): Attribute
+    {
+        return Attribute::get(fn () => $this->tab_switch_detection ?? true);
+    }
+
+    protected function detectFullscreenExit(): Attribute
+    {
+        return Attribute::get(fn () => $this->browser_lock_enabled ?? true);
+    }
+
+    protected function detectCopyPaste(): Attribute
+    {
+        return Attribute::get(fn () => $this->block_keyboard_shortcuts ?? true);
+    }
+
+    protected function detectRightClick(): Attribute
+    {
+        return Attribute::get(fn () => $this->block_keyboard_shortcuts ?? true);
+    }
+
+    protected function screenCaptureEnabled(): Attribute
+    {
+        return Attribute::get(fn () => false); // Feature not implemented
+    }
 
     /**
      * Get the exam for this setting
@@ -81,7 +105,6 @@ class ExamSetting extends Model
     {
         return [
             'webcam_enabled' => true,
-            'screen_capture_enabled' => true,
             'browser_lock_enabled' => true,
             'tab_switch_detection' => true,
             'max_tab_switches' => 5,
@@ -91,12 +114,6 @@ class ExamSetting extends Model
             'show_correct_answers' => false,
             'show_score' => true,
             'passing_score' => 60,
-            'detect_face' => true,
-            'detect_multiple_faces' => true,
-            'detect_tab_switch' => true,
-            'detect_fullscreen_exit' => true,
-            'detect_copy_paste' => true,
-            'detect_right_click' => true,
             'block_keyboard_shortcuts' => true,
             'warning_threshold' => 3,
             'auto_submit_threshold' => 5,

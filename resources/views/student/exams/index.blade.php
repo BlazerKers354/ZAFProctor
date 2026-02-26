@@ -40,8 +40,8 @@
                             <div class="d-flex align-items-start justify-content-between gap-3">
                                 <div class="d-flex align-items-center gap-3">
                                     <!-- Exam Icon -->
-                                    <div class="exam-icon bg-primary bg-opacity-10 text-primary">
-                                        <i class="ph ph-file-text"></i>
+                                    <div class="exam-icon" style="background: rgba(124, 58, 237, 0.1); color: #7c3aed;">
+                                        <i class="ph ph-file-text f-24"></i>
                                     </div>
                                     
                                     <!-- Exam Title & Course -->
@@ -86,7 +86,7 @@
                             <div class="row g-2 mb-4">
                                 <div class="col-4">
                                     <div class="text-center p-2 bg-light rounded-3">
-                                        <i class="ph ph-calendar f-20 text-muted mb-1 d-block"></i>
+                                        <i class="ph ph-calendar-dots f-20 text-muted mb-1 d-block"></i>
                                         <small class="text-muted d-block">Mulai</small>
                                         <span class="f-14 f-w-600">{{ $exam->start_time?->format('d M') ?? 'Fleksibel' }}</span>
                                     </div>
@@ -108,9 +108,9 @@
                             </div>
                             
                             <!-- Schedule Info -->
-                            <div class="d-flex align-items-center gap-2 p-3 bg-primary bg-opacity-10 rounded-3 mb-4">
-                                <i class="ph ph-calendar-blank text-primary f-20"></i>
-                                <span class="text-primary f-14">
+                            <div class="d-flex align-items-center gap-2 p-3 rounded-3 mb-4" style="background: rgba(124, 58, 237, 0.08);">
+                                <i class="ph ph-calendar-blank f-20" style="color: #6d28d9;"></i>
+                                <span class="f-14" style="color: #6d28d9;">
                                     @if($exam->type === 'scheduled' && $exam->start_time && $exam->end_time)
                                         {{ $exam->start_time->format('d M Y, H:i') }} - {{ $exam->end_time->format('d M Y, H:i') }}
                                     @else

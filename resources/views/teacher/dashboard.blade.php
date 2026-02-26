@@ -11,7 +11,7 @@
                 <div class="col-md-8">
                     <div class="d-flex align-items-center gap-3">
                         <div style="background: linear-gradient(135deg, #10b981, #34d399); border-radius: 14px;" class="p-3">
-                            <i class="ph-duotone ph-chalkboard-teacher f-30 text-white"></i>
+                            <i class="ph ph-chalkboard-teacher f-30 text-white"></i>
                         </div>
                         <div>
                             <p class="mb-1 f-14" style="color: rgba(255,255,255,0.5);">Selamat datang,</p>
@@ -21,7 +21,7 @@
                 </div>
                 <div class="col-md-4 text-md-end mt-3 mt-md-0">
                     <span class="badge px-3 py-2" style="background: rgba(255,255,255,0.08); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.06); color: rgba(255,255,255,0.7);">
-                        <i class="ph-duotone ph-calendar me-1"></i>{{ now()->locale('id')->translatedFormat('l, d M Y') }}
+                        <i class="ph ph-calendar-dots me-1"></i>{{ now()->locale('id')->translatedFormat('l, d M Y') }}
                     </span>
                 </div>
             </div>
@@ -41,7 +41,7 @@
                             <h3 class="mb-0" style="font-weight: 700;">{{ $stats['total_courses'] }}</h3>
                         </div>
                         <div class="avatar avatar-md" style="background: rgba(16,185,129,0.1); border-radius: 12px;">
-                            <i class="ph-duotone ph-books" style="color: #10b981;"></i>
+                            <i class="ph ph-book" style="color: #10b981;"></i>
                         </div>
                     </div>
                 </div>
@@ -56,7 +56,7 @@
                             <h3 class="mb-0" style="font-weight: 700; color: #3b82f6;">{{ $stats['total_students'] }}</h3>
                         </div>
                         <div class="avatar avatar-md" style="background: rgba(59,130,246,0.1); border-radius: 12px;">
-                            <i class="ph-duotone ph-users" style="color: #3b82f6;"></i>
+                            <i class="ph ph-users" style="color: #3b82f6;"></i>
                         </div>
                     </div>
                 </div>
@@ -71,7 +71,7 @@
                             <h3 class="mb-0" style="font-weight: 700; color: #f59e0b;">{{ $stats['total_exams'] }}</h3>
                         </div>
                         <div class="avatar avatar-md" style="background: rgba(245,158,11,0.1); border-radius: 12px;">
-                            <i class="ph-duotone ph-exam" style="color: #f59e0b;"></i>
+                            <i class="ph ph-file-text" style="color: #f59e0b;"></i>
                         </div>
                     </div>
                 </div>
@@ -86,7 +86,7 @@
                             <h3 class="mb-0" style="font-weight: 700; color: #ef4444;">{{ $stats['active_exams'] }}</h3>
                         </div>
                         <div class="avatar avatar-md" style="background: rgba(239,68,68,0.1); border-radius: 12px;">
-                            <i class="ph-duotone ph-broadcast" style="color: #ef4444;"></i>
+                            <i class="ph ph-broadcast" style="color: #ef4444;"></i>
                         </div>
                     </div>
                 </div>
@@ -100,7 +100,7 @@
             <div class="card mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">
-                        <i class="ph-duotone ph-play-circle text-success me-2"></i>Ujian Berlangsung
+                        <i class="ph ph-play-circle text-success me-2"></i>Ujian Berlangsung
                     </h5>
                     <a href="{{ route('teacher.exams.create') }}" class="btn btn-sm btn-primary">
                         <i class="ph ph-plus me-1"></i>Buat Ujian
@@ -112,7 +112,7 @@
                             <div class="d-flex align-items-center justify-content-between">
                                 <div class="d-flex align-items-center">
                                     <div class="avatar avatar-sm me-3" style="width: 45px; height: 45px; display: inline-flex; align-items: center; justify-content: center; border-radius: 12px; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-                                        <i class="ph-duotone ph-exam text-white"></i>
+                                        <i class="ph ph-file-text text-white"></i>
                                     </div>
                                     <div>
                                         <h6 class="mb-0">{{ $exam->title }}</h6>
@@ -128,7 +128,7 @@
                         </div>
                     @empty
                         <div class="p-4 text-center text-muted">
-                            <i class="ph-duotone ph-calendar-x fs-1 d-block mb-2 opacity-50"></i>
+                            <i class="ph ph-calendar-x fs-1 d-block mb-2 opacity-50"></i>
                             Tidak ada ujian aktif saat ini.
                         </div>
                     @endforelse
@@ -141,7 +141,7 @@
             <div class="card mb-4">
                 <div class="card-header">
                     <h5 class="card-title mb-0">
-                        <i class="ph-duotone ph-activity text-info me-2"></i>Aktivitas Terakhir
+                        <i class="ph ph-chart-line-up text-info me-2"></i>Aktivitas Terakhir
                     </h5>
                 </div>
                 <div class="card-body p-0" style="max-height: 350px; overflow-y: auto;">
@@ -171,7 +171,7 @@
                         </div>
                     @empty
                         <div class="p-4 text-center text-muted">
-                            <i class="ph-duotone ph-clock-countdown fs-1 d-block mb-2 opacity-50"></i>
+                            <i class="ph ph-clock fs-1 d-block mb-2 opacity-50"></i>
                             Belum ada aktivitas.
                         </div>
                     @endforelse
@@ -184,7 +184,7 @@
     <div class="card">
         <div class="card-header">
             <h5 class="card-title mb-0">
-                <i class="ph-duotone ph-books text-primary me-2"></i>Mata Pelajaran Saya
+                <i class="ph ph-book text-primary me-2"></i>Mata Pelajaran Saya
             </h5>
         </div>
         <div class="card-body">
@@ -195,7 +195,7 @@
                             <div class="card-body">
                                 <div class="d-flex align-items-center mb-3">
                                     <div class="avatar avatar-sm me-3" style="width: 45px; height: 45px; display: inline-flex; align-items: center; justify-content: center; border-radius: 12px; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-                                        <i class="ph-duotone ph-book-open text-white"></i>
+                                        <i class="ph ph-book-open text-white"></i>
                                     </div>
                                     <div>
                                         <h6 class="mb-0">{{ $course->name }}</h6>
@@ -204,14 +204,14 @@
                                 </div>
                                 <div class="d-flex justify-content-between text-muted small">
                                     <span><i class="ph ph-users me-1"></i>{{ $course->students_count }} siswa</span>
-                                    <span><i class="ph ph-exam me-1"></i>{{ $course->exams_count }} ujian</span>
+                                    <span><i class="ph ph-file-text me-1"></i>{{ $course->exams_count }} ujian</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 @empty
                     <div class="col-12 text-center py-5 text-muted">
-                        <i class="ph-duotone ph-folder-open fs-1 d-block mb-2 opacity-50"></i>
+                        <i class="ph ph-folder-open fs-1 d-block mb-2 opacity-50"></i>
                         Belum ada mata pelajaran yang ditugaskan.
                     </div>
                 @endforelse

@@ -13,7 +13,7 @@
                         <h5 class="m-b-10">Tambah Pengguna Baru</h5>
                     </div>
                     <ul class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="ph-duotone ph-house"></i></a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="ph ph-house"></i></a></li>
                         <li class="breadcrumb-item"><a href="{{ route('admin.users.index') }}">Pengguna</a></li>
                         <li class="breadcrumb-item active" aria-current="page">Tambah</li>
                     </ul>
@@ -30,7 +30,7 @@
                 <div class="card">
                     <div class="card-header">
                         <h5 class="card-title mb-0">
-                            <i class="ph-duotone ph-user-plus me-2"></i>Informasi Pengguna
+                            <i class="ph ph-user-plus me-2"></i>Informasi Pengguna
                         </h5>
                     </div>
                     <div class="card-body">
@@ -105,10 +105,10 @@
                     </div>
                     <div class="card-footer text-end">
                         <a href="{{ route('admin.users.index') }}" class="btn btn-outline-secondary me-2">
-                            <i class="ph-duotone ph-x me-1"></i>Batal
+                            <i class="ph ph-x me-1"></i>Batal
                         </a>
                         <button type="submit" class="btn btn-primary">
-                            <i class="ph-duotone ph-floppy-disk me-1"></i>Simpan
+                            <i class="ph ph-floppy-disk me-1"></i>Simpan
                         </button>
                     </div>
                 </div>
@@ -119,7 +119,7 @@
             <div class="card">
                 <div class="card-header">
                     <h5 class="card-title mb-0">
-                        <i class="ph-duotone ph-info me-2"></i>Informasi
+                        <i class="ph ph-info me-2"></i>Informasi
                     </h5>
                 </div>
                 <div class="card-body">

@@ -40,24 +40,6 @@ class ProfileController extends Controller
     }
 
     /**
-     * Update the user's password.
-     */
-    public function updatePassword(Request $request): RedirectResponse
-    {
-        $validated = $request->validate([
-            'current_password' => ['required', 'current_password'],
-            'password' => ['required', Password::defaults(), 'confirmed'],
-        ]);
-
-        $request->user()->update([
-            'password' => Hash::make($validated['password']),
-        ]);
-
-        return redirect()->route('profile.edit')
-            ->with('status', 'password-updated');
-    }
-
-    /**
      * Update the user's avatar.
      */
     public function updateAvatar(Request $request): RedirectResponse

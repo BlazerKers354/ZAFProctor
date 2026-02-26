@@ -12,13 +12,10 @@
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     
     <!-- Phosphor Icons -->
-    <link rel="stylesheet" href="{{ asset('assets/fonts/phosphor/regular/style.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
     
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="{{ asset('assets/fonts/phosphor/duotone/style.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     
     <!-- Custom Exam Styles -->
     <style>
@@ -491,6 +488,117 @@
         /* Face Modals */
         .face-modal { z-index: 1050; }
 
+        /* ── Flag / Bookmark ─────────────────── */
+        .q-nav-btn.flagged {
+            position: relative;
+        }
+        .q-nav-btn.flagged::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            width: 8px;
+            height: 8px;
+            background: #f59e0b;
+            border-radius: 50%;
+            border: 1px solid rgba(0,0,0,0.2);
+            box-shadow: 0 0 4px rgba(245,158,11,0.5);
+        }
+        .btn-flag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            border: 1px solid rgba(245,158,11,0.3);
+            background: transparent;
+            color: #9ca3af;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-flag:hover, .btn-flag.active {
+            background: rgba(245,158,11,0.15);
+            color: #f59e0b;
+            border-color: #f59e0b;
+        }
+        .legend-dot.flagged {
+            background: #f59e0b;
+            box-shadow: 0 0 6px rgba(245,158,11,0.4);
+        }
+
+        /* ── Dark Mode ───────────────────────── */
+        body.dark-mode .question-card { background: #1e1e2e; border-color: #2a2a3d; }
+        body.dark-mode .question-body { color: #e0e0e0; }
+        body.dark-mode .question-text { color: #e0e0e0; }
+        body.dark-mode .option-item { background: #252536; border-color: #333; color: #d0d0d0; }
+        body.dark-mode .option-item:hover { background: #2d2d44; }
+        body.dark-mode .option-item.selected { background: rgba(99,102,241,0.15); border-color: var(--exam-primary); }
+        body.dark-mode .essay-textarea { background: #252536; border-color: #333; color: #e0e0e0; }
+        body.dark-mode .nav-footer { background: #1a1a2a; border-color: #2a2a3d; }
+        body.dark-mode .exam-content { background: #141421; }
+
+        /* ── Font Size ───────────────────────── */
+        body.fs-small .question-text { font-size: 0.85rem; }
+        body.fs-small .option-text { font-size: 0.82rem; }
+        body.fs-small .essay-textarea { font-size: 0.85rem; }
+        body.fs-large .question-text { font-size: 1.15rem; }
+        body.fs-large .option-text { font-size: 1.05rem; }
+        body.fs-large .essay-textarea { font-size: 1.1rem; }
+
+        /* ── Toolbar buttons ─────────────────── */
+        .exam-toolbar-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.05);
+            color: #aaa;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .exam-toolbar-btn:hover, .exam-toolbar-btn.active {
+            background: rgba(255,255,255,0.12);
+            color: #fff;
+            border-color: rgba(255,255,255,0.3);
+        }
+        .toolbar-group {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            margin-left: 10px;
+        }
+
+        /* ── Prominent Progress ──────────────── */
+        .header-progress-wrap {
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
+        .header-progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--exam-success) 0%, #22c55e 100%);
+            transition: width 0.5s ease;
+            border-radius: 0 3px 3px 0;
+        }
+        .header-progress-text {
+            position: absolute;
+            bottom: 8px;
+            right: 12px;
+            font-size: 0.65rem;
+            color: rgba(255,255,255,0.7);
+            font-weight: 600;
+        }
+
         /* Responsive */
         @media (max-width: 991px) {
             .exam-sidebar { width: 240px; }
@@ -521,7 +629,7 @@
                         <i class="ph ph-list fs-4"></i>
                     </button>
                     <div class="d-flex align-items-center justify-content-center rounded-3" style="width: 44px; height: 44px; background: linear-gradient(135deg, var(--exam-primary) 0%, #6d28d9 100%);">
-                        <i class="ph-duotone ph-file-text text-white fs-5"></i>
+                        <i class="ph ph-file-text text-white fs-5"></i>
                     </div>
                     <div class="d-none d-sm-block">
                         <h1 class="text-white mb-0 fw-semibold" style="font-size: 1.1rem;">{{ $attempt->exam->title }}</h1>
@@ -546,7 +654,7 @@
                         <canvas id="face-canvas"></canvas>
                         <div id="camera-status" class="camera-status inactive"></div>
                         <div id="camera-placeholder" class="camera-placeholder">
-                            <i class="ph ph-camera-slash fs-5"></i>
+                            <i class="ph ph-video-camera-slash fs-5"></i>
                         </div>
                     </div>
                     
@@ -569,6 +677,18 @@
                             <span id="violation-count" class="text-white fw-bold" style="font-size: 1.1rem;">0</span>
                         </div>
                     </div>
+
+                    <!-- Toolbar: Font Size -->
+                    <div class="toolbar-group d-none d-md-flex">
+                        <button onclick="setFontSize('small')" class="exam-toolbar-btn" title="Font kecil" id="fs-small">A<small style="font-size:0.6em">−</small></button>
+                        <button onclick="setFontSize('normal')" class="exam-toolbar-btn active" title="Font normal" id="fs-normal">A</button>
+                        <button onclick="setFontSize('large')" class="exam-toolbar-btn" title="Font besar" id="fs-large">A<small style="font-size:0.6em">+</small></button>
+                    </div>
+
+                    <!-- Toolbar: Dark Mode -->
+                    <button onclick="toggleDarkMode()" class="exam-toolbar-btn d-none d-md-flex" title="Mode gelap" id="dark-mode-btn">
+                        <i class="ph ph-moon"></i>
+                    </button>
                     
                     <!-- Submit Button -->
                     <button onclick="confirmSubmit()" class="btn btn-nav-success d-none d-sm-inline-flex">
@@ -579,16 +699,17 @@
             </div>
         </div>
         
-        <!-- Progress Bar -->
-        <div style="height: 4px; background: rgba(255,255,255,0.1); position: absolute; bottom: 0; left: 0; right: 0;">
-            <div id="progress-bar" style="height: 100%; width: 0%; background: linear-gradient(90deg, var(--exam-success) 0%, #22c55e 100%); transition: width 0.5s ease;"></div>
+        <!-- Progress Bar (prominent) -->
+        <div class="header-progress-wrap">
+            <div id="progress-bar" class="header-progress-fill"></div>
         </div>
+        <span id="header-progress-text" class="header-progress-text">0%</span>
     </header>
 
     <!-- Warning Banner -->
     <div id="warning-banner" class="warning-banner">
         <div class="d-flex align-items-center justify-content-center gap-2">
-            <i class="ph ph-warning-octagon fs-5"></i>
+            <i class="ph ph-warning fs-5"></i>
             <span id="warning-message" class="fw-semibold">Peringatan!</span>
         </div>
     </div>
@@ -627,6 +748,10 @@
                 <div class="legend-item mb-0">
                     <div class="legend-dot current"></div>
                     <span class="text-secondary" style="font-size: 0.8rem;">Soal aktif</span>
+                </div>
+                <div class="legend-item mb-0 mt-2">
+                    <div class="legend-dot flagged"></div>
+                    <span class="text-secondary" style="font-size: 0.8rem;">Ditandai</span>
                 </div>
             </div>
             
@@ -749,6 +874,11 @@
                                                     class="btn btn-nav btn-nav-outline {{ $index === 0 ? 'invisible' : '' }}">
                                                 <i class="ph ph-arrow-left"></i>
                                                 <span class="d-none d-sm-inline">Sebelumnya</span>
+                                            </button>
+
+                                            <button onclick="toggleFlag({{ $index }})" id="flag-btn-{{ $index }}" class="btn-flag" title="Tandai soal ini">
+                                                <i class="ph ph-flag"></i>
+                                                <span class="d-none d-sm-inline">Tandai</span>
                                             </button>
                                             
                                             @if($index === $questions->count() - 1)
@@ -879,7 +1009,7 @@
     <script src="{{ asset('assets/proctoring/face-api.min.js') }}"></script>
     
     <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
 
     <script>
         // Configuration
@@ -932,6 +1062,9 @@
         let isOnline = navigator.onLine;
         let isSyncing = false;
 
+        // Flag / Bookmark
+        let flaggedQuestions = new Set();
+
         // Initialize
         document.addEventListener('DOMContentLoaded', async function() {
             // Setup online/offline handlers
@@ -942,6 +1075,7 @@
             
             initTimer();
             updateProgressBar();
+            restorePreferences();
             
             // Start auto-save for essay answers
             startEssayAutoSave();
@@ -1160,8 +1294,10 @@
             
             const countEl = document.getElementById('answered-count');
             const percentEl = document.getElementById('answered-percent');
+            const headerTextEl = document.getElementById('header-progress-text');
             if (countEl) countEl.textContent = answeredQuestions.size;
             if (percentEl) percentEl.textContent = Math.round(progress) + '%';
+            if (headerTextEl) headerTextEl.textContent = answeredQuestions.size + '/' + config.totalQuestions + ' (' + Math.round(progress) + '%)';
         }
 
         // Question Navigation
@@ -1340,7 +1476,7 @@
                     break;
                 case 'offline':
                     statusEl.className = 'text-info';
-                    statusEl.innerHTML = '<i class="ph ph-cloud-slash me-1"></i>Disimpan lokal';
+                    statusEl.innerHTML = '<i class="ph ph-cloud me-1"></i>Disimpan lokal';
                     break;
             }
         }
@@ -1422,6 +1558,66 @@
             if (answered) {
                 btn.classList.add('answered');
             }
+        }
+
+        // ── Flag / Bookmark ─────────────────────────────
+        function toggleFlag(index) {
+            if (flaggedQuestions.has(index)) {
+                flaggedQuestions.delete(index);
+            } else {
+                flaggedQuestions.add(index);
+            }
+            const navBtn = document.getElementById(`nav-btn-${index}`);
+            const flagBtn = document.getElementById(`flag-btn-${index}`);
+            if (navBtn) navBtn.classList.toggle('flagged', flaggedQuestions.has(index));
+            if (flagBtn) flagBtn.classList.toggle('active', flaggedQuestions.has(index));
+            // Save to localStorage
+            localStorage.setItem(`flags_${config.attemptId}`, JSON.stringify([...flaggedQuestions]));
+        }
+
+        // ── Dark Mode ───────────────────────────────────
+        function toggleDarkMode() {
+            const isDark = document.body.classList.toggle('dark-mode');
+            const btn = document.getElementById('dark-mode-btn');
+            if (btn) {
+                btn.innerHTML = isDark ? '<i class="ph ph-sun"></i>' : '<i class="ph ph-moon"></i>';
+                btn.classList.toggle('active', isDark);
+            }
+            localStorage.setItem('exam_dark_mode', isDark ? '1' : '0');
+        }
+
+        // ── Font Size ───────────────────────────────────
+        function setFontSize(size) {
+            document.body.classList.remove('fs-small', 'fs-large');
+            if (size !== 'normal') document.body.classList.add('fs-' + size);
+            document.querySelectorAll('.exam-toolbar-btn[id^="fs-"]').forEach(b => b.classList.remove('active'));
+            const activeBtn = document.getElementById('fs-' + size);
+            if (activeBtn) activeBtn.classList.add('active');
+            localStorage.setItem('exam_font_size', size);
+        }
+
+        // ── Restore Preferences (dark mode, font size, flags) ──
+        function restorePreferences() {
+            // Dark mode
+            if (localStorage.getItem('exam_dark_mode') === '1') {
+                document.body.classList.add('dark-mode');
+                const btn = document.getElementById('dark-mode-btn');
+                if (btn) { btn.innerHTML = '<i class="ph ph-sun"></i>'; btn.classList.add('active'); }
+            }
+            // Font size
+            const fs = localStorage.getItem('exam_font_size');
+            if (fs && fs !== 'normal') setFontSize(fs);
+            // Flags
+            try {
+                const saved = JSON.parse(localStorage.getItem(`flags_${config.attemptId}`) || '[]');
+                saved.forEach(i => {
+                    flaggedQuestions.add(i);
+                    const navBtn = document.getElementById(`nav-btn-${i}`);
+                    const flagBtn = document.getElementById(`flag-btn-${i}`);
+                    if (navBtn) navBtn.classList.add('flagged');
+                    if (flagBtn) flagBtn.classList.add('active');
+                });
+            } catch(e) {}
         }
 
         // Submit Modal

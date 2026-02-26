@@ -11,14 +11,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     
     <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     
     <!-- Phosphor Icons -->
-    <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.0.3/src/regular/style.css">
-    <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.0.3/src/duotone/style.css">
-    
-    <!-- Tabler Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
 
     <style>
         :root {
@@ -449,7 +445,7 @@
 
         .badge-soft-warning {
             background: rgba(245, 158, 11, 0.1);
-            color: #f59e0b;
+            color: #b45309;
         }
 
         .badge-soft-danger {
@@ -464,12 +460,42 @@
 
         .badge-soft-info {
             background: rgba(6, 182, 212, 0.1);
-            color: #06b6d4;
+            color: #0e7490;
         }
 
         .badge-soft-secondary {
             background: rgba(100, 116, 139, 0.1);
             color: #64748b;
+        }
+
+        .bg-light-success {
+            background: rgba(16, 185, 129, 0.12) !important;
+            color: #059669 !important;
+        }
+
+        .bg-light-warning {
+            background: rgba(245, 158, 11, 0.12) !important;
+            color: #d97706 !important;
+        }
+
+        .bg-light-danger {
+            background: rgba(239, 68, 68, 0.12) !important;
+            color: #dc2626 !important;
+        }
+
+        .bg-light-info {
+            background: rgba(59, 130, 246, 0.12) !important;
+            color: #2563eb !important;
+        }
+
+        .bg-light-primary {
+            background: rgba(59, 130, 246, 0.12) !important;
+            color: var(--pc-brand-color-1) !important;
+        }
+
+        .bg-light-secondary {
+            background: rgba(100, 116, 139, 0.12) !important;
+            color: #64748b !important;
         }
 
         /* Form Styles */
@@ -552,6 +578,17 @@
             color: #fff;
         }
 
+        .btn-light-info {
+            background: rgba(59, 130, 246, 0.1);
+            color: #2563eb;
+            border: none;
+        }
+
+        .btn-light-info:hover {
+            background: #3b82f6;
+            color: #fff;
+        }
+
         /* Dropdown Styles */
         .dropdown-menu {
             border: none;
@@ -576,6 +613,13 @@
             height: 40px;
             border-radius: 10px;
             object-fit: cover;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .avatar i {
+            font-size: 20px;
         }
 
         .avatar-sm {
@@ -583,9 +627,26 @@
             height: 32px;
         }
 
-        .avatar-lg {
+        .avatar-sm i {
+            font-size: 16px;
+        }
+
+        .avatar-md {
             width: 48px;
             height: 48px;
+        }
+
+        .avatar-md i {
+            font-size: 24px;
+        }
+
+        .avatar-lg {
+            width: 64px;
+            height: 64px;
+        }
+
+        .avatar-lg i {
+            font-size: 30px;
         }
 
         .avatar-xl {
@@ -593,11 +654,17 @@
             height: 64px;
         }
 
+        .avatar-xl i {
+            font-size: 30px;
+        }
+
         .avatar-circle {
             border-radius: 50%;
         }
 
         /* Utility Classes */
+        .arrow-none::after { display: none; }
+
         .f-w-300 { font-weight: 300; }
         .f-w-400 { font-weight: 400; }
         .f-w-500 { font-weight: 500; }
@@ -807,7 +874,7 @@
                     <!-- Dashboard -->
                     <li class="pc-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                         <a href="{{ route('dashboard') }}" class="pc-link">
-                            <span class="pc-micon"><i class="ph-duotone ph-chart-pie-slice"></i></span>
+                            <span class="pc-micon"><i class="ph ph-chart-pie-slice"></i></span>
                             <span class="pc-mtext">Dashboard</span>
                         </a>
                     </li>
@@ -820,7 +887,7 @@
                     <!-- Users -->
                     <li class="pc-item {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
                         <a href="{{ route('admin.users.index') }}" class="pc-link">
-                            <span class="pc-micon"><i class="ph-duotone ph-users-three"></i></span>
+                            <span class="pc-micon"><i class="ph ph-users"></i></span>
                             <span class="pc-mtext">Kelola Pengguna</span>
                             @php
                                 $pendingCount = \App\Models\User::where('is_approved', false)->count();
@@ -834,7 +901,7 @@
                     <!-- Classes -->
                     <li class="pc-item {{ request()->routeIs('admin.classes.*') ? 'active' : '' }}">
                         <a href="{{ route('admin.classes.index') }}" class="pc-link">
-                            <span class="pc-micon"><i class="ph-duotone ph-chalkboard-teacher"></i></span>
+                            <span class="pc-micon"><i class="ph ph-chalkboard-teacher"></i></span>
                             <span class="pc-mtext">Kelola Kelas</span>
                         </a>
                     </li>
@@ -842,7 +909,7 @@
                     <!-- Courses -->
                     <li class="pc-item {{ request()->routeIs('admin.courses.*') ? 'active' : '' }}">
                         <a href="{{ route('admin.courses.index') }}" class="pc-link">
-                            <span class="pc-micon"><i class="ph-duotone ph-books"></i></span>
+                            <span class="pc-micon"><i class="ph ph-book"></i></span>
                             <span class="pc-mtext">Mata Pelajaran</span>
                         </a>
                     </li>
@@ -855,7 +922,7 @@
                     <!-- Profile -->
                     <li class="pc-item {{ request()->routeIs('profile.*') ? 'active' : '' }}">
                         <a href="{{ route('profile.edit') }}" class="pc-link">
-                            <span class="pc-micon"><i class="ph-duotone ph-user-circle"></i></span>
+                            <span class="pc-micon"><i class="ph ph-user-circle"></i></span>
                             <span class="pc-mtext">Profil Saya</span>
                         </a>
                     </li>
@@ -874,7 +941,7 @@
                         <form method="POST" action="{{ route('logout') }}" class="mt-3">
                             @csrf
                             <button type="submit" class="btn btn-light btn-sm w-100">
-                                <i class="ph-duotone ph-sign-out me-2"></i>Keluar
+                                <i class="ph ph-sign-out me-2"></i>Keluar
                             </button>
                         </form>
                     </div>
@@ -908,7 +975,7 @@
                     <!-- Date Display -->
                     <li class="pc-h-item d-none d-md-block me-2">
                         <span class="badge bg-light text-dark px-3 py-2 f-14">
-                            <i class="ph-duotone ph-calendar me-1"></i>
+                            <i class="ph ph-calendar-dots me-1"></i>
                             {{ now()->locale('id')->translatedFormat('l, d M Y') }}
                         </span>
                     </li>
@@ -916,7 +983,7 @@
                     <!-- Notifications -->
                     <li class="pc-h-item dropdown me-2">
                         <a class="pc-head-link dropdown-toggle arrow-none position-relative" data-bs-toggle="dropdown" href="#" role="button">
-                            <i class="ph-duotone ph-bell"></i>
+                            <i class="ph ph-bell"></i>
                             @php
                                 $pendingUsers = \App\Models\User::where('is_approved', false)->count();
                             @endphp
@@ -933,7 +1000,7 @@
                                     <div class="d-flex align-items-center">
                                         <div class="flex-shrink-0">
                                             <span class="badge bg-warning p-2 rounded">
-                                                <i class="ph-duotone ph-user-plus f-20"></i>
+                                                <i class="ph ph-user-plus f-20"></i>
                                             </span>
                                         </div>
                                         <div class="flex-grow-1 ms-3">
@@ -944,7 +1011,7 @@
                                 </a>
                             @else
                                 <div class="p-4 text-center text-muted">
-                                    <i class="ph-duotone ph-check-circle f-30 mb-2 d-block"></i>
+                                    <i class="ph ph-check-circle f-30 mb-2 d-block"></i>
                                     <span class="f-14">Tidak ada notifikasi</span>
                                 </div>
                             @endif
@@ -962,13 +1029,13 @@
                                 <small class="text-muted">{{ auth()->user()->email }}</small>
                             </div>
                             <a class="dropdown-item" href="{{ route('profile.edit') }}">
-                                <i class="ph-duotone ph-user-circle me-2"></i>Profil Saya
+                                <i class="ph ph-user-circle me-2"></i>Profil Saya
                             </a>
                             <div class="dropdown-divider"></div>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <button type="submit" class="dropdown-item text-danger">
-                                    <i class="ph-duotone ph-sign-out me-2"></i>Keluar
+                                    <i class="ph ph-sign-out me-2"></i>Keluar
                                 </button>
                             </form>
                         </div>
@@ -984,7 +1051,7 @@
             <!-- Flash Messages -->
             @if (session('success'))
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="ph-duotone ph-check-circle me-2 f-20"></i>
+                    <i class="ph ph-check-circle me-2 f-20"></i>
                     {{ session('success') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
@@ -992,7 +1059,7 @@
 
             @if (session('error'))
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="ph-duotone ph-x-circle me-2 f-20"></i>
+                    <i class="ph ph-x-circle me-2 f-20"></i>
                     {{ session('error') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
@@ -1000,7 +1067,7 @@
 
             @if (session('warning'))
                 <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                    <i class="ph-duotone ph-warning me-2 f-20"></i>
+                    <i class="ph ph-warning me-2 f-20"></i>
                     {{ session('warning') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
@@ -1008,7 +1075,7 @@
 
             @if (session('info'))
                 <div class="alert alert-info alert-dismissible fade show" role="alert">
-                    <i class="ph-duotone ph-info me-2 f-20"></i>
+                    <i class="ph ph-info me-2 f-20"></i>
                     {{ session('info') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
@@ -1031,7 +1098,7 @@
     </footer>
 
     <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
 
     <script>
         // Mobile sidebar toggle

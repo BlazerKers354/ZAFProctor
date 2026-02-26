@@ -96,17 +96,29 @@ class ExamService
     protected function seededShuffle(Collection $collection, int $seed): Collection
     {
         $items = $collection->all();
-        mt_srand($seed);
         
-        for ($i = count($items) - 1; $i > 0; $i--) {
-            $j = mt_rand(0, $i);
-            $temp = $items[$i];
-            $items[$i] = $items[$j];
-            $items[$j] = $temp;
+        // Use Random\Engine\Mt19937 for PHP 8.2+ compatibility (mt_srand deprecated in 8.3)
+        if (class_exists('\Random\Engine\Mt19937')) {
+            $engine = new \Random\Engine\Mt19937($seed);
+            $randomizer = new \Random\Randomizer($engine);
+            
+            for ($i = count($items) - 1; $i > 0; $i--) {
+                $j = $randomizer->getInt(0, $i);
+                $temp = $items[$i];
+                $items[$i] = $items[$j];
+                $items[$j] = $temp;
+            }
+        } else {
+            // Fallback for PHP < 8.2
+            mt_srand($seed);
+            for ($i = count($items) - 1; $i > 0; $i--) {
+                $j = mt_rand(0, $i);
+                $temp = $items[$i];
+                $items[$i] = $items[$j];
+                $items[$j] = $temp;
+            }
+            mt_srand();
         }
-        
-        // Reset random seed
-        mt_srand();
         
         return collect($items);
     }

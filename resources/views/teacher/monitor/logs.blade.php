@@ -15,7 +15,7 @@
                                 <h5 class="m-b-10">Log Pelanggaran: {{ $attempt->user->name }}</h5>
                             </div>
                             <ul class="breadcrumb">
-                                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="ph-duotone ph-house"></i></a></li>
+                                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="ph ph-house"></i></a></li>
                                 <li class="breadcrumb-item"><a href="{{ route('teacher.exams.index') }}">Ujian</a></li>
                                 <li class="breadcrumb-item"><a href="{{ route('teacher.monitor.index', $exam) }}">Monitor</a></li>
                                 <li class="breadcrumb-item active" aria-current="page">Log</li>
@@ -46,7 +46,7 @@
                             <h3 class="mb-0 text-danger">{{ $attempt->violation_count }}</h3>
                         </div>
                         <div class="avatar avatar-md bg-light-danger">
-                            <i class="ph-duotone ph-warning text-danger"></i>
+                            <i class="ph ph-warning text-danger"></i>
                         </div>
                     </div>
                 </div>
@@ -61,7 +61,7 @@
                             <h3 class="mb-0 text-warning">{{ $attempt->tab_switch_count ?? 0 }}</h3>
                         </div>
                         <div class="avatar avatar-md bg-light-warning">
-                            <i class="ph-duotone ph-tabs text-warning"></i>
+                            <i class="ph ph-browsers text-warning"></i>
                         </div>
                     </div>
                 </div>
@@ -76,7 +76,7 @@
                             <h3 class="mb-0 text-info">{{ $attempt->fullscreen_exit_count ?? 0 }}</h3>
                         </div>
                         <div class="avatar avatar-md bg-light-info">
-                            <i class="ph-duotone ph-arrows-out text-info"></i>
+                            <i class="ph ph-arrows-out text-info"></i>
                         </div>
                     </div>
                 </div>
@@ -88,7 +88,7 @@
     <div class="card table-card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="card-title mb-0">
-                <i class="ph-duotone ph-list-bullets me-2"></i>Riwayat Pelanggaran
+                <i class="ph ph-list-dashes me-2"></i>Riwayat Pelanggaran
             </h5>
             <span class="badge bg-secondary">{{ $logs->total() }} Log</span>
         </div>
@@ -156,7 +156,7 @@
                 </div>
             @else
                 <div class="text-center py-5 text-muted">
-                    <i class="ph-duotone ph-check-circle text-success f-48 mb-3 d-block"></i>
+                    <i class="ph ph-check-circle text-success f-48 mb-3 d-block"></i>
                     <h6>Tidak Ada Log Pelanggaran</h6>
                     <p class="mb-0">Peserta ini tidak melakukan pelanggaran selama ujian.</p>
                 </div>

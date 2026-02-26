@@ -15,7 +15,7 @@
                                 <h5 class="m-b-10">{{ $exam->title }}</h5>
                             </div>
                             <ul class="breadcrumb">
-                                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="ph-duotone ph-house"></i></a></li>
+                                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="ph ph-house"></i></a></li>
                                 <li class="breadcrumb-item"><a href="{{ route('teacher.exams.index') }}">Ujian</a></li>
                                 <li class="breadcrumb-item active" aria-current="page">{{ Str::limit($exam->title, 30) }}</li>
                             </ul>
@@ -45,7 +45,7 @@
                             <div class="d-flex gap-2 align-items-center">
                                 @if($exam->status === 'draft')
                                     <span class="badge bg-light-secondary">
-                                        <i class="ph ph-file-dashed me-1"></i>Draft
+                                        <i class="ph ph-file me-1"></i>Draft
                                     </span>
                                 @elseif($exam->status === 'published')
                                     <span class="badge bg-light-success">
@@ -63,7 +63,7 @@
 
                                 @if($exam->type === 'scheduled')
                                     <span class="badge bg-light-primary">
-                                        <i class="ph ph-calendar me-1"></i>Terjadwal
+                                        <i class="ph ph-calendar-dots me-1"></i>Terjadwal
                                     </span>
                                 @else
                                     <span class="badge bg-light-info">
@@ -113,8 +113,8 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="flex-shrink-0">
-                            <div class="avtar avtar-s bg-light-primary">
-                                <i class="ph-duotone ph-clipboard-text fs-4"></i>
+                            <div class="avatar avatar-sm bg-light-primary">
+                                <i class="ph ph-clipboard-text"></i>
                             </div>
                         </div>
                         <div class="flex-grow-1 ms-3">
@@ -130,8 +130,8 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="flex-shrink-0">
-                            <div class="avtar avtar-s bg-light-success">
-                                <i class="ph-duotone ph-users fs-4"></i>
+                            <div class="avatar avatar-sm bg-light-success">
+                                <i class="ph ph-users"></i>
                             </div>
                         </div>
                         <div class="flex-grow-1 ms-3">
@@ -147,8 +147,8 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="flex-shrink-0">
-                            <div class="avtar avtar-s bg-light-info">
-                                <i class="ph-duotone ph-check-circle fs-4"></i>
+                            <div class="avatar avatar-sm bg-light-info">
+                                <i class="ph ph-check-circle"></i>
                             </div>
                         </div>
                         <div class="flex-grow-1 ms-3">
@@ -164,8 +164,8 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="flex-shrink-0">
-                            <div class="avtar avtar-s bg-light-warning">
-                                <i class="ph-duotone ph-star fs-4"></i>
+                            <div class="avatar avatar-sm bg-light-warning">
+                                <i class="ph ph-star"></i>
                             </div>
                         </div>
                         <div class="flex-grow-1 ms-3">
@@ -183,7 +183,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h5 class="mb-0"><i class="ph-duotone ph-lightning text-warning me-2"></i>Aksi Cepat</h5>
+                    <h5 class="mb-0"><i class="ph ph-lightning text-warning me-2"></i>Aksi Cepat</h5>
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
@@ -205,7 +205,7 @@
                         </div>
                         <div class="col-md-3">
                             <a href="{{ route('teacher.exams.export', $exam) }}" class="btn btn-outline-secondary w-100">
-                                <i class="ph ph-download me-2"></i>Export Data
+                                <i class="ph ph-download-simple me-2"></i>Export Data
                             </a>
                         </div>
                     </div>
@@ -220,7 +220,7 @@
             <!-- Exam Information -->
             <div class="card mb-4">
                 <div class="card-header">
-                    <h5 class="mb-0"><i class="ph-duotone ph-info text-primary me-2"></i>Informasi Ujian</h5>
+                    <h5 class="mb-0"><i class="ph ph-info text-primary me-2"></i>Informasi Ujian</h5>
                 </div>
                 <div class="card-body">
                     <div class="row mb-3">
@@ -249,14 +249,14 @@
                             <div class="col-md-6">
                                 <label class="text-muted small">Waktu Mulai</label>
                                 <p class="mb-0 fw-semibold">
-                                    <i class="ph ph-calendar me-1"></i>
+                                    <i class="ph ph-calendar-dots me-1"></i>
                                     {{ $exam->start_time ? $exam->start_time->format('d M Y, H:i') : '-' }}
                                 </p>
                             </div>
                             <div class="col-md-6">
                                 <label class="text-muted small">Waktu Selesai</label>
                                 <p class="mb-0 fw-semibold">
-                                    <i class="ph ph-calendar me-1"></i>
+                                    <i class="ph ph-calendar-dots me-1"></i>
                                     {{ $exam->end_time ? $exam->end_time->format('d M Y, H:i') : '-' }}
                                 </p>
                             </div>
@@ -278,7 +278,7 @@
             <div class="card">
                 <div class="card-header">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="ph-duotone ph-list-numbers text-success me-2"></i>Soal</h5>
+                        <h5 class="mb-0"><i class="ph ph-list-numbers text-success me-2"></i>Soal</h5>
                         <a href="{{ route('teacher.questions.index', $exam) }}" class="btn btn-sm btn-primary">
                             <i class="ph ph-pencil-simple me-1"></i>Kelola Soal
                         </a>
@@ -287,7 +287,7 @@
                 <div class="card-body">
                     @if($exam->questions->isEmpty())
                         <div class="text-center py-4">
-                            <i class="ph-duotone ph-clipboard-text text-muted mb-3" style="font-size: 48px; opacity: 0.3;"></i>
+                            <i class="ph ph-clipboard-text text-muted mb-3" style="font-size: 48px; opacity: 0.3;"></i>
                             <p class="text-muted mb-3">Belum ada soal untuk ujian ini</p>
                             <a href="{{ route('teacher.questions.index', $exam) }}" class="btn btn-sm btn-primary">
                                 <i class="ph ph-plus me-1"></i>Tambah Soal
@@ -345,20 +345,12 @@
             @if($exam->settings)
                 <div class="card mb-4">
                     <div class="card-header">
-                        <h5 class="mb-0"><i class="ph-duotone ph-shield-check text-info me-2"></i>Pengaturan Proctoring</h5>
+                        <h5 class="mb-0"><i class="ph ph-shield-check text-info me-2"></i>Pengaturan Proctoring</h5>
                     </div>
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <span class="text-muted small">Webcam Monitor</span>
                             @if($exam->settings->webcam_enabled)
-                                <span class="badge bg-light-success">Aktif</span>
-                            @else
-                                <span class="badge bg-light-secondary">Nonaktif</span>
-                            @endif
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="text-muted small">Screen Capture</span>
-                            @if($exam->settings->screen_capture_enabled)
                                 <span class="badge bg-light-success">Aktif</span>
                             @else
                                 <span class="badge bg-light-secondary">Nonaktif</span>
@@ -392,7 +384,7 @@
             @if($exam->settings)
                 <div class="card mb-4">
                     <div class="card-header">
-                        <h5 class="mb-0"><i class="ph-duotone ph-eye text-success me-2"></i>Pengaturan Tampilan</h5>
+                        <h5 class="mb-0"><i class="ph ph-eye text-success me-2"></i>Pengaturan Tampilan</h5>
                     </div>
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -435,7 +427,7 @@
             @if($exam->settings)
                 <div class="card mb-4">
                     <div class="card-header">
-                        <h5 class="mb-0"><i class="ph-duotone ph-repeat text-warning me-2"></i>Percobaan</h5>
+                        <h5 class="mb-0"><i class="ph ph-repeat text-warning me-2"></i>Percobaan</h5>
                     </div>
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -465,7 +457,7 @@
             <!-- Access Token -->
             <div class="card mb-4">
                 <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-                    <h5 class="mb-0 text-white"><i class="ph-duotone ph-key me-2"></i>Token Akses Ujian</h5>
+                    <h5 class="mb-0 text-white"><i class="ph ph-key me-2"></i>Token Akses Ujian</h5>
                 </div>
                 <div class="card-body">
                     <p class="text-muted small mb-3">Bagikan token ini kepada siswa untuk mengakses ujian.</p>
@@ -494,7 +486,7 @@
             <!-- Danger Zone -->
             <div class="card border-danger">
                 <div class="card-header bg-danger text-white">
-                    <h5 class="mb-0"><i class="ph-duotone ph-warning me-2"></i>Zona Berbahaya</h5>
+                    <h5 class="mb-0"><i class="ph ph-warning me-2"></i>Zona Berbahaya</h5>
                 </div>
                 <div class="card-body">
                     <p class="text-muted small mb-3">Hapus ujian ini secara permanen. Tindakan ini tidak dapat dibatalkan.</p>

@@ -42,15 +42,7 @@ class SchoolClass extends Model
         return $this->hasMany(User::class, 'class_id');
     }
 
-    /**
-     * Get all students ever enrolled in this class
-     */
-    public function enrolledStudents(): BelongsToMany
-    {
-        return $this->belongsToMany(User::class, 'class_student')
-            ->withPivot('academic_year')
-            ->withTimestamps();
-    }
+    // enrolledStudents() pivot removed – use students() via class_id instead
 
     /**
      * Scope for active classes

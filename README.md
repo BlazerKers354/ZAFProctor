@@ -2,45 +2,52 @@
 
 ![PHP](https://img.shields.io/badge/PHP-8.2%2B-777BB4?style=flat-square&logo=php&logoColor=white)
 ![Laravel](https://img.shields.io/badge/Laravel-11-FF2D20?style=flat-square&logo=laravel&logoColor=white)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-3.x-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
+![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3.2-7952B3?style=flat-square&logo=bootstrap&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 
 Sistem ujian online (Computer Based Test) berbasis web dengan pengawasan kamera (webcam proctoring) untuk meminimalkan kecurangan peserta ujian.
 
 ## 📋 Deskripsi
 
-ZAFProctor adalah sistem ujian online yang dirancang untuk institusi pendidikan (sekolah/universitas). Sistem ini dilengkapi dengan fitur pengawasan kamera real-time yang dapat mendeteksi dan mencatat perilaku mencurigakan selama ujian berlangsung. Aplikasi ini mendukung multi-role dengan sistem approval untuk pendaftaran pengguna baru.
+ZAFProctor adalah sistem ujian online yang dirancang untuk institusi pendidikan (sekolah/universitas). Sistem ini dilengkapi dengan fitur pengawasan kamera real-time yang dapat mendeteksi dan mencatat perilaku mencurigakan selama ujian berlangsung. Aplikasi ini mendukung multi-role (admin, guru, siswa) dengan sistem approval untuk pendaftaran pengguna baru, serta menyediakan panduan pengguna dalam format PDF yang dapat diunduh langsung dari halaman landing.
 
 ## 🌟 Fitur Utama
 
 ### 👨‍💼 Administrator
 - Manajemen pengguna (CRUD admin, guru, siswa)
-- Sistem approval pendaftaran pengguna baru
-- Manajemen kelas (kelompokkan siswa berdasarkan kelas)
-- Manajemen mata pelajaran/kuliah
-- Assign siswa ke kelas dan mata pelajaran
-- Melihat log aktivitas sistem
+- Sistem approval/reject pendaftaran pengguna baru
+- Manajemen kelas (kelompokkan siswa berdasarkan kelas, assign wali kelas)
+- Manajemen mata pelajaran dengan guru pengampu
+- Assign/hapus siswa ke kelas dan mata pelajaran
+- Toggle status aktif/nonaktif pengguna
 - Dashboard statistik
 
 ### 👨‍🏫 Guru
 - Membuat dan mengelola ujian (scheduled & flexible)
-- Membuat soal (pilihan ganda & essay)
-- Import/Export soal dari template
+- Membuat soal (pilihan ganda & essay) dengan urutan yang dapat diatur
+- Import/Export soal dari template (download template tersedia)
 - Duplikasi soal dan ujian
+- Hapus soal secara massal (delete multiple)
 - Mengatur jadwal dan durasi ujian
-- Mengatur pengaturan proctoring (webcam, screen capture, browser lock)
-- Monitoring peserta ujian secara real-time
-- Melihat log pelanggaran dengan snapshot
-- Menilai jawaban essay
+- Mengatur pengaturan proctoring per ujian (webcam, screen capture, browser lock)
+- Publish/unpublish ujian
+- Monitoring peserta ujian secara real-time (live monitoring)
+- Melihat detail aktivitas peserta dan log pelanggaran dengan snapshot
+- Terminate (paksa selesai) ujian peserta jika diperlukan
+- Menilai jawaban essay (grading)
+- Memberikan feedback pada hasil ujian
 - Export hasil ujian
 - Regenerate access token ujian
 
 ### 👨‍🎓 Siswa/Mahasiswa
 - Verifikasi email sebelum dapat mengakses sistem
-- Melihat daftar ujian yang tersedia
+- Melihat daftar ujian yang tersedia dan riwayat ujian
 - Pre-check kamera dan fullscreen sebelum ujian
-- Mengerjakan ujian dengan pengawasan kamera
-- Melihat hasil ujian (jika diizinkan guru)
+- Memasukkan token akses dari guru untuk memulai ujian
+- Mengerjakan ujian dengan pengawasan kamera (mode fullscreen)
+- Navigasi soal dan auto-save jawaban
+- Sinkronisasi waktu dengan server (timer server-side)
+- Melihat hasil ujian dan detail jawaban (jika diizinkan guru)
 
 ### 📷 Fitur Proctoring
 - **Pengawasan Webcam**: Snapshot otomatis selama ujian dengan interval yang dapat diatur
@@ -54,13 +61,18 @@ ZAFProctor adalah sistem ujian online yang dirancang untuk institusi pendidikan 
 - **Pencatatan Pelanggaran**: Log semua aktivitas mencurigakan dengan severity level
 - **Auto-Submit**: Otomatis kumpulkan ujian jika melebihi batas pelanggaran
 - **Heartbeat System**: Monitoring koneksi peserta secara real-time
+- **Rate Limiting**: Throttle pada endpoint kritis (start, save-answer, violation, snapshot, heartbeat)
 
 ## 🛠️ Tech Stack
 
 - **Backend**: Laravel 11 (PHP 8.2+)
-- **Frontend**: Blade Templates + Tailwind CSS + Alpine.js
+- **Frontend**: Blade Templates + Bootstrap 5.3.2 (CDN) + Alpine.js
+- **Ikon**: Phosphor Icons Web 2.1.1
+- **Font**: Open Sans (dashboard) + Inter (auth)
 - **Database**: MySQL
+- **PDF Generation**: barryvdh/laravel-dompdf
 - **Proctoring**: WebRTC (MediaDevices API)
+- **Build Tool**: Vite 5
 
 ## 📦 Instalasi
 
@@ -150,21 +162,24 @@ Fitur proctoring (webcam) memerlukan browser modern dengan dukungan WebRTC:
 
 ## 👤 Akun Default
 
-| Role | Email | Password |
-|------|-------|----------|
-| Admin | admin@zafproctor.test | password |
-| Guru | guru@zafproctor.test | password |
-| Siswa | siswa1@zafproctor.test | password |
+| Role | Nama | Email | Password |
+|------|------|-------|----------|
+| Admin | Administrator | admin@zafproctor.test | password |
+| Guru | Ibu Guru Demo | guru@zafproctor.test | password |
+| Siswa | Ahmad Siswa | siswa1@zafproctor.test | password |
+| Siswa | Budi Pelajar | siswa2@zafproctor.test | password |
+| Siswa | Citra Murid | siswa3@zafproctor.test | password |
 
-> **Catatan**: User baru yang mendaftar perlu diapprove oleh admin terlebih dahulu, kecuali akun yang dibuat melalui seeder.
+> **Catatan**: Semua akun seeder sudah dalam status aktif, disetujui, dan terverifikasi email. User baru yang mendaftar perlu diapprove oleh admin terlebih dahulu.
 
 ## 🔑 Fitur Authentication
 
 - **Email Verification**: Pengguna harus memverifikasi email sebelum dapat mengakses sistem
 - **Sistem Approval**: Admin dapat menyetujui/menolak pendaftaran user baru
+- **Registrasi Terpisah**: Form registrasi berbeda untuk siswa dan guru
 - **Forgot Password**: Reset password melalui email
-- **Role-based Access**: Akses berbeda untuk admin, guru, dan siswa
-- **Active Status**: Admin dapat menonaktifkan user
+- **Role-based Access**: Akses berbeda untuk admin, guru, dan siswa (middleware + policy)
+- **Active Status**: Admin dapat menonaktifkan/mengaktifkan user
 
 ## 📐 Struktur Database
 
@@ -254,28 +269,30 @@ zafproctor/
 │   │   │   │   ├── ForgotPasswordController.php
 │   │   │   │   ├── LoginController.php
 │   │   │   │   ├── PasswordController.php
-│   │   │   │   ├── RegisterController.php
+│   │   │   │   ├── RegisterController.php   # Registrasi siswa & guru
 │   │   │   │   └── VerificationController.php  # Email verification
 │   │   │   ├── Student/
 │   │   │   │   ├── ExamController.php       # Mengerjakan ujian
-│   │   │   │   └── ProctoringController.php # Logging pelanggaran
+│   │   │   │   └── ProctoringController.php # Logging pelanggaran & snapshot
 │   │   │   ├── Teacher/
-│   │   │   │   ├── ExamController.php       # CRUD ujian + grading
+│   │   │   │   ├── ExamController.php       # CRUD ujian + grading + export
 │   │   │   │   ├── MonitorController.php    # Monitoring real-time
 │   │   │   │   └── QuestionController.php   # CRUD soal + import/export
-│   │   │   ├── DashboardController.php
-│   │   │   └── ProfileController.php
+│   │   │   ├── DashboardController.php      # Dashboard multi-role
+│   │   │   ├── GuideController.php          # Download panduan PDF
+│   │   │   ├── ProfileController.php
+│   │   │   └── SnapshotController.php       # Serve snapshot proctoring
 │   │   └── Middleware/
 │   │       ├── CheckActiveUser.php          # Cek user aktif & approved
 │   │       ├── EnsureExamInProgress.php     # Cek sesi ujian aktif
-│   │       ├── LogActivity.php              # Logging aktivitas
+│   │       ├── LogActivity.php              # Logging aktivitas (audit log)
 │   │       └── RoleMiddleware.php           # Autentikasi role
 │   ├── Models/
 │   │   ├── Answer.php
 │   │   ├── AuditLog.php
 │   │   ├── Course.php
 │   │   ├── Exam.php                         # Tipe: scheduled/flexible
-│   │   ├── ExamAttempt.php
+│   │   ├── ExamAttempt.php                  # Dengan feedback & tracking
 │   │   ├── ExamSetting.php                  # Pengaturan proctoring lengkap
 │   │   ├── ProctoringLog.php                # Dengan severity level
 │   │   ├── Question.php
@@ -292,7 +309,7 @@ zafproctor/
 │       ├── ExamService.php
 │       └── ProctoringService.php            # Penanganan snapshot & log
 ├── database/
-│   ├── migrations/
+│   ├── migrations/                          # 21 migration files
 │   └── seeders/
 │       ├── ClassSeeder.php
 │       ├── CourseSeeder.php
@@ -301,21 +318,39 @@ zafproctor/
 │       └── UserSeeder.php
 ├── resources/
 │   └── views/
+│       ├── landing.blade.php                # Halaman landing publik
 │       ├── admin/
-│       │   ├── classes/                     # Manajemen kelas
-│       │   ├── courses/
-│       │   └── users/                       # + approval system
-│       ├── auth/                            # Login, register, verify
+│       │   ├── dashboard.blade.php
+│       │   ├── classes/                     # CRUD + assign siswa
+│       │   ├── courses/                     # CRUD + assign siswa
+│       │   └── users/                       # CRUD + approval + pending
+│       ├── auth/
+│       │   ├── auth.blade.php               # Login & register
+│       │   ├── forgot-password.blade.php
+│       │   ├── reset-password.blade.php
+│       │   └── verify-email.blade.php
+│       ├── guides/
+│       │   └── panduan-pengguna.blade.php   # Template PDF panduan
 │       ├── layouts/
+│       │   ├── admin.blade.php              # Layout panel admin
+│       │   ├── app.blade.php                # Layout base
+│       │   ├── exam.blade.php               # Layout pengerjaan ujian
+│       │   ├── guest.blade.php              # Layout halaman tamu
+│       │   ├── navigation.blade.php
+│       │   ├── student.blade.php            # Layout panel siswa
+│       │   └── teacher.blade.php            # Layout panel guru
 │       ├── profile/
+│       │   └── edit.blade.php
 │       ├── student/
+│       │   ├── dashboard.blade.php
 │       │   └── exams/                       # Pre-check, take exam, result
 │       └── teacher/
-│           ├── exams/                       # CRUD + grading
-│           ├── monitor/                     # Real-time monitoring
+│           ├── dashboard.blade.php
+│           ├── exams/                       # CRUD + grading + results
+│           ├── monitor/                     # Live monitoring + logs
 │           └── questions/                   # CRUD + import/export
 └── routes/
-    └── web.php
+    └── web.php                              # Semua route (public, auth, admin, teacher, student)
 ```
 
 ## 🧪 Testing
@@ -356,6 +391,7 @@ php artisan optimize:clear
 
 ## 🚀 Pengembangan Selanjutnya
 
+- [ ] Halaman admin untuk melihat audit log aktivitas
 - [ ] Integrasi face detection menggunakan TensorFlow.js
 - [ ] Real-time notification menggunakan WebSocket
 - [ ] Bank soal dengan kategori
@@ -370,31 +406,41 @@ Memungkinkan pelaksanaan ujian secara digital dengan fitur:
 - Ujian terjadwal (scheduled) dan fleksibel
 - Timer otomatis dengan sinkronisasi waktu server
 - Auto-save jawaban untuk mencegah kehilangan data
-- Multiple attempt dengan berbagai metode penilaian
+- Multiple attempt dengan berbagai metode penilaian (highest/latest/average)
+- Feedback guru pada hasil ujian
 
 ### 2. **Proctoring System (Sistem Pengawasan)**
 Implementasi pengawasan ujian digital untuk menjaga integritas akademik:
 - Webcam monitoring dengan snapshot berkala
 - Browser lockdown untuk mencegah kecurangan
-- Deteksi aktivitas mencurigakan (tab switch, copy-paste, dll)
-- Logging pelanggaran dengan bukti screenshot
+- Deteksi aktivitas mencurigakan (tab switch, copy-paste, fullscreen exit, dll)
+- Logging pelanggaran dengan bukti screenshot dan severity level
+- Rate limiting pada endpoint proctoring untuk mencegah abuse
 
 ### 3. **Manajemen Akademik**
 - Struktur hierarki: Kelas → Siswa → Mata Pelajaran → Ujian
 - Wali kelas untuk setiap kelas
 - Enrollment siswa ke mata pelajaran
+- Registrasi terpisah untuk siswa dan guru
 
 ### 4. **Penilaian & Grading**
 - Auto-grading untuk soal pilihan ganda
 - Manual grading untuk soal essay
 - Berbagai metode penilaian untuk multiple attempts
 - Export hasil ujian
+- Feedback per attempt
 
 ### 5. **Audit & Keamanan**
-- Logging semua aktivitas pengguna
-- Sistem approval untuk pendaftaran
+- Logging aktivitas pengguna (audit log via middleware)
+- Sistem approval untuk pendaftaran baru
 - Email verification
-- Role-based access control
+- Role-based access control dengan policy
+- Rate limiting pada endpoint sensitif
+
+### 6. **Panduan Pengguna (PDF)**
+- Panduan lengkap untuk admin, guru, dan siswa
+- Generate PDF otomatis menggunakan DomPDF
+- Download langsung dari halaman landing (publik)
 
 ## 📄 Lisensi
 

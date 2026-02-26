@@ -32,8 +32,8 @@
                 
                 <div class="card-body">
                     <div class="d-flex align-items-center gap-3 mb-4">
-                        <div class="bg-primary bg-opacity-10 rounded-3 p-3">
-                            <i class="ph ph-file-text f-24 text-primary"></i>
+                        <div class="rounded-3 p-3" style="background: rgba(124, 58, 237, 0.1);">
+                            <i class="ph ph-file-text f-24" style="color: #7c3aed;"></i>
                         </div>
                         <div>
                             <h5 class="mb-1 f-w-600">{{ $attempt->exam->title }}</h5>

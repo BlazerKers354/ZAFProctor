@@ -13,7 +13,7 @@
                         <h5 class="m-b-10">Persetujuan Pendaftaran</h5>
                     </div>
                     <ul class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="ph-duotone ph-house"></i></a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="ph ph-house"></i></a></li>
                         <li class="breadcrumb-item"><a href="{{ route('admin.users.index') }}">Pengguna</a></li>
                         <li class="breadcrumb-item active" aria-current="page">Pending Approval</li>
                     </ul>
@@ -26,7 +26,7 @@
         @if($pendingUsers->count() > 0)
             <div class="card-header">
                 <h5 class="card-title mb-0">
-                    <i class="ph-duotone ph-user-check me-2"></i>User Menunggu Persetujuan
+                    <i class="ph ph-user-check me-2"></i>User Menunggu Persetujuan
                     <span class="badge bg-warning ms-2">{{ $pendingUsers->total() }}</span>
                 </h5>
             </div>
@@ -71,14 +71,14 @@
                                         <form action="{{ route('admin.users.approve', $user) }}" method="POST" class="d-inline">
                                             @csrf
                                             <button type="submit" class="btn btn-sm btn-success" title="Setujui">
-                                                <i class="ph-duotone ph-check me-1"></i>Setujui
+                                                <i class="ph ph-check me-1"></i>Setujui
                                             </button>
                                         </form>
                                         <form action="{{ route('admin.users.reject', $user) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menolak pendaftaran ini? Akun akan dihapus.')">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-sm btn-danger" title="Tolak">
-                                                <i class="ph-duotone ph-x me-1"></i>Tolak
+                                                <i class="ph ph-x me-1"></i>Tolak
                                             </button>
                                         </form>
                                     </td>
@@ -97,7 +97,7 @@
             <div class="card-body">
                 <div class="empty-state">
                     <div class="empty-state-icon">
-                        <i class="ph-duotone ph-check-circle text-success"></i>
+                        <i class="ph ph-check-circle text-success"></i>
                     </div>
                     <h6>Tidak ada pendaftaran yang menunggu</h6>
                     <p class="text-muted mb-0">Semua pendaftaran telah diproses.</p>

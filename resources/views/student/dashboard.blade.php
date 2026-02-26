@@ -11,7 +11,7 @@
                 <div class="col-md-8">
                     <div class="d-flex align-items-center gap-3">
                         <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1);" class="rounded-3 p-3">
-                            <i class="ph ph-student f-36 text-white"></i>
+                            <i class="ph ph-graduation-cap f-36 text-white"></i>
                         </div>
                         <div>
                             <p class="mb-1 f-14" style="color: rgba(255,255,255,0.7);">Selamat datang kembali,</p>
@@ -26,7 +26,7 @@
                             <i class="ph ph-graduation-cap me-1"></i>{{ $stats['class_name'] }}
                         </span>
                         <span class="badge px-3 py-2" style="background: rgba(255,255,255,0.12); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.08);">
-                            <i class="ph ph-calendar me-1"></i>{{ now()->locale('id')->translatedFormat('d M Y') }}
+                            <i class="ph ph-calendar-dots me-1"></i>{{ now()->locale('id')->translatedFormat('d M Y') }}
                         </span>
                     </div>
                 </div>
@@ -185,7 +185,7 @@
                 <div class="card-header py-3" style="background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); border-radius: 16px 16px 0 0 !important;">
                     <div class="d-flex align-items-center gap-3">
                         <div style="background: rgba(255,255,255,0.2); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.15);" class="rounded-3 p-2">
-                            <i class="ph ph-calendar f-20 text-white"></i>
+                            <i class="ph ph-calendar-dots f-20 text-white"></i>
                         </div>
                         <div>
                             <h5 class="mb-0 text-white f-w-600">Jadwal Ujian</h5>

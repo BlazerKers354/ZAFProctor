@@ -13,16 +13,16 @@
                         <h5 class="m-b-10">Kelola Pengguna</h5>
                     </div>
                     <ul class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="ph-duotone ph-house"></i></a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="ph ph-house"></i></a></li>
                         <li class="breadcrumb-item active" aria-current="page">Pengguna</li>
                     </ul>
                 </div>
                 <div class="col-md-6 text-md-end">
                     <a href="{{ route('admin.users.pending') }}" class="btn btn-warning me-2">
-                        <i class="ph-duotone ph-user-check me-2"></i>Persetujuan Pengguna
+                        <i class="ph ph-user-check me-2"></i>Persetujuan Pengguna
                     </a>
                     <a href="{{ route('admin.users.create') }}" class="btn btn-primary">
-                        <i class="ph-duotone ph-user-plus me-2"></i>Tambah Pengguna
+                        <i class="ph ph-user-plus me-2"></i>Tambah Pengguna
                     </a>
                 </div>
             </div>
@@ -37,7 +37,7 @@
                     <div class="col-md-4">
                         <label class="form-label">Cari Pengguna</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-transparent"><i class="ph-duotone ph-magnifying-glass"></i></span>
+                            <span class="input-group-text bg-transparent"><i class="ph ph-magnifying-glass"></i></span>
                             <input type="text" name="search" value="{{ request('search') }}" 
                                    placeholder="Nama atau email..."
                                    class="form-control">
@@ -64,11 +64,11 @@
                     </div>
                     <div class="col-md-4">
                         <button type="submit" class="btn btn-primary me-2">
-                            <i class="ph-duotone ph-funnel me-1"></i>Filter
+                            <i class="ph ph-funnel me-1"></i>Filter
                         </button>
                         @if(request()->hasAny(['search', 'role', 'status']))
                             <a href="{{ route('admin.users.index') }}" class="btn btn-outline-secondary">
-                                <i class="ph-duotone ph-x me-1"></i>Reset
+                                <i class="ph ph-x me-1"></i>Reset
                             </a>
                         @endif
                     </div>
@@ -128,24 +128,24 @@
                                 </td>
                                 <td class="text-end">
                                     <a href="{{ route('admin.users.show', $user) }}" class="btn btn-sm btn-light-info" title="Detail">
-                                        <i class="ph-duotone ph-eye"></i>
+                                        <i class="ph ph-eye"></i>
                                     </a>
-                                    <a href="{{ route('admin.users.edit', $user) }}" class="btn btn-sm btn-light-primary" title="Edit">
-                                        <i class="ph-duotone ph-pencil-simple"></i>
+                                    <a href="{{ route('admin.users.edit', $user) }}" class="btn btn-sm btn-light-warning" title="Edit">
+                                        <i class="ph ph-pencil-simple"></i>
                                     </a>
                                     @if($user->id !== auth()->id())
                                         <form action="{{ route('admin.users.toggle-status', $user) }}" method="POST" class="d-inline">
                                             @csrf
                                             @method('PATCH')
                                             <button type="submit" class="btn btn-sm btn-light-warning" title="{{ $user->is_active ? 'Nonaktifkan' : 'Aktifkan' }}">
-                                                <i class="ph-duotone ph-{{ $user->is_active ? 'prohibit' : 'check' }}"></i>
+                                                <i class="ph ph-{{ $user->is_active ? 'prohibit' : 'check' }}"></i>
                                             </button>
                                         </form>
                                         <form action="{{ route('admin.users.destroy', $user) }}" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus pengguna ini?')">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-sm btn-light-danger" title="Hapus">
-                                                <i class="ph-duotone ph-trash"></i>
+                                                <i class="ph ph-trash"></i>
                                             </button>
                                         </form>
                                     @endif
@@ -156,7 +156,7 @@
                                 <td colspan="5">
                                     <div class="empty-state">
                                         <div class="empty-state-icon">
-                                            <i class="ph-duotone ph-users"></i>
+                                            <i class="ph ph-users"></i>
                                         </div>
                                         <h6>Tidak ada pengguna ditemukan</h6>
                                         <p class="text-muted mb-0">Coba ubah filter pencarian atau tambah pengguna baru</p>

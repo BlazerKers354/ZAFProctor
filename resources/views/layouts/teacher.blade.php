@@ -11,14 +11,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     
     <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     
     <!-- Phosphor Icons -->
-    <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.0.3/src/regular/style.css">
-    <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.0.3/src/duotone/style.css">
-    
-    <!-- Tabler Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
 
     <style>
         :root {
@@ -225,8 +221,8 @@
         .pc-header {
             position: fixed;
             top: 0;
-            left: var(--pc-sidebar-width);
             right: 0;
+            left: var(--pc-sidebar-width);
             height: var(--pc-header-height);
             background: #ffffff;
             z-index: 1024;
@@ -245,28 +241,25 @@
             background: linear-gradient(90deg, var(--pc-brand-color-1), #34d399, #6ee7b7);
             opacity: 0.6;
         }
-            box-shadow: 0 1px 0 rgba(0,0,0,0.05);
-            transition: all 0.3s ease;
-        }
 
         .pc-header .header-wrapper {
             display: flex;
             align-items: center;
-            justify-content: space-between;
             height: 100%;
             padding: 0 24px;
         }
 
         .pc-header .pc-head-link {
-            width: 44px;
-            height: 44px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 12px;
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
             color: #64748b;
-            transition: all 0.2s ease;
+            font-size: 20px;
             text-decoration: none;
+            transition: all 0.2s ease;
         }
 
         .pc-header .pc-head-link:hover {
@@ -274,35 +267,30 @@
             color: var(--pc-brand-color-1);
         }
 
-        .pc-header .pc-head-link i {
-            font-size: 22px;
-        }
-
-        .pc-header .dropdown-toggle::after {
-            display: none;
-        }
-
         .pc-header .pc-h-item {
+            list-style: none;
             margin: 0 4px;
         }
 
-        .pc-header .user-avatar-header {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            object-fit: cover;
+        .pc-header .pc-h-badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            font-size: 9px;
+            padding: 4px 6px;
         }
 
         /* Container/Content Styles */
         .pc-container {
             position: relative;
             margin-left: var(--pc-sidebar-width);
+            padding-top: var(--pc-header-height);
             min-height: 100vh;
             transition: all 0.3s ease;
         }
 
         .pc-content {
-            padding: calc(var(--pc-header-height) + 24px) 24px 24px;
+            padding: 24px;
         }
 
         /* Page Header */
@@ -412,12 +400,6 @@
         }
 
         /* Badge Styles */
-        .badge {
-            font-weight: 500;
-            padding: 6px 12px;
-            border-radius: 8px;
-        }
-
         .badge-soft-success {
             background: rgba(16, 185, 129, 0.1);
             color: #059669;
@@ -436,6 +418,11 @@
         .badge-soft-info {
             background: rgba(59, 130, 246, 0.1);
             color: #2563eb;
+        }
+
+        .badge-soft-primary {
+            background: rgba(16, 185, 129, 0.1);
+            color: #059669;
         }
 
         .badge-soft-secondary {
@@ -472,6 +459,38 @@
             background: rgba(100, 116, 139, 0.12) !important;
             color: #64748b !important;
         }
+
+        /* Utility Classes */
+        .arrow-none::after { display: none; }
+
+        .f-w-300 { font-weight: 300; }
+        .f-w-400 { font-weight: 400; }
+        .f-w-500 { font-weight: 500; }
+        .f-w-600 { font-weight: 600; }
+        .f-w-700 { font-weight: 700; }
+
+        .f-10 { font-size: 10px; }
+        .f-12 { font-size: 12px; }
+        .f-14 { font-size: 14px; }
+        .f-16 { font-size: 16px; }
+        .f-20 { font-size: 20px; }
+        .f-24 { font-size: 24px; }
+        .f-30 { font-size: 30px; }
+        .f-36 { font-size: 36px; }
+
+        .m-b-0 { margin-bottom: 0; }
+        .m-b-10 { margin-bottom: 10px; }
+        .m-b-15 { margin-bottom: 15px; }
+        .m-b-20 { margin-bottom: 20px; }
+        .m-t-10 { margin-top: 10px; }
+        .m-t-15 { margin-top: 15px; }
+        .m-t-20 { margin-top: 20px; }
+        .m-t-30 { margin-top: 30px; }
+        .m-r-5 { margin-right: 5px; }
+        .m-r-10 { margin-right: 10px; }
+        .m-r-15 { margin-right: 15px; }
+        .m-l-10 { margin-left: 10px; }
+        .m-l-15 { margin-left: 15px; }
 
         /* Button Styles */
         .btn {
@@ -797,29 +816,44 @@
 
         /* Avatar */
         .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            border-radius: 12px;
-            font-weight: 600;
+        }
+
+        .avatar i {
+            font-size: 20px;
         }
 
         .avatar-sm {
             width: 36px;
             height: 36px;
-            font-size: 14px;
+        }
+
+        .avatar-sm i {
+            font-size: 16px;
         }
 
         .avatar-md {
             width: 48px;
             height: 48px;
-            font-size: 18px;
+        }
+
+        .avatar-md i {
+            font-size: 24px;
         }
 
         .avatar-lg {
             width: 64px;
             height: 64px;
-            font-size: 24px;
+        }
+
+        .avatar-lg i {
+            font-size: 30px;
         }
 
         /* Alpine.js cloak */
@@ -858,7 +892,7 @@
                     <!-- Dashboard -->
                     <li class="pc-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                         <a href="{{ route('dashboard') }}" class="pc-link">
-                            <span class="pc-micon"><i class="ph-duotone ph-chart-pie-slice"></i></span>
+                            <span class="pc-micon"><i class="ph ph-chart-pie-slice"></i></span>
                             <span class="pc-mtext">Dashboard</span>
                         </a>
                     </li>
@@ -871,7 +905,7 @@
                     <!-- All Exams -->
                     <li class="pc-item {{ request()->routeIs('teacher.exams.*') ? 'active' : '' }}">
                         <a href="{{ route('teacher.exams.index') }}" class="pc-link">
-                            <span class="pc-micon"><i class="ph-duotone ph-exam"></i></span>
+                            <span class="pc-micon"><i class="ph ph-file-text"></i></span>
                             <span class="pc-mtext">Kelola Ujian</span>
                         </a>
                     </li>
@@ -887,7 +921,7 @@
                     @foreach($teacherCourses->take(5) as $course)
                         <li class="pc-item">
                             <a href="{{ route('teacher.exams.index', ['course' => $course->id]) }}" class="pc-link">
-                                <span class="pc-micon"><i class="ph-duotone ph-book-open"></i></span>
+                                <span class="pc-micon"><i class="ph ph-book-open"></i></span>
                                 <span class="pc-mtext">{{ Str::limit($course->name, 20) }}</span>
                             </a>
                         </li>
@@ -901,7 +935,7 @@
                     <!-- Profile -->
                     <li class="pc-item {{ request()->routeIs('profile.*') ? 'active' : '' }}">
                         <a href="{{ route('profile.edit') }}" class="pc-link">
-                            <span class="pc-micon"><i class="ph-duotone ph-user-circle"></i></span>
+                            <span class="pc-micon"><i class="ph ph-user-circle"></i></span>
                             <span class="pc-mtext">Profil Saya</span>
                         </a>
                     </li>
@@ -920,7 +954,7 @@
                         <form method="POST" action="{{ route('logout') }}" class="mt-3">
                             @csrf
                             <button type="submit" class="btn btn-light btn-sm w-100">
-                                <i class="ph-duotone ph-sign-out me-2"></i>Keluar
+                                <i class="ph ph-sign-out me-2"></i>Keluar
                             </button>
                         </form>
                     </div>
@@ -941,9 +975,8 @@
                         </a>
                     </li>
                     <li class="pc-h-item d-none d-lg-block">
-                        <div class="text-muted">
-                            <span>Selamat datang,</span>
-                            <strong class="text-dark">{{ auth()->user()->name }}</strong>
+                        <div class="page-header-title">
+                            <h5 class="mb-0 fw-semibold">@yield('page-title', 'Dashboard')</h5>
                         </div>
                     </li>
                 </ul>
@@ -952,53 +985,72 @@
             <!-- Right Side -->
             <div class="ms-auto">
                 <ul class="list-unstyled d-flex align-items-center mb-0">
-                    <!-- Create Exam Button -->
-                    <li class="pc-h-item me-2">
-                        <a href="{{ route('teacher.exams.create') }}" class="btn btn-primary btn-sm">
-                            <i class="ph-duotone ph-plus me-1"></i>Buat Ujian
-                        </a>
+                    <!-- Date Display -->
+                    <li class="pc-h-item d-none d-md-block me-2">
+                        <span class="badge bg-light text-dark px-3 py-2 f-14">
+                            <i class="ph ph-calendar-dots me-1"></i>
+                            {{ now()->locale('id')->translatedFormat('l, d M Y') }}
+                        </span>
                     </li>
 
                     <!-- Notifications -->
-                    <li class="pc-h-item">
-                        <div class="dropdown">
-                            <a href="#" class="pc-head-link dropdown-toggle" data-bs-toggle="dropdown">
-                                <i class="ph ph-bell"></i>
-                            </a>
-                            <div class="dropdown-menu dropdown-menu-end" style="width: 320px;">
-                                <div class="p-3 border-bottom">
-                                    <h6 class="mb-0">Notifikasi</h6>
-                                </div>
-                                <div class="p-3 text-center text-muted">
-                                    <i class="ph ph-bell-slash" style="font-size: 32px;"></i>
-                                    <p class="mb-0 mt-2">Tidak ada notifikasi baru</p>
-                                </div>
+                    <li class="pc-h-item dropdown me-2">
+                        <a class="pc-head-link dropdown-toggle arrow-none position-relative" data-bs-toggle="dropdown" href="#" role="button">
+                            <i class="ph ph-bell"></i>
+                            @php
+                                $pendingGrading = \App\Models\ExamAttempt::whereHas('exam', fn($q) => $q->where('created_by', auth()->id()))->where('status', 'submitted')->count();
+                            @endphp
+                            @if($pendingGrading > 0)
+                                <span class="badge bg-danger rounded-circle position-absolute" style="top: 2px; right: 2px; font-size: 10px; padding: 4px 6px;">{{ $pendingGrading }}</span>
+                            @endif
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end" style="min-width: 320px;">
+                            <div class="px-3 py-2 border-bottom">
+                                <h6 class="mb-0">Notifikasi</h6>
                             </div>
+                            @if($pendingGrading > 0)
+                                <a class="dropdown-item py-3" href="{{ route('teacher.exams.index') }}">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-shrink-0">
+                                            <span class="badge bg-warning p-2 rounded">
+                                                <i class="ph ph-pencil-simple f-20"></i>
+                                            </span>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <h6 class="mb-1 f-14">Menunggu Penilaian</h6>
+                                            <p class="mb-0 text-muted f-12">{{ $pendingGrading }} jawaban perlu dinilai</p>
+                                        </div>
+                                    </div>
+                                </a>
+                            @else
+                                <div class="p-4 text-center text-muted">
+                                    <i class="ph ph-check-circle f-30 mb-2 d-block"></i>
+                                    <span class="f-14">Tidak ada notifikasi</span>
+                                </div>
+                            @endif
                         </div>
                     </li>
 
-                    <!-- User Menu -->
-                    <li class="pc-h-item">
-                        <div class="dropdown">
-                            <a href="#" class="pc-head-link dropdown-toggle" data-bs-toggle="dropdown">
-                                <img src="{{ auth()->user()->avatar_url }}" alt="{{ auth()->user()->name }}" class="user-avatar-header">
-                            </a>
-                            <div class="dropdown-menu dropdown-menu-end">
-                                <div class="px-3 py-2 border-bottom">
-                                    <h6 class="mb-0">{{ auth()->user()->name }}</h6>
-                                    <small class="text-muted">{{ auth()->user()->email }}</small>
-                                </div>
-                                <a href="{{ route('profile.edit') }}" class="dropdown-item">
-                                    <i class="ph-duotone ph-user"></i>Profil
-                                </a>
-                                <div class="dropdown-divider"></div>
-                                <form method="POST" action="{{ route('logout') }}">
-                                    @csrf
-                                    <button type="submit" class="dropdown-item text-danger">
-                                        <i class="ph-duotone ph-sign-out"></i>Keluar
-                                    </button>
-                                </form>
+                    <!-- Profile Dropdown -->
+                    <li class="pc-h-item dropdown">
+                        <a class="pc-head-link dropdown-toggle arrow-none me-0" data-bs-toggle="dropdown" href="#" role="button">
+                            <img src="{{ auth()->user()->avatar_url }}" alt="{{ auth()->user()->name }}" class="avatar">
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end">
+                            <div class="px-3 py-2 border-bottom mb-2">
+                                <h6 class="mb-0">{{ auth()->user()->name }}</h6>
+                                <small class="text-muted">{{ auth()->user()->email }}</small>
                             </div>
+                            <a class="dropdown-item" href="{{ route('profile.edit') }}">
+                                <i class="ph ph-user-circle me-2"></i>Profil Saya
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="dropdown-item text-danger">
+                                    <i class="ph ph-sign-out me-2"></i>Keluar
+                                </button>
+                            </form>
                         </div>
                     </li>
                 </ul>
@@ -1012,7 +1064,7 @@
             <!-- Flash Messages -->
             @if(session('success'))
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="ph-duotone ph-check-circle me-2"></i>
+                    <i class="ph ph-check-circle me-2 f-20"></i>
                     {{ session('success') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
@@ -1020,7 +1072,7 @@
 
             @if(session('error'))
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="ph-duotone ph-x-circle me-2"></i>
+                    <i class="ph ph-x-circle me-2 f-20"></i>
                     {{ session('error') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
@@ -1028,7 +1080,7 @@
 
             @if(session('warning'))
                 <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                    <i class="ph-duotone ph-warning me-2"></i>
+                    <i class="ph ph-warning me-2"></i>
                     {{ session('warning') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
@@ -1051,7 +1103,7 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     
     <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
     
     <script>
         // Mobile sidebar toggle

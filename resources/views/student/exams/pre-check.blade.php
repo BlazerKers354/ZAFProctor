@@ -418,7 +418,7 @@
 
                 <!-- Camera Off State -->
                 <div id="camera-off-state" class="position-absolute top-0 start-0 end-0 bottom-0 d-flex flex-column align-items-center justify-content-center text-white">
-                    <i class="ph ph-camera-slash mb-2" style="font-size: 36px; opacity: 0.45;"></i>
+                    <i class="ph ph-video-camera-slash mb-2" style="font-size: 36px; opacity: 0.45;"></i>
                     <p class="mb-2 opacity-75" style="font-size: 13px;">Kamera belum aktif</p>
                     <button type="button" class="btn btn-primary btn-sm" onclick="requestCameraAccess()">
                         <i class="ph ph-camera me-1"></i>Aktifkan Kamera
@@ -453,7 +453,7 @@
         <div class="exam-info-bar fade-in-up">
             <div class="d-flex align-items-center gap-3 exam-title-section">
                 <div style="width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;background:linear-gradient(135deg,#eef2ff,#e0e7ff);color:#4f46e5;">
-                    <i class="ph ph-exam"></i>
+                    <i class="ph ph-file-text"></i>
                 </div>
                 <div>
                     <h5>{{ $exam->title }}</h5>
@@ -501,7 +501,7 @@
                 <!-- Face Detection Check -->
                 <div id="check-face" class="check-card pending">
                     <div id="icon-face" class="check-icon pending">
-                        <i class="ph ph-user-focus"></i>
+                        <i class="ph ph-user-large"></i>
                     </div>
                     <div class="check-info">
                         <h6>Deteksi Wajah</h6>
@@ -515,7 +515,7 @@
                 <!-- Browser Compatibility Check -->
                 <div id="check-browser" class="check-card pending">
                     <div id="icon-browser" class="check-icon pending">
-                        <i class="ph ph-browser"></i>
+                        <i class="ph ph-frame-corners"></i>
                     </div>
                     <div class="check-info">
                         <h6>Browser</h6>
@@ -527,7 +527,7 @@
                 <!-- Fullscreen Support Check -->
                 <div id="check-fullscreen" class="check-card pending">
                     <div id="icon-fullscreen" class="check-icon pending">
-                        <i class="ph ph-corners-out"></i>
+                        <i class="ph ph-arrows-out"></i>
                     </div>
                     <div class="check-info">
                         <h6>Fullscreen</h6>
@@ -738,7 +738,7 @@ function startFaceDetection() {
         try {
             const detections = await faceapi.detectAllFaces(
                 video,
-                new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.5 })
+                new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 })
             );
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);

@@ -15,12 +15,12 @@
                                 <h5 class="m-b-10">Kelola Ujian</h5>
                             </div>
                             <ul class="breadcrumb">
-                                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="ph-duotone ph-house"></i></a></li>
+                                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="ph ph-house"></i></a></li>
                                 <li class="breadcrumb-item active" aria-current="page">Ujian</li>
                             </ul>
                         </div>
                         <a href="{{ route('teacher.exams.create') }}" class="btn btn-primary">
-                            <i class="ph-duotone ph-plus me-2"></i>Buat Ujian Baru
+                            <i class="ph ph-plus me-2"></i>Buat Ujian Baru
                         </a>
                     </div>
                 </div>
@@ -39,7 +39,7 @@
                             <h3 class="mb-0">{{ $exams->total() }}</h3>
                         </div>
                         <div class="avatar avatar-md bg-light-primary">
-                            <i class="ph-duotone ph-exam text-primary"></i>
+                            <i class="ph ph-file-text text-primary"></i>
                         </div>
                     </div>
                 </div>
@@ -54,7 +54,7 @@
                             <h3 class="mb-0 text-success">{{ $exams->filter(fn($e) => $e->isActive())->count() }}</h3>
                         </div>
                         <div class="avatar avatar-md bg-light-success">
-                            <i class="ph-duotone ph-play-circle text-success"></i>
+                            <i class="ph ph-play-circle text-success"></i>
                         </div>
                     </div>
                 </div>
@@ -69,7 +69,7 @@
                             <h3 class="mb-0 text-warning">{{ $exams->where('status', 'draft')->count() }}</h3>
                         </div>
                         <div class="avatar avatar-md bg-light-warning">
-                            <i class="ph-duotone ph-pencil-simple-line text-warning"></i>
+                            <i class="ph ph-pencil-simple text-warning"></i>
                         </div>
                     </div>
                 </div>
@@ -84,7 +84,7 @@
                             <h3 class="mb-0 text-info">{{ $courses->count() }}</h3>
                         </div>
                         <div class="avatar avatar-md bg-light-info">
-                            <i class="ph-duotone ph-books text-info"></i>
+                            <i class="ph ph-book text-info"></i>
                         </div>
                     </div>
                 </div>
@@ -131,7 +131,7 @@
                     </div>
                     <div class="col-md-2">
                         <button type="submit" class="btn btn-primary w-100">
-                            <i class="ph-duotone ph-funnel me-1"></i>Filter
+                            <i class="ph ph-funnel me-1"></i>Filter
                         </button>
                     </div>
                 </div>
@@ -143,7 +143,7 @@
     <div class="card table-card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="card-title mb-0">
-                <i class="ph-duotone ph-list-bullets me-2"></i>Daftar Ujian
+                <i class="ph ph-list-dashes me-2"></i>Daftar Ujian
             </h5>
             @if(request()->hasAny(['search', 'course', 'status']))
                 <a href="{{ route('teacher.exams.index') }}" class="btn btn-sm btn-outline-secondary">
@@ -172,7 +172,7 @@
                                     <td>
                                         <div class="d-flex align-items-center">
                                             <div class="avatar avatar-sm me-3" style="width: 45px; height: 45px; display: inline-flex; align-items: center; justify-content: center; border-radius: 12px; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-                                                <i class="ph-duotone ph-exam text-white"></i>
+                                                <i class="ph ph-file-text text-white"></i>
                                             </div>
                                             <div>
                                                 <h6 class="mb-0">{{ $exam->title }}</h6>
@@ -234,11 +234,11 @@
                                             </span>
                                         @elseif($exam->isActive())
                                             <span class="badge bg-success animate-pulse">
-                                                <i class="ph ph-circle-fill me-1" style="font-size: 8px;"></i>Berlangsung
+                                                <i class="ph ph-circle me-1" style="font-size: 8px;"></i>Berlangsung
                                             </span>
                                         @elseif(!$exam->hasStarted())
                                             <span class="badge bg-light-info">
-                                                <i class="ph ph-calendar me-1"></i>Terjadwal
+                                                <i class="ph ph-calendar-dots me-1"></i>Terjadwal
                                             </span>
                                         @else
                                             <span class="badge bg-light-danger">
@@ -250,21 +250,21 @@
                                         <div class="btn-group">
                                             <a href="{{ route('teacher.exams.show', $exam) }}" 
                                                class="btn btn-sm btn-light-info" title="Detail">
-                                                <i class="ph-duotone ph-eye"></i>
+                                                <i class="ph ph-eye"></i>
                                             </a>
                                             <a href="{{ route('teacher.exams.edit', $exam) }}" 
                                                class="btn btn-sm btn-light-warning" title="Edit">
-                                                <i class="ph-duotone ph-pencil-simple"></i>
+                                                <i class="ph ph-pencil-simple"></i>
                                             </a>
                                             <a href="{{ route('teacher.questions.index', $exam) }}" 
                                                class="btn btn-sm btn-light-primary" title="Kelola Soal">
-                                                <i class="ph-duotone ph-list-bullets"></i>
+                                                <i class="ph ph-list-dashes"></i>
                                             </a>
                                             @if($exam->status === 'draft')
                                                 <form action="{{ route('teacher.exams.publish', $exam) }}" method="POST" class="d-inline">
                                                     @csrf
                                                     <button type="submit" class="btn btn-sm btn-success" title="Publish" onclick="return confirm('Publish ujian ini?')">
-                                                        <i class="ph-duotone ph-paper-plane-tilt"></i>
+                                                        <i class="ph ph-paper-plane-tilt"></i>
                                                     </button>
                                                 </form>
                                             @endif
@@ -273,7 +273,7 @@
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-sm btn-light-danger" title="Hapus" 
                                                         onclick="return confirm('Hapus ujian ini? Semua data akan dihapus permanen.')">
-                                                    <i class="ph-duotone ph-trash"></i>
+                                                    <i class="ph ph-trash"></i>
                                                 </button>
                                             </form>
                                         </div>
@@ -286,12 +286,12 @@
             @else
                 <div class="empty-state">
                     <div class="empty-state-icon">
-                        <i class="ph-duotone ph-exam"></i>
+                        <i class="ph ph-file-text"></i>
                     </div>
                     <h6>Belum Ada Ujian</h6>
                     <p class="text-muted mb-3">Mulai buat ujian pertama Anda untuk mata pelajaran yang Anda ajar.</p>
                     <a href="{{ route('teacher.exams.create') }}" class="btn btn-primary">
-                        <i class="ph-duotone ph-plus me-2"></i>Buat Ujian Baru
+                        <i class="ph ph-plus me-2"></i>Buat Ujian Baru
                     </a>
                 </div>
             @endif

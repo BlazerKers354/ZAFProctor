@@ -11,7 +11,7 @@
                 <div class="col-md-8">
                     <div class="d-flex align-items-center gap-3">
                         <div style="background: linear-gradient(135deg, #3b82f6, #8b5cf6); border-radius: 14px;" class="p-3">
-                            <i class="ph-duotone ph-chart-pie-slice f-30 text-white"></i>
+                            <i class="ph ph-chart-pie-slice f-30 text-white"></i>
                         </div>
                         <div>
                             <p class="mb-1 f-14" style="color: rgba(255,255,255,0.5);">Panel Administrasi</p>
@@ -21,7 +21,7 @@
                 </div>
                 <div class="col-md-4 text-md-end mt-3 mt-md-0">
                     <span class="badge px-3 py-2" style="background: rgba(255,255,255,0.08); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.06); color: rgba(255,255,255,0.7);">
-                        <i class="ph-duotone ph-calendar me-1"></i>{{ now()->locale('id')->translatedFormat('l, d M Y') }}
+                        <i class="ph ph-calendar-dots me-1"></i>{{ now()->locale('id')->translatedFormat('l, d M Y') }}
                     </span>
                 </div>
             </div>
@@ -41,7 +41,7 @@
                             <h3 class="stats-value">{{ number_format($stats['total_users']) }}</h3>
                         </div>
                         <div class="stats-icon" style="background: rgba(59,130,246,0.08);">
-                            <i class="ph-duotone ph-users" style="color: #3b82f6;"></i>
+                            <i class="ph ph-users" style="color: #3b82f6;"></i>
                         </div>
                     </div>
                     <div class="mt-3 pt-3 border-top">
@@ -63,7 +63,7 @@
                             <h3 class="stats-value">{{ number_format($stats['total_courses']) }}</h3>
                         </div>
                         <div class="stats-icon" style="background: rgba(16,185,129,0.08);">
-                            <i class="ph-duotone ph-books" style="color: #10b981;"></i>
+                            <i class="ph ph-book" style="color: #10b981;"></i>
                         </div>
                     </div>
                     <div class="mt-3 pt-3 border-top">
@@ -85,7 +85,7 @@
                             <h3 class="stats-value">{{ number_format($stats['total_exams']) }}</h3>
                         </div>
                         <div class="stats-icon" style="background: rgba(245,158,11,0.08);">
-                            <i class="ph-duotone ph-exam" style="color: #f59e0b;"></i>
+                            <i class="ph ph-file-text" style="color: #f59e0b;"></i>
                         </div>
                     </div>
                     <div class="mt-3 pt-3 border-top">
@@ -107,7 +107,7 @@
                             <h3 class="stats-value">{{ number_format($stats['completed_attempts']) }}</h3>
                         </div>
                         <div class="stats-icon" style="background: rgba(6,182,212,0.08);">
-                            <i class="ph-duotone ph-check-circle" style="color: #06b6d4;"></i>
+                            <i class="ph ph-check-circle" style="color: #06b6d4;"></i>
                         </div>
                     </div>
                     <div class="mt-3 pt-3 border-top">
@@ -129,7 +129,7 @@
                     <div class="d-flex align-items-center">
                         <div class="flex-shrink-0">
                             <div class="avatar avatar-lg rounded" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); display: flex; align-items: center; justify-content: center;">
-                                <i class="ph-duotone ph-student text-white f-24"></i>
+                                <i class="ph ph-graduation-cap text-white f-24"></i>
                             </div>
                         </div>
                         <div class="flex-grow-1 ms-3">
@@ -150,7 +150,7 @@
                     <div class="d-flex align-items-center">
                         <div class="flex-shrink-0">
                             <div class="avatar avatar-lg rounded" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); display: flex; align-items: center; justify-content: center;">
-                                <i class="ph-duotone ph-chalkboard-teacher text-white f-24"></i>
+                                <i class="ph ph-chalkboard-teacher text-white f-24"></i>
                             </div>
                         </div>
                         <div class="flex-grow-1 ms-3">
@@ -171,7 +171,7 @@
                     <div class="d-flex align-items-center">
                         <div class="flex-shrink-0">
                             <div class="avatar avatar-lg rounded" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); display: flex; align-items: center; justify-content: center;">
-                                <i class="ph-duotone ph-clock-countdown text-white f-24"></i>
+                                <i class="ph ph-clock text-white f-24"></i>
                             </div>
                         </div>
                         <div class="flex-grow-1 ms-3">
@@ -193,7 +193,7 @@
             <div class="card table-card">
                 <div class="card-header d-flex align-items-center justify-content-between">
                     <h5 class="card-title mb-0">
-                        <i class="ph-duotone ph-users me-2"></i>User Terbaru
+                        <i class="ph ph-users me-2"></i>User Terbaru
                     </h5>
                     <a href="{{ route('admin.users.index') }}" class="btn btn-light-primary btn-sm">
                         Lihat Semua <i class="ph ph-arrow-right ms-1"></i>
@@ -261,7 +261,7 @@
             <div class="card table-card">
                 <div class="card-header d-flex align-items-center justify-content-between">
                     <h5 class="card-title mb-0">
-                        <i class="ph-duotone ph-exam me-2"></i>Ujian Terbaru
+                        <i class="ph ph-file-text me-2"></i>Ujian Terbaru
                     </h5>
                     <a href="#" class="btn btn-light-primary btn-sm">
                         Lihat Semua <i class="ph ph-arrow-right ms-1"></i>
@@ -319,13 +319,13 @@
     <!-- Quick Actions -->
     <div class="row">
         <div class="col-12">
-            <h5 class="mb-3"><i class="ph-duotone ph-lightning me-2"></i>Aksi Cepat</h5>
+            <h5 class="mb-3"><i class="ph ph-lightning me-2"></i>Aksi Cepat</h5>
         </div>
         <div class="col-md-6 col-xl-3">
             <a href="{{ route('admin.users.create') }}" class="card quick-action-card text-decoration-none">
                 <div class="card-body text-center py-4">
                     <div class="avatar avatar-xl rounded mx-auto mb-3" style="background: rgba(59, 130, 246, 0.1); display: flex; align-items: center; justify-content: center;">
-                        <i class="ph-duotone ph-user-plus text-primary f-30"></i>
+                        <i class="ph ph-user-plus text-primary f-30"></i>
                     </div>
                     <h6 class="mb-1">Tambah Pengguna</h6>
                     <small class="text-muted">Daftarkan user baru</small>
@@ -336,7 +336,7 @@
             <a href="{{ route('admin.classes.create') }}" class="card quick-action-card text-decoration-none">
                 <div class="card-body text-center py-4">
                     <div class="avatar avatar-xl rounded mx-auto mb-3" style="background: rgba(16, 185, 129, 0.1); display: flex; align-items: center; justify-content: center;">
-                        <i class="ph-duotone ph-chalkboard text-success f-30"></i>
+                        <i class="ph ph-chalkboard text-success f-30"></i>
                     </div>
                     <h6 class="mb-1">Tambah Kelas</h6>
                     <small class="text-muted">Buat kelas baru</small>
@@ -347,7 +347,7 @@
             <a href="{{ route('admin.courses.create') }}" class="card quick-action-card text-decoration-none">
                 <div class="card-body text-center py-4">
                     <div class="avatar avatar-xl rounded mx-auto mb-3" style="background: rgba(245, 158, 11, 0.1); display: flex; align-items: center; justify-content: center;">
-                        <i class="ph-duotone ph-book-bookmark text-warning f-30"></i>
+                        <i class="ph ph-book-bookmark text-warning f-30"></i>
                     </div>
                     <h6 class="mb-1">Tambah Mapel</h6>
                     <small class="text-muted">Mata pelajaran baru</small>
@@ -358,7 +358,7 @@
             <a href="{{ route('admin.users.pending') }}" class="card quick-action-card text-decoration-none">
                 <div class="card-body text-center py-4">
                     <div class="avatar avatar-xl rounded mx-auto mb-3" style="background: rgba(239, 68, 68, 0.1); display: flex; align-items: center; justify-content: center;">
-                        <i class="ph-duotone ph-user-check text-danger f-30"></i>
+                        <i class="ph ph-user-check text-danger f-30"></i>
                     </div>
                     <h6 class="mb-1">Approval User</h6>
                     <small class="text-muted">Review pendaftaran</small>

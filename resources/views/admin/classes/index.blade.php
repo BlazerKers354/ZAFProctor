@@ -13,13 +13,13 @@
                         <h5 class="m-b-10">Kelola Kelas</h5>
                     </div>
                     <ul class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="ph-duotone ph-house"></i></a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="ph ph-house"></i></a></li>
                         <li class="breadcrumb-item active" aria-current="page">Kelas</li>
                     </ul>
                 </div>
                 <div class="col-md-6 text-md-end">
                     <a href="{{ route('admin.classes.create') }}" class="btn btn-primary">
-                        <i class="ph-duotone ph-plus me-2"></i>Tambah Kelas
+                        <i class="ph ph-plus me-2"></i>Tambah Kelas
                     </a>
                 </div>
             </div>
@@ -85,17 +85,17 @@
                                     @endif
                                 </td>
                                 <td class="text-end">
-                                    <a href="{{ route('admin.classes.show', $class) }}" class="btn btn-sm btn-light-primary" title="Lihat">
-                                        <i class="ph-duotone ph-eye"></i>
+                                    <a href="{{ route('admin.classes.show', $class) }}" class="btn btn-sm btn-light-info" title="Lihat">
+                                        <i class="ph ph-eye"></i>
                                     </a>
                                     <a href="{{ route('admin.classes.edit', $class) }}" class="btn btn-sm btn-light-warning" title="Edit">
-                                        <i class="ph-duotone ph-pencil-simple"></i>
+                                        <i class="ph ph-pencil-simple"></i>
                                     </a>
                                     <form action="{{ route('admin.classes.destroy', $class) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus kelas ini?')">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-sm btn-light-danger" title="Hapus">
-                                            <i class="ph-duotone ph-trash"></i>
+                                            <i class="ph ph-trash"></i>
                                         </button>
                                     </form>
                                 </td>
@@ -105,12 +105,12 @@
                                 <td colspan="6">
                                     <div class="empty-state">
                                         <div class="empty-state-icon">
-                                            <i class="ph-duotone ph-chalkboard-teacher"></i>
+                                            <i class="ph ph-chalkboard-teacher"></i>
                                         </div>
                                         <h6>Belum ada data kelas</h6>
                                         <p class="text-muted mb-3">Mulai dengan menambahkan kelas baru</p>
                                         <a href="{{ route('admin.classes.create') }}" class="btn btn-primary btn-sm">
-                                            <i class="ph-duotone ph-plus me-1"></i>Tambah Kelas
+                                            <i class="ph ph-plus me-1"></i>Tambah Kelas
                                         </a>
                                     </div>
                                 </td>

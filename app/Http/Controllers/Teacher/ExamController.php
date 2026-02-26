@@ -131,10 +131,10 @@ class ExamController extends Controller
                 'exam_id' => $exam->id,
                 // Proctoring settings
                 'webcam_enabled' => $request->boolean('webcam_enabled', true),
-                'screen_capture_enabled' => $request->boolean('screen_capture_enabled', true),
                 'browser_lock_enabled' => $request->boolean('browser_lock_enabled', true),
                 'tab_switch_detection' => $request->boolean('tab_switch_detection', true),
                 'max_tab_switches' => $request->input('max_tab_switches', 5),
+                'block_keyboard_shortcuts' => $request->boolean('block_keyboard_shortcuts', true),
                 
                 // Display settings
                 'shuffle_questions' => $request->boolean('shuffle_questions', false),
@@ -246,10 +246,10 @@ class ExamController extends Controller
                 [
                     // Proctoring settings
                     'webcam_enabled' => $request->boolean('webcam_enabled'),
-                    'screen_capture_enabled' => $request->boolean('screen_capture_enabled'),
                     'browser_lock_enabled' => $request->boolean('browser_lock_enabled'),
                     'tab_switch_detection' => $request->boolean('tab_switch_detection'),
                     'max_tab_switches' => $request->input('max_tab_switches', 5),
+                    'block_keyboard_shortcuts' => $request->boolean('block_keyboard_shortcuts'),
                     
                     // Display settings
                     'shuffle_questions' => $request->boolean('shuffle_questions'),
@@ -497,19 +497,16 @@ class ExamController extends Controller
 
         $validated = $request->validate([
             'snapshot_interval' => ['integer', 'min:10', 'max:120'],
-            'detect_face' => ['boolean'],
-            'detect_multiple_faces' => ['boolean'],
-            'detect_tab_switch' => ['boolean'],
-            'detect_fullscreen_exit' => ['boolean'],
-            'detect_copy_paste' => ['boolean'],
-            'detect_right_click' => ['boolean'],
+            'webcam_enabled' => ['boolean'],
+            'browser_lock_enabled' => ['boolean'],
+            'tab_switch_detection' => ['boolean'],
             'block_keyboard_shortcuts' => ['boolean'],
             'warning_threshold' => ['integer', 'min:1', 'max:10'],
             'auto_submit_threshold' => ['integer', 'min:1', 'max:20'],
         ]);
 
         // Convert checkboxes to boolean
-        foreach (['detect_face', 'detect_multiple_faces', 'detect_tab_switch', 'detect_fullscreen_exit', 'detect_copy_paste', 'detect_right_click', 'block_keyboard_shortcuts'] as $field) {
+        foreach (['webcam_enabled', 'browser_lock_enabled', 'tab_switch_detection', 'block_keyboard_shortcuts'] as $field) {
             $validated[$field] = $request->boolean($field);
         }
 

@@ -83,8 +83,8 @@ class ProctoringService
             $extension
         );
 
-        // Store in public disk for teacher access
-        Storage::disk('public')->put($filename, $imageData);
+        // Store in private disk (not publicly accessible)
+        Storage::disk('local')->put($filename, $imageData);
 
         return $filename;
     }
@@ -100,8 +100,8 @@ class ProctoringService
             $attempt->user_id
         );
 
-        // Store in public disk for teacher access
-        return $file->store($path, 'public');
+        // Store in private disk (not publicly accessible)
+        return $file->store($path, 'local');
     }
 
     /**
@@ -170,7 +170,7 @@ class ProctoringService
             ->map(function ($log) {
                 return [
                     'id' => $log->id,
-                    'url' => Storage::disk('public')->url($log->snapshot_path),
+                    'url' => route('proctoring.snapshot.view', $log->id),
                     'violation_type' => $log->violation_type,
                     'violation_label' => $log->violation_label,
                     'severity' => $log->severity,

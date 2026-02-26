@@ -15,7 +15,7 @@
                                 <h5 class="m-b-10">Hasil Ujian</h5>
                             </div>
                             <ul class="breadcrumb">
-                                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="ph-duotone ph-house"></i></a></li>
+                                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="ph ph-house"></i></a></li>
                                 <li class="breadcrumb-item"><a href="{{ route('teacher.exams.index') }}">Ujian</a></li>
                                 <li class="breadcrumb-item"><a href="{{ route('teacher.exams.show', $exam) }}">{{ Str::limit($exam->title, 20) }}</a></li>
                                 <li class="breadcrumb-item active" aria-current="page">Hasil</li>
@@ -23,7 +23,7 @@
                         </div>
                         <div class="d-flex gap-2">
                             <a href="{{ route('teacher.exams.export', $exam) }}" class="btn btn-success">
-                                <i class="ph ph-download me-2"></i>Export CSV
+                                <i class="ph ph-download-simple me-2"></i>Export CSV
                             </a>
                             <a href="{{ route('teacher.exams.show', $exam) }}" class="btn btn-outline-secondary">
                                 <i class="ph ph-arrow-left me-2"></i>Kembali
@@ -52,7 +52,7 @@
                 <div class="col-md-4 text-end">
                     @if($exam->settings?->passing_score)
                         <span class="badge bg-light-primary">
-                            <i class="ph ph-target me-1"></i>KKM: {{ $exam->settings->passing_score }}%
+                            <i class="ph ph-crosshair me-1"></i>KKM: {{ $exam->settings->passing_score }}%
                         </span>
                     @endif
                 </div>
@@ -67,8 +67,8 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="flex-shrink-0">
-                            <div class="avtar avtar-s bg-light-primary">
-                                <i class="ph-duotone ph-users fs-4"></i>
+                            <div class="avatar avatar-sm bg-light-primary">
+                                <i class="ph ph-users"></i>
                             </div>
                         </div>
                         <div class="flex-grow-1 ms-3">
@@ -84,8 +84,8 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="flex-shrink-0">
-                            <div class="avtar avtar-s bg-light-success">
-                                <i class="ph-duotone ph-check-circle fs-4"></i>
+                            <div class="avatar avatar-sm bg-light-success">
+                                <i class="ph ph-check-circle"></i>
                             </div>
                         </div>
                         <div class="flex-grow-1 ms-3">
@@ -101,8 +101,8 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="flex-shrink-0">
-                            <div class="avtar avtar-s bg-light-info">
-                                <i class="ph-duotone ph-chart-line-up fs-4"></i>
+                            <div class="avatar avatar-sm bg-light-info">
+                                <i class="ph ph-chart-line-up"></i>
                             </div>
                         </div>
                         <div class="flex-grow-1 ms-3">
@@ -118,8 +118,8 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="flex-shrink-0">
-                            <div class="avtar avtar-s bg-light-warning">
-                                <i class="ph-duotone ph-trophy fs-4"></i>
+                            <div class="avatar avatar-sm bg-light-warning">
+                                <i class="ph ph-trophy"></i>
                             </div>
                         </div>
                         <div class="flex-grow-1 ms-3">
@@ -136,7 +136,7 @@
     <div class="card">
         <div class="card-header">
             <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0"><i class="ph-duotone ph-list-numbers text-primary me-2"></i>Daftar Hasil</h5>
+                <h5 class="mb-0"><i class="ph ph-list-numbers text-primary me-2"></i>Daftar Hasil</h5>
                 <div>
                     <span class="badge bg-light-success me-2">
                         <i class="ph ph-check me-1"></i>Lulus: {{ $attempts->where('percentage', '>=', $exam->settings?->passing_score ?? 60)->count() }}
@@ -150,7 +150,7 @@
         <div class="card-body p-0">
             @if($attempts->isEmpty())
                 <div class="text-center py-5">
-                    <i class="ph-duotone ph-clipboard-text text-muted mb-3" style="font-size: 64px; opacity: 0.3;"></i>
+                    <i class="ph ph-clipboard-text text-muted mb-3" style="font-size: 64px; opacity: 0.3;"></i>
                     <h5 class="text-muted">Belum Ada Peserta</h5>
                     <p class="text-muted mb-0">Belum ada siswa yang mengikuti ujian ini.</p>
                 </div>
@@ -266,7 +266,7 @@
                                                 </li>
                                                 <li>
                                                     <a class="dropdown-item" href="{{ route('teacher.monitor.logs', ['exam' => $exam, 'attempt' => $attempt]) }}">
-                                                        <i class="ph ph-list-bullets me-2"></i>Log Aktivitas
+                                                        <i class="ph ph-list-dashes me-2"></i>Log Aktivitas
                                                     </a>
                                                 </li>
                                             </ul>
@@ -287,7 +287,7 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                    <h5 class="mb-0"><i class="ph-duotone ph-chart-bar text-info me-2"></i>Distribusi Nilai</h5>
+                    <h5 class="mb-0"><i class="ph ph-chart-bar text-info me-2"></i>Distribusi Nilai</h5>
                 </div>
                 <div class="card-body">
                     @php
@@ -318,7 +318,7 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                    <h5 class="mb-0"><i class="ph-duotone ph-chart-pie text-success me-2"></i>Statistik Kelulusan</h5>
+                    <h5 class="mb-0"><i class="ph ph-chart-pie-slice text-success me-2"></i>Statistik Kelulusan</h5>
                 </div>
                 <div class="card-body">
                     @php

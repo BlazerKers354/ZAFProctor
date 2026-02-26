@@ -15,7 +15,7 @@
                                 <h5 class="m-b-10">Penilaian Manual</h5>
                             </div>
                             <ul class="breadcrumb">
-                                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="ph-duotone ph-house"></i></a></li>
+                                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="ph ph-house"></i></a></li>
                                 <li class="breadcrumb-item"><a href="{{ route('teacher.exams.index') }}">Ujian</a></li>
                                 <li class="breadcrumb-item"><a href="{{ route('teacher.exams.show', $exam) }}">{{ Str::limit($exam->title, 20) }}</a></li>
                                 <li class="breadcrumb-item"><a href="{{ route('teacher.exams.results', $exam) }}">Hasil</a></li>
@@ -110,7 +110,7 @@
                         <div class="card-body">
                             <!-- Question Text -->
                             <div class="mb-4">
-                                <div class="question-text">{!! $question->question_text !!}</div>
+                                <div class="question-text">{!! nl2br(e($question->question ?? $question->question_text ?? '')) !!}</div>
                             </div>
 
                             <!-- Options / Answer -->
@@ -219,7 +219,7 @@
                 <!-- Summary & Submit -->
                 <div class="card position-sticky" style="top: 80px;">
                     <div class="card-header">
-                        <h5 class="mb-0"><i class="ph-duotone ph-calculator text-primary me-2"></i>Ringkasan Nilai</h5>
+                        <h5 class="mb-0"><i class="ph ph-calculator text-primary me-2"></i>Ringkasan Nilai</h5>
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
@@ -253,7 +253,7 @@
 
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="ph-duotone ph-check-circle me-2"></i>Simpan Nilai
+                                <i class="ph ph-check-circle me-2"></i>Simpan Nilai
                             </button>
                             <a href="{{ route('teacher.exams.results', $exam) }}" class="btn btn-outline-secondary">
                                 Batal

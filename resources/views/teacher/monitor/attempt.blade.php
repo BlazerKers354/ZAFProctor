@@ -15,7 +15,7 @@
                                 <h5 class="m-b-10">Detail Peserta: {{ $attempt->user->name }}</h5>
                             </div>
                             <ul class="breadcrumb">
-                                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="ph-duotone ph-house"></i></a></li>
+                                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="ph ph-house"></i></a></li>
                                 <li class="breadcrumb-item"><a href="{{ route('teacher.exams.index') }}">Ujian</a></li>
                                 <li class="breadcrumb-item"><a href="{{ route('teacher.monitor.index', $exam) }}">Monitor</a></li>
                                 <li class="breadcrumb-item active" aria-current="page">{{ Str::limit($attempt->user->name, 20) }}</li>
@@ -41,7 +41,7 @@
             <div class="card">
                 <div class="card-header">
                     <h5 class="card-title mb-0">
-                        <i class="ph-duotone ph-user me-2"></i>Info Peserta
+                        <i class="ph ph-user me-2"></i>Info Peserta
                     </h5>
                 </div>
                 <div class="card-body text-center">
@@ -66,7 +66,7 @@
             <div class="card">
                 <div class="card-header">
                     <h5 class="card-title mb-0">
-                        <i class="ph-duotone ph-chart-line me-2"></i>Statistik
+                        <i class="ph ph-chart-line-up me-2"></i>Statistik
                     </h5>
                 </div>
                 <div class="card-body">
@@ -114,7 +114,7 @@
             <div class="card mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">
-                        <i class="ph-duotone ph-warning text-danger me-2"></i>Ringkasan Pelanggaran
+                        <i class="ph ph-warning text-danger me-2"></i>Ringkasan Pelanggaran
                     </h5>
                     <span class="badge bg-{{ $attempt->violation_count > 0 ? 'danger' : 'success' }} px-3">
                         {{ $attempt->violation_count }} Pelanggaran
@@ -149,7 +149,7 @@
                         </div>
                     @else
                         <div class="text-center py-4 text-muted">
-                            <i class="ph-duotone ph-check-circle text-success f-36 mb-2 d-block"></i>
+                            <i class="ph ph-check-circle text-success f-36 mb-2 d-block"></i>
                             <p class="mb-0">Tidak ada pelanggaran tercatat</p>
                         </div>
                     @endif
@@ -160,7 +160,7 @@
             <div class="card mb-4">
                 <div class="card-header">
                     <h5 class="card-title mb-0">
-                        <i class="ph-duotone ph-camera me-2"></i>Snapshot Kamera
+                        <i class="ph ph-camera me-2"></i>Snapshot Kamera
                     </h5>
                 </div>
                 <div class="card-body">
@@ -180,7 +180,7 @@
                         </div>
                     @else
                         <div class="text-center py-4 text-muted">
-                            <i class="ph-duotone ph-camera-slash f-36 mb-2 d-block opacity-50"></i>
+                            <i class="ph ph-video-camera-slash f-36 mb-2 d-block opacity-50"></i>
                             <p class="mb-0">Tidak ada snapshot tersedia</p>
                         </div>
                     @endif
@@ -191,7 +191,7 @@
             <div class="card">
                 <div class="card-header">
                     <h5 class="card-title mb-0">
-                        <i class="ph-duotone ph-list-numbers me-2"></i>Jawaban Peserta
+                        <i class="ph ph-list-numbers me-2"></i>Jawaban Peserta
                     </h5>
                 </div>
                 <div class="card-body p-0">

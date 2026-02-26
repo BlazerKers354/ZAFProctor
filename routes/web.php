@@ -16,6 +16,7 @@ use App\Http\Controllers\Teacher\QuestionController;
 use App\Http\Controllers\Teacher\MonitorController;
 use App\Http\Controllers\Student\ExamController as StudentExamController;
 use App\Http\Controllers\Student\ProctoringController;
+use App\Http\Controllers\SnapshotController;
 use App\Http\Controllers\GuideController;
 
 /*
@@ -81,6 +82,9 @@ Route::middleware(['auth', 'check.active'])->group(function () {
     // Dashboard
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
     
+    // Proctoring Snapshots (authenticated access)
+    Route::get('proctoring/snapshot/{log}', [SnapshotController::class, 'show'])->name('proctoring.snapshot.view');
+    
     // Profile
     Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -136,6 +140,7 @@ Route::middleware(['auth', 'check.active'])->group(function () {
         // Monitoring
         Route::prefix('exams/{exam}/monitor')->name('monitor.')->group(function () {
             Route::get('/', [MonitorController::class, 'index'])->name('index');
+            Route::get('live', [MonitorController::class, 'liveData'])->name('live');
             Route::get('attempts/{attempt}', [MonitorController::class, 'attempt'])->name('attempt');
             Route::get('attempts/{attempt}/logs', [MonitorController::class, 'logs'])->name('logs');
             Route::post('attempts/{attempt}/terminate', [MonitorController::class, 'terminate'])->name('terminate');
@@ -154,7 +159,9 @@ Route::middleware(['auth', 'check.active'])->group(function () {
         Route::get('exams', [StudentExamController::class, 'index'])->name('exams.index');
         Route::get('exams/{exam}', [StudentExamController::class, 'show'])->name('exams.show');
         Route::get('exams/{exam}/pre-check', [StudentExamController::class, 'preCheck'])->name('exams.pre-check');
-        Route::post('exams/{exam}/start', [StudentExamController::class, 'start'])->name('exams.start');
+        Route::post('exams/{exam}/start', [StudentExamController::class, 'start'])
+            ->middleware('throttle:5,1')
+            ->name('exams.start');
         
         // Active Exam Session
         Route::middleware('exam.in-progress')->group(function () {

@@ -28,6 +28,7 @@ class ExamAttempt extends Model
         'camera_enabled',
         'ip_address',
         'user_agent',
+        'feedback',
     ];
 
     protected $casts = [

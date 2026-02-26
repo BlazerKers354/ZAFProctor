@@ -15,7 +15,7 @@
                                 <h5 class="m-b-10">Kelola Soal - {{ $exam->title }}</h5>
                             </div>
                             <ul class="breadcrumb">
-                                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="ph-duotone ph-house"></i></a></li>
+                                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="ph ph-house"></i></a></li>
                                 <li class="breadcrumb-item"><a href="{{ route('teacher.exams.index') }}">Ujian</a></li>
                                 <li class="breadcrumb-item"><a href="{{ route('teacher.exams.show', $exam) }}">{{ Str::limit($exam->title, 20) }}</a></li>
                                 <li class="breadcrumb-item active" aria-current="page">Soal</li>
@@ -51,7 +51,7 @@
             <div class="row g-3">
                 <div class="col-md-3">
                     <a href="{{ route('teacher.questions.create', $exam) }}" class="btn btn-primary w-100">
-                        <i class="ph ph-plus-circle me-2"></i>Tambah Soal Manual
+                        <i class="ph ph-circle-plus me-2"></i>Tambah Soal Manual
                     </a>
                 </div>
                 <div class="col-md-3">
@@ -108,7 +108,7 @@
         <div class="card">
             <div class="card-body text-center py-5">
                 <div class="mb-4">
-                    <i class="ph-duotone ph-clipboard-text text-muted" style="font-size: 80px; opacity: 0.3;"></i>
+                    <i class="ph ph-clipboard-text text-muted" style="font-size: 80px; opacity: 0.3;"></i>
                 </div>
                 <h4 class="mb-2">Belum Ada Soal</h4>
                 <p class="text-muted mb-4">Mulai tambahkan soal untuk ujian ini dengan cara:</p>
@@ -116,7 +116,7 @@
                     <div class="col-md-4">
                         <div class="card border border-primary">
                             <div class="card-body">
-                                <i class="ph-duotone ph-pencil-simple text-primary mb-3" style="font-size: 48px;"></i>
+                                <i class="ph ph-pencil-simple text-primary mb-3" style="font-size: 48px;"></i>
                                 <h6>Tambah Manual</h6>
                                 <p class="text-muted small mb-3">Buat soal satu per satu dengan form yang mudah digunakan</p>
                                 <a href="{{ route('teacher.questions.create', $exam) }}" class="btn btn-sm btn-primary">Mulai</a>
@@ -126,7 +126,7 @@
                     <div class="col-md-4">
                         <div class="card border border-success">
                             <div class="card-body">
-                                <i class="ph-duotone ph-file-csv text-success mb-3" style="font-size: 48px;"></i>
+                                <i class="ph ph-file-csv text-success mb-3" style="font-size: 48px;"></i>
                                 <h6>Import CSV</h6>
                                 <p class="text-muted small mb-3">Upload banyak soal sekaligus dari file CSV</p>
                                 <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#importModal">Import</button>
@@ -142,7 +142,7 @@
             <div class="card-header">
                 <div class="d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">
-                        <i class="ph-duotone ph-list-numbers text-primary me-2"></i>Daftar Soal
+                        <i class="ph ph-list-numbers text-primary me-2"></i>Daftar Soal
                     </h5>
                     <div class="d-flex gap-2">
                         <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteSelected()" id="deleteSelectedBtn" style="display: none;">
@@ -214,16 +214,16 @@
                                     </td>
                                     <td class="text-center">
                                         <div class="btn-group btn-group-sm">
-                                            <button type="button" class="btn btn-light-info" onclick="viewQuestion({{ $question->id }})" title="Lihat Detail">
+                                            <button type="button" class="btn btn-sm btn-light-info" onclick="viewQuestion({{ $question->id }})" title="Lihat Detail">
                                                 <i class="ph ph-eye"></i>
                                             </button>
-                                            <a href="{{ route('teacher.questions.edit', [$exam, $question]) }}" class="btn btn-light-warning" title="Edit">
+                                            <a href="{{ route('teacher.questions.edit', [$exam, $question]) }}" class="btn btn-sm btn-light-warning" title="Edit">
                                                 <i class="ph ph-pencil-simple"></i>
                                             </a>
-                                            <button type="button" class="btn btn-light-primary" onclick="duplicateQuestion({{ $question->id }})" title="Duplikat">
+                                            <button type="button" class="btn btn-sm btn-light-primary" onclick="duplicateQuestion({{ $question->id }})" title="Duplikat">
                                                 <i class="ph ph-copy"></i>
                                             </button>
-                                            <button type="button" class="btn btn-light-danger" onclick="deleteQuestion({{ $question->id }})" title="Hapus">
+                                            <button type="button" class="btn btn-sm btn-light-danger" onclick="deleteQuestion({{ $question->id }})" title="Hapus">
                                                 <i class="ph ph-trash"></i>
                                             </button>
                                         </div>
@@ -243,7 +243,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">
-                        <i class="ph-duotone ph-file-arrow-up text-success me-2"></i>Import Soal dari CSV
+                        <i class="ph ph-file-arrow-up text-success me-2"></i>Import Soal dari CSV
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -327,7 +327,7 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                         <button type="submit" class="btn btn-success">
-                            <i class="ph ph-upload me-2"></i>Upload & Import
+                            <i class="ph ph-upload-simple me-2"></i>Upload & Import
                         </button>
                     </div>
                 </form>
