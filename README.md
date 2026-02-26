@@ -46,22 +46,35 @@ ZAFProctor adalah sistem ujian online yang dirancang untuk institusi pendidikan 
 - Memasukkan token akses dari guru untuk memulai ujian
 - Mengerjakan ujian dengan pengawasan kamera (mode fullscreen)
 - Navigasi soal dan auto-save jawaban
-- Sinkronisasi waktu dengan server (timer server-side)
+- Flag/bookmark soal untuk ditinjau ulang
+- Sinkronisasi waktu dengan server (timer server-side, anti-manipulasi waktu)
+- Offline queue: jawaban tersimpan lokal saat koneksi terputus, otomatis sinkron saat online
+- Essay auto-save setiap 10 detik
+- Dark mode dan pengaturan ukuran font (4 level) dalam antarmuka ujian
 - Melihat hasil ujian dan detail jawaban (jika diizinkan guru)
 
 ### 📷 Fitur Proctoring
 - **Pengawasan Webcam**: Snapshot otomatis selama ujian dengan interval yang dapat diatur
-- **Screen Capture**: Kemampuan menangkap layar peserta
+- **Deteksi Wajah (face-api.js)**: Deteksi keberadaan wajah peserta dengan peringatan countdown jika wajah tidak terdeteksi
+- **Deteksi Multiple Wajah**: Mendeteksi jika lebih dari satu wajah terlihat di kamera
 - **Browser Lock**: Mengunci browser agar tidak dapat melakukan aktivitas lain
-- **Deteksi Tab Switch**: Mendeteksi ketika peserta berpindah tab dengan batas maksimal
-- **Mode Fullscreen**: Memaksa peserta dalam mode fullscreen
-- **Blokir Copy/Paste**: Mencegah aksi copy-paste
-- **Blokir Right Click**: Mencegah klik kanan
-- **Blokir Keyboard Shortcut**: Mencegah shortcut keyboard terlarang
-- **Pencatatan Pelanggaran**: Log semua aktivitas mencurigakan dengan severity level
+- **Deteksi Tab Switch**: Mendeteksi ketika peserta berpindah tab (4 layer: visibilitychange, blur, focus monitoring, mouse leave)
+- **Mode Fullscreen**: Memaksa peserta dalam mode fullscreen dengan keyboard lock (Escape)
+- **Blokir Copy/Paste**: Mencegah aksi copy-paste (event listeners, Clipboard API override, execCommand override, Selection API override, drag & drop blocking)
+- **Blokir Right Click**: Mencegah klik kanan (capture-phase pada document & window)
+- **Blokir Keyboard Shortcut**: Mencegah shortcut keyboard terlarang (Ctrl, Alt, Meta, Function keys, PrintScreen)
+- **Deteksi DevTools**: Mendeteksi pembukaan developer tools (3 metode: debugger timing, window size, console access)
+- **Console Disable**: Menonaktifkan semua console method browser untuk mencegah manipulasi via console
+- **Anti-Tampering**: Integrity check berkala memastikan fungsi anti-cheat tidak dimodifikasi atau dihapus
+- **Print Blocking**: Mencegah aksi cetak halaman (beforeprint event + window.print override)
+- **Picture-in-Picture Blocking**: Mencegah video PiP
+- **Window.open Blocking**: Mencegah pembukaan window/tab baru via script
+- **Middle-click Blocking**: Mencegah buka tab baru via middle-click
+- **Pencatatan Pelanggaran**: Log semua aktivitas mencurigakan dengan severity level (low, medium, high)
 - **Auto-Submit**: Otomatis kumpulkan ujian jika melebihi batas pelanggaran
 - **Heartbeat System**: Monitoring koneksi peserta secara real-time
 - **Rate Limiting**: Throttle pada endpoint kritis (start, save-answer, violation, snapshot, heartbeat)
+- **Deteksi Manipulasi Waktu**: Validasi drift waktu client-server (>30 detik dicatat sebagai pelanggaran)
 
 ## 🛠️ Tech Stack
 
@@ -71,7 +84,7 @@ ZAFProctor adalah sistem ujian online yang dirancang untuk institusi pendidikan 
 - **Font**: Open Sans (dashboard) + Inter (auth)
 - **Database**: MySQL
 - **PDF Generation**: barryvdh/laravel-dompdf
-- **Proctoring**: WebRTC (MediaDevices API)
+- **Proctoring**: WebRTC (MediaDevices API) + face-api.js (TinyFaceDetector)
 - **Build Tool**: Vite 5
 
 ## 📦 Instalasi
@@ -210,7 +223,6 @@ Fitur proctoring (webcam) memerlukan browser modern dengan dukungan WebRTC:
 | `users` | Data pengguna (admin, guru, siswa) dengan sistem approval |
 | `roles` | Role pengguna (admin, teacher, student) |
 | `classes` | Kelas siswa (1A, 1B, 2A, dll) dengan wali kelas |
-| `class_student` | Relasi siswa-kelas dengan tahun ajaran |
 | `courses` | Mata pelajaran/kuliah dengan guru pengampu |
 | `course_student` | Relasi siswa-mata pelajaran |
 | `exams` | Data ujian dengan tipe scheduled/flexible |
@@ -228,30 +240,37 @@ Sistem mendeteksi dan mencatat berbagai jenis pelanggaran dengan tingkat severit
 
 | Kode | Pelanggaran | Severity | Deskripsi |
 |------|-------------|----------|-----------|
-| `tab_switch` | Tab Switch | Medium | Peserta berpindah ke tab lain |
-| `window_blur` | Window Blur | Low | Window kehilangan fokus |
-| `fullscreen_exit` | Keluar Fullscreen | High | Peserta keluar dari mode fullscreen |
-| `camera_disabled` | Kamera Dinonaktifkan | Critical | Akses kamera ditolak atau dimatikan |
-| `copy_paste` | Copy/Paste | Medium | Aksi copy/paste terdeteksi |
-| `keyboard_shortcut` | Shortcut Keyboard | Low | Shortcut terlarang terdeteksi |
+| `tab_switch` | Tab Switch | High | Peserta berpindah ke tab lain |
+| `window_blur` | Window Blur | Medium | Window kehilangan fokus |
+| `fullscreen_exit` | Keluar Fullscreen | Medium | Peserta keluar dari mode fullscreen |
+| `camera_disabled` | Kamera Dinonaktifkan | High | Akses kamera ditolak atau dimatikan |
+| `no_face_detected` | Wajah Tidak Terdeteksi | Medium | Wajah peserta tidak terlihat di kamera |
+| `multiple_faces` | Multiple Wajah | High | Lebih dari satu wajah terdeteksi di kamera |
+| `copy_paste` | Copy/Paste | High | Aksi copy/paste terdeteksi |
+| `keyboard_shortcut` | Shortcut Keyboard | Medium | Shortcut terlarang terdeteksi |
 | `right_click` | Klik Kanan | Low | Klik kanan mouse |
+| `browser_refresh` | Refresh Browser | Low | Peserta me-refresh halaman |
+| `devtools` | Developer Tools | High | Pembukaan DevTools terdeteksi |
+| `tampering` | Tampering | High | Fungsi anti-cheat dimodifikasi |
 
 ### Pengaturan Proctoring per Ujian
 
 | Pengaturan | Default | Deskripsi |
 |------------|---------|-----------|
-| `webcam_enabled` | true | Mengaktifkan pengawasan webcam |
-| `screen_capture_enabled` | true | Mengaktifkan tangkapan layar |
-| `browser_lock_enabled` | true | Mengunci browser dari aktivitas lain |
-| `tab_switch_detection` | true | Mendeteksi perpindahan tab |
+| `webcam_enabled` | true | Mengaktifkan pengawasan webcam + deteksi wajah |
+| `browser_lock_enabled` | true | Mengunci browser (fullscreen + deteksi keluar fullscreen) |
+| `tab_switch_detection` | true | Mendeteksi perpindahan tab/window |
+| `block_keyboard_shortcuts` | true | Blokir copy/paste, klik kanan, keyboard shortcut terlarang |
 | `max_tab_switches` | 5 | Batas maksimal perpindahan tab |
 | `snapshot_interval` | 30 | Interval snapshot dalam detik |
+| `warning_threshold` | 3 | Jumlah pelanggaran sebelum peringatan intensif |
+| `auto_submit_threshold` | 5 | Jumlah pelanggaran sebelum ujian auto-submit |
 | `shuffle_questions` | false | Mengacak urutan soal |
 | `shuffle_options` | false | Mengacak urutan pilihan jawaban |
 | `show_score` | true | Menampilkan skor ke peserta |
 | `show_correct_answers` | false | Menampilkan jawaban benar |
 | `passing_score` | 60 | Nilai minimum kelulusan |
-| `max_attempts` | null | Batas percobaan ujian |
+| `max_attempts` | 1 | Batas percobaan ujian (0 = unlimited) |
 | `grade_method` | highest | Metode penilaian (highest/latest/average) |
 
 ## 📁 Struktur Project
@@ -309,7 +328,7 @@ zafproctor/
 │       ├── ExamService.php
 │       └── ProctoringService.php            # Penanganan snapshot & log
 ├── database/
-│   ├── migrations/                          # 21 migration files
+│   ├── migrations/                          # 22 migration files
 │   └── seeders/
 │       ├── ClassSeeder.php
 │       ├── CourseSeeder.php
@@ -391,13 +410,15 @@ php artisan optimize:clear
 
 ## 🚀 Pengembangan Selanjutnya
 
+- [x] ~~Integrasi face detection~~ (Terimplementasi menggunakan face-api.js)
+- [x] ~~Dark mode~~ (Terimplementasi di antarmuka ujian)
 - [ ] Halaman admin untuk melihat audit log aktivitas
-- [ ] Integrasi face detection menggunakan TensorFlow.js
 - [ ] Real-time notification menggunakan WebSocket
 - [ ] Bank soal dengan kategori
 - [ ] Multi-language support
-- [ ] Dark mode
 - [ ] Laporan analitik nilai siswa
+- [ ] Deteksi Virtual Machine (VM)
+- [ ] Watermark dinamis pada halaman ujian
 
 ## 📊 Fitur Akademis Krusial
 
@@ -412,10 +433,17 @@ Memungkinkan pelaksanaan ujian secara digital dengan fitur:
 ### 2. **Proctoring System (Sistem Pengawasan)**
 Implementasi pengawasan ujian digital untuk menjaga integritas akademik:
 - Webcam monitoring dengan snapshot berkala
-- Browser lockdown untuk mencegah kecurangan
-- Deteksi aktivitas mencurigakan (tab switch, copy-paste, fullscreen exit, dll)
-- Logging pelanggaran dengan bukti screenshot dan severity level
+- Face detection (deteksi keberadaan wajah & multiple wajah) menggunakan face-api.js
+- Browser lockdown (fullscreen + keyboard lock + window.open block)
+- Multi-layer tab switch detection (visibilitychange, blur, focus monitoring)
+- Blokir copy/paste (event listener, Clipboard API, execCommand, Selection API, drag & drop)
+- Blokir keyboard shortcut (Ctrl, Alt, Meta, Function keys, PrintScreen)
+- Deteksi DevTools (debugger timing, window size, console access)
+- Console disable & anti-tampering integrity monitor
+- Logging pelanggaran dengan bukti screenshot dan severity level (low, medium, high)
 - Rate limiting pada endpoint proctoring untuk mencegah abuse
+- Deteksi manipulasi waktu client-server
+- Offline answer queue dengan auto-sync
 
 ### 3. **Manajemen Akademik**
 - Struktur hierarki: Kelas → Siswa → Mata Pelajaran → Ujian
