@@ -1071,8 +1071,8 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
 
     <script>
-        // Configuration
-        const config = {
+        // Configuration - frozen to prevent tampering
+        const config = Object.freeze({
             attemptId: {{ $attempt->id }},
             examId: {{ $attempt->exam->id }},
             totalQuestions: {{ $questions->count() }},
@@ -1091,14 +1091,14 @@
             warningThreshold: {{ $attempt->exam->settings?->warning_threshold ?? 3 }},
             csrfToken: '{{ csrf_token() }}',
             modelPath: '{{ asset("assets/proctoring/models") }}',
-            endpoints: {
+            endpoints: Object.freeze({
                 saveAnswer: '{{ route("student.exams.save-answer", $attempt) }}',
                 logViolation: '{{ route("student.proctoring.violation", $attempt) }}',
                 uploadSnapshot: '{{ route("student.proctoring.snapshot", $attempt) }}',
                 heartbeat: '{{ route("student.proctoring.heartbeat", $attempt) }}',
                 autoSubmit: '{{ route("student.exams.auto-submit", $attempt) }}',
-            }
-        };
+            })
+        });
 
         // State
         let currentQuestion = 0;
@@ -1131,7 +1131,72 @@
         // (before DOMContentLoaded, before any async operation)
         // ══════════════════════════════════════════════════════
         (function() {
-            // ── Copy / Cut / Paste (capture-phase, highest priority) ──
+            // ═══════════════════════════════════════════════════
+            // 0. OVERRIDE CLIPBOARD & EXEC COMMAND APIs
+            //    Prevents programmatic copy/paste via JS console
+            // ═══════════════════════════════════════════════════
+            if (config.detectCopyPaste) {
+                // Override navigator.clipboard API
+                try {
+                    Object.defineProperty(navigator, 'clipboard', {
+                        get: function() {
+                            return {
+                                readText: function() { logViolation('copy_paste', 'Clipboard API readText blocked'); return Promise.reject('blocked'); },
+                                writeText: function() { logViolation('copy_paste', 'Clipboard API writeText blocked'); return Promise.reject('blocked'); },
+                                read: function() { logViolation('copy_paste', 'Clipboard API read blocked'); return Promise.reject('blocked'); },
+                                write: function() { logViolation('copy_paste', 'Clipboard API write blocked'); return Promise.reject('blocked'); },
+                            };
+                        },
+                        configurable: false
+                    });
+                } catch(x) {}
+
+                // Override document.execCommand for copy/cut/paste
+                var _origExecCommand = document.execCommand.bind(document);
+                document.execCommand = function(cmd) {
+                    var c = cmd.toLowerCase();
+                    if (c === 'copy' || c === 'cut' || c === 'paste' || c === 'selectall') {
+                        logViolation('copy_paste', 'execCommand ' + cmd + ' blocked');
+                        return false;
+                    }
+                    return _origExecCommand.apply(document, arguments);
+                };
+
+                // Override Selection API to prevent getSelection-based copying
+                var _origGetSelection = window.getSelection.bind(window);
+                window.getSelection = function() {
+                    var sel = _origGetSelection();
+                    // Allow selection inside essay-textarea, block everywhere else
+                    var active = document.activeElement;
+                    if (active && active.classList && active.classList.contains('essay-textarea')) {
+                        return sel;
+                    }
+                    try {
+                        // Return a wrapper that blocks toString
+                        return {
+                            toString: function() { return ''; },
+                            anchorNode: sel.anchorNode,
+                            anchorOffset: sel.anchorOffset,
+                            focusNode: sel.focusNode,
+                            focusOffset: sel.focusOffset,
+                            isCollapsed: sel.isCollapsed,
+                            rangeCount: sel.rangeCount,
+                            type: sel.type,
+                            removeAllRanges: function() { sel.removeAllRanges(); },
+                            getRangeAt: function(i) { return sel.getRangeAt(i); },
+                            collapse: function() { sel.collapse.apply(sel, arguments); },
+                            collapseToStart: function() { sel.collapseToStart(); },
+                            collapseToEnd: function() { sel.collapseToEnd(); },
+                            extend: function() { sel.extend.apply(sel, arguments); },
+                            addRange: function() { sel.addRange.apply(sel, arguments); },
+                        };
+                    } catch(e) { return sel; }
+                };
+            }
+
+            // ═══════════════════════════════════════════════════
+            // 1. COPY / CUT / PASTE (capture-phase, highest priority)
+            // ═══════════════════════════════════════════════════
             if (config.detectCopyPaste) {
                 ['copy', 'cut', 'paste'].forEach(function(evt) {
                     document.addEventListener(evt, function(e) {
@@ -1146,17 +1211,45 @@
                     }, true);
                 });
 
-                // Block all drag operations
-                ['dragstart', 'drop', 'dragover'].forEach(function(evt) {
-                    document.addEventListener(evt, function(e) {
+                // Also listen on window level for extra coverage
+                ['copy', 'cut', 'paste'].forEach(function(evt) {
+                    window.addEventListener(evt, function(e) {
+                        if (isSubmitting) return;
                         e.preventDefault();
-                        e.stopPropagation();
-                        if (evt === 'dragstart') logViolation('copy_paste', 'Drag operation blocked');
+                        e.stopImmediatePropagation();
+                        return false;
                     }, true);
                 });
+
+                // Block all drag operations
+                ['dragstart', 'drop', 'dragover', 'dragenter', 'dragleave'].forEach(function(evt) {
+                    document.addEventListener(evt, function(e) {
+                        e.preventDefault();
+                        e.stopImmediatePropagation();
+                        if (evt === 'dragstart' || evt === 'drop') logViolation('copy_paste', 'Drag operation blocked');
+                        return false;
+                    }, true);
+                });
+
+                // Block input event paste (catches some mobile/autofill paste attempts)
+                document.addEventListener('input', function(e) {
+                    if (isSubmitting) return;
+                    if (e.inputType === 'insertFromPaste' || e.inputType === 'insertFromDrop') {
+                        // For essay textareas we need to undo the paste
+                        if (e.target && e.target.classList && e.target.classList.contains('essay-textarea')) {
+                            // Attempt to undo the paste via execCommand (already overridden but try native)
+                            try { _origExecCommand('undo'); } catch(x) {}
+                        }
+                        e.preventDefault();
+                        e.stopImmediatePropagation();
+                        logViolation('copy_paste', 'Paste via input event blocked');
+                    }
+                }, true);
             }
 
-            // ── Right-click (capture-phase) ──
+            // ═══════════════════════════════════════════════════
+            // 2. RIGHT-CLICK (capture-phase, both document & window)
+            // ═══════════════════════════════════════════════════
             if (config.detectRightClick) {
                 document.addEventListener('contextmenu', function(e) {
                     if (isSubmitting) return;
@@ -1165,16 +1258,42 @@
                     logViolation('right_click', 'Right click blocked');
                     return false;
                 }, true);
+                window.addEventListener('contextmenu', function(e) {
+                    if (isSubmitting) return;
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    return false;
+                }, true);
             }
 
-            // ── Keyboard shortcuts (capture-phase) ──
+            // ═══════════════════════════════════════════════════
+            // 3. KEYBOARD SHORTCUTS (capture-phase, both document & window)
+            // ═══════════════════════════════════════════════════
             if (config.blockKeyboardShortcuts || config.detectCopyPaste) {
                 document.addEventListener('keydown', preventKeyboardShortcuts, true);
+                window.addEventListener('keydown', preventKeyboardShortcuts, true);
+                // Also block keyup for modifier keys to prevent held-key bypasses
+                document.addEventListener('keyup', function(e) {
+                    if (isSubmitting) return;
+                    if (e.key === 'PrintScreen') {
+                        e.preventDefault();
+                        e.stopImmediatePropagation();
+                        // Clear clipboard after PrintScreen
+                        if (config.detectCopyPaste) {
+                            try { navigator.clipboard.writeText(''); } catch(x) {}
+                        }
+                        logViolation('keyboard_shortcut', 'PrintScreen blocked (keyup)');
+                    }
+                }, true);
             }
 
-            // ── Tab / Window visibility ──
+            // ═══════════════════════════════════════════════════
+            // 4. TAB / WINDOW VISIBILITY (multiple detection layers)
+            // ═══════════════════════════════════════════════════
             if (config.detectTabSwitch) {
                 var lastSwitchTime = 0;
+
+                // Layer 1: visibilitychange
                 document.addEventListener('visibilitychange', function() {
                     if (isSubmitting) return;
                     var now = Date.now();
@@ -1183,6 +1302,8 @@
                         logViolation('tab_switch', 'User switched to another tab');
                     }
                 });
+
+                // Layer 2: window blur
                 window.addEventListener('blur', function() {
                     if (isSubmitting) return;
                     var now = Date.now();
@@ -1191,19 +1312,207 @@
                         logViolation('window_blur', 'Window lost focus');
                     }
                 });
+
+                // Layer 3: focus monitoring - periodically check if window has focus
+                var _focusCheckInterval = setInterval(function() {
+                    if (isSubmitting) { clearInterval(_focusCheckInterval); return; }
+                    if (!document.hasFocus()) {
+                        var now = Date.now();
+                        if (now - lastSwitchTime > 3000) {
+                            lastSwitchTime = now;
+                            logViolation('tab_switch', 'Window lost focus (periodic check)');
+                        }
+                    }
+                }, 2000);
+
+                // Layer 4: mouse leave window (detects when mouse exits the page area)
+                document.addEventListener('mouseleave', function(e) {
+                    if (isSubmitting) return;
+                    // Only log if mouse is leaving to top (likely address bar / tab bar)
+                    if (e.clientY <= 0) {
+                        var now = Date.now();
+                        if (now - lastSwitchTime > 5000) {
+                            // Don't count as violation, but log for monitoring
+                            // logViolation('suspicious', 'Mouse left to top of window');
+                        }
+                    }
+                });
             }
 
-            // ── Print blocking ──
+            // ═══════════════════════════════════════════════════
+            // 5. PRINT BLOCKING
+            // ═══════════════════════════════════════════════════
             window.addEventListener('beforeprint', function(e) { e.preventDefault(); });
             window.addEventListener('afterprint', function() {
                 logViolation('keyboard_shortcut', 'Print attempt detected');
             });
+            // Override window.print
+            window.print = function() {
+                logViolation('keyboard_shortcut', 'window.print() blocked');
+            };
 
-            // ── PiP blocking ──
+            // ═══════════════════════════════════════════════════
+            // 6. PICTURE-IN-PICTURE BLOCKING
+            // ═══════════════════════════════════════════════════
             document.addEventListener('enterpictureinpicture', function(e) {
                 e.preventDefault();
                 try { document.exitPictureInPicture(); } catch(x) {}
             }, true);
+
+            // ═══════════════════════════════════════════════════
+            // 7. CONSOLE OVERRIDE (disable console methods)
+            //    MUST run before DevTools detection so we can
+            //    save original console.log for the trap
+            // ═══════════════════════════════════════════════════
+            var _origConsoleLog;
+            (function disableConsole() {
+                var noop = function() {};
+                // Keep references for internal use
+                window._origConsoleError = console.error.bind(console);
+                _origConsoleLog = console.log.bind(console);
+                var _origClear = console.clear.bind(console);
+                var methods = ['log', 'debug', 'info', 'warn', 'dir', 'dirxml', 'table', 'trace', 'group', 'groupCollapsed', 'groupEnd', 'profile', 'profileEnd', 'time', 'timeEnd', 'timeStamp', 'count', 'assert'];
+                methods.forEach(function(m) {
+                    try { console[m] = noop; } catch(x) {}
+                });
+                // Clear console periodically
+                setInterval(function() {
+                    try { _origClear(); } catch(x) {}
+                }, 2000);
+            })();
+
+            // ═══════════════════════════════════════════════════
+            // 8. DEVTOOLS DETECTION (multiple methods)
+            // ═══════════════════════════════════════════════════
+            (function detectDevTools() {
+                var devToolsOpen = false;
+                var devToolsCheckCount = 0;
+
+                // Method 1: debugger timing detection
+                // Running debugger statement takes much longer when DevTools is open
+                function checkDebuggerTiming() {
+                    if (isSubmitting) return;
+                    var start = performance.now();
+                    (function() { debugger; })();
+                    var end = performance.now();
+                    if (end - start > 100) {
+                        if (!devToolsOpen) {
+                            devToolsOpen = true;
+                            devToolsCheckCount++;
+                            logViolation('devtools', 'Developer Tools detected (debugger timing)');
+                        }
+                    } else {
+                        devToolsOpen = false;
+                    }
+                }
+
+                // Method 2: Window size difference detection
+                // DevTools docked panel changes inner dimensions
+                var _prevWidth = window.outerWidth - window.innerWidth;
+                var _prevHeight = window.outerHeight - window.innerHeight;
+                function checkWindowSize() {
+                    if (isSubmitting) return;
+                    var widthDiff = window.outerWidth - window.innerWidth;
+                    var heightDiff = window.outerHeight - window.innerHeight;
+                    // Threshold of 160px typically indicates DevTools panel
+                    if (widthDiff > 160 || heightDiff > 160) {
+                        if (!devToolsOpen) {
+                            devToolsOpen = true;
+                            devToolsCheckCount++;
+                            logViolation('devtools', 'Developer Tools detected (window size anomaly)');
+                        }
+                    }
+                }
+
+                // Method 3: Detect console.log toString trick
+                // When DevTools is open, objects logged have their toString called
+                var _dtElement = new Image();
+                Object.defineProperty(_dtElement, 'id', {
+                    get: function() {
+                        if (!devToolsOpen && !isSubmitting) {
+                            devToolsOpen = true;
+                            devToolsCheckCount++;
+                            logViolation('devtools', 'Developer Tools detected (console access)');
+                        }
+                    }
+                });
+
+                // Run periodic console check (uses saved original console.log)
+                setInterval(function() {
+                    if (isSubmitting) return;
+                    devToolsOpen = false;
+                    _origConsoleLog('%c', _dtElement);
+                }, 3000);
+
+                // Run window size check
+                setInterval(checkWindowSize, 2000);
+
+                // Resize event also triggers check
+                window.addEventListener('resize', function() {
+                    if (isSubmitting) return;
+                    checkWindowSize();
+                });
+            })();
+
+            // ═══════════════════════════════════════════════════
+            // 9. ANTI-TAMPERING: Integrity checks
+            //    Periodically verify critical functions exist
+            // ═══════════════════════════════════════════════════
+            (function integrityMonitor() {
+                // Store references to critical functions
+                var _origLogViolation = null;
+                var _origPreventKeyboard = null;
+
+                // Wait for functions to be defined, then snapshot them
+                setTimeout(function() {
+                    _origLogViolation = typeof logViolation === 'function' ? logViolation : null;
+                    _origPreventKeyboard = typeof preventKeyboardShortcuts === 'function' ? preventKeyboardShortcuts : null;
+                }, 100);
+
+                setInterval(function() {
+                    if (isSubmitting) return;
+
+                    // Check if logViolation was redefined/nullified
+                    if (_origLogViolation && typeof logViolation === 'function' && logViolation !== _origLogViolation) {
+                        // Someone replaced logViolation!
+                        logViolation = _origLogViolation;
+                        _origLogViolation('tampering', 'Anti-cheat function was tampered with');
+                    }
+                    if (typeof logViolation !== 'function') {
+                        // logViolation was deleted, restore it
+                        if (_origLogViolation) {
+                            window.logViolation = _origLogViolation;
+                            _origLogViolation('tampering', 'Anti-cheat function was deleted');
+                        }
+                    }
+
+                    // Check if preventKeyboardShortcuts was tampered
+                    if (_origPreventKeyboard && typeof preventKeyboardShortcuts === 'function' && preventKeyboardShortcuts !== _origPreventKeyboard) {
+                        preventKeyboardShortcuts = _origPreventKeyboard;
+                        if (_origLogViolation) _origLogViolation('tampering', 'Keyboard blocker was tampered with');
+                    }
+                }, 3000);
+            })();
+
+            // ═══════════════════════════════════════════════════
+            // 10. BLOCK NEW WINDOW / TAB OPENING
+            // ═══════════════════════════════════════════════════
+            // Override window.open
+            window.open = function() {
+                logViolation('keyboard_shortcut', 'window.open() blocked');
+                return null;
+            };
+
+            // Block middle-click (opens new tab)
+            document.addEventListener('auxclick', function(e) {
+                if (isSubmitting) return;
+                if (e.button === 1) { // middle click
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    return false;
+                }
+            }, true);
+
         })();
 
         // Initialize
@@ -1313,7 +1622,7 @@
                         break; // Stop on server error
                     }
                 } catch (err) {
-                    console.error('Sync error:', err);
+                    if (window._origConsoleError) window._origConsoleError('Sync error:', err);
                     break;
                 }
             }
@@ -1336,7 +1645,7 @@
                             offlineQueue.push(data);
                         }
                     } catch (e) {
-                        console.error('Error restoring answer:', e);
+                        if (window._origConsoleError) window._origConsoleError('Error restoring answer:', e);
                     }
                 }
             }
@@ -1411,7 +1720,7 @@
                         // Correct timer if drift > 5 seconds
                         const drift = Math.abs(timeRemaining - data.remaining_time);
                         if (drift > 5) {
-                            console.log('Timer synced, drift was:', drift);
+                            // Timer synced silently
                             timeRemaining = data.remaining_time;
                         }
                     }
@@ -1422,7 +1731,7 @@
                         autoSubmit();
                     }
                 } catch (e) {
-                    console.error('Time sync failed:', e);
+                    if (window._origConsoleError) window._origConsoleError('Time sync failed:', e);
                 }
             }, 60000);
         }
@@ -1512,7 +1821,7 @@
                     updateProgressBar();
                 }
             } catch (err) {
-                console.error('Error saving answer:', err);
+                if (window._origConsoleError) window._origConsoleError('Error saving answer:', err);
                 // Queue for later retry
                 offlineQueue.push(queueData);
                 answeredQuestions.add(questionId);
@@ -1565,7 +1874,7 @@
                     showEssayStatus(questionId, 'saved');
                 }
             } catch (err) {
-                console.error('Error saving essay:', err);
+                if (window._origConsoleError) window._origConsoleError('Error saving essay:', err);
                 offlineQueue.push(queueData);
                 answeredQuestions.add(questionId);
                 updateNavButton(questionIndex, true);
@@ -1647,7 +1956,7 @@
                                 localStorage.removeItem(`answer_${config.attemptId}_${questionId}`);
                             }
                         }).catch(err => {
-                            console.error('Error saving essay on submit:', err);
+                            if (window._origConsoleError) window._origConsoleError('Error saving essay on submit:', err);
                             // Save to localStorage as backup
                             localStorage.setItem(`answer_${config.attemptId}_${questionId}`, JSON.stringify({ payload, questionIndex: index }));
                         });
@@ -1665,7 +1974,7 @@
                         new Promise((_, reject) => setTimeout(() => reject('timeout'), 5000))
                     ]);
                 } catch (err) {
-                    console.warn('Some essay answers may not have saved:', err);
+                    if (window._origConsoleError) window._origConsoleError('Some essay answers may not have saved:', err);
                 }
             }
         }
@@ -1803,7 +2112,7 @@
             document.getElementById('submit-modal').classList.remove('show');
         }
 
-        // Fullscreen
+        // Fullscreen with aggressive re-entry
         function initFullscreen() {
             if (!config.requireFullscreen) return;
             
@@ -1811,22 +2120,59 @@
                 document.getElementById('fullscreen-modal').classList.add('show');
             }
             
+            // Listen for fullscreen exit
             document.addEventListener('fullscreenchange', function() {
-                if (!document.fullscreenElement && config.requireFullscreen) {
+                if (!document.fullscreenElement && config.requireFullscreen && !isSubmitting) {
                     document.getElementById('fullscreen-modal').classList.add('show');
                     if (config.detectFullscreenExit) {
                         logViolation('fullscreen_exit', 'User exited fullscreen mode');
                     }
+                    // Aggressively try to re-enter fullscreen after a short delay
+                    setTimeout(function() {
+                        if (!document.fullscreenElement && !isSubmitting) {
+                            try {
+                                document.documentElement.requestFullscreen().then(function() {
+                                    document.getElementById('fullscreen-modal').classList.remove('show');
+                                }).catch(function() {});
+                            } catch(x) {}
+                        }
+                    }, 1000);
                 } else {
                     document.getElementById('fullscreen-modal').classList.remove('show');
                 }
             });
+
+            // Periodic fullscreen check
+            setInterval(function() {
+                if (!document.fullscreenElement && config.requireFullscreen && !isSubmitting) {
+                    // Keep showing the modal until they re-enter
+                    var modal = document.getElementById('fullscreen-modal');
+                    if (modal && !modal.classList.contains('show')) {
+                        modal.classList.add('show');
+                    }
+                }
+            }, 3000);
+
+            // Block Escape key at the document level to prevent fullscreen exit
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && config.requireFullscreen && document.fullscreenElement) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    return false;
+                }
+            }, true);
         }
 
         function enterFullscreen() {
             document.documentElement.requestFullscreen().then(() => {
                 document.getElementById('fullscreen-modal').classList.remove('show');
-            }).catch(err => console.error('Fullscreen error:', err));
+                // Lock keyboard to prevent Escape from exiting
+                try {
+                    if (navigator.keyboard && navigator.keyboard.lock) {
+                        navigator.keyboard.lock(['Escape']).catch(function() {});
+                    }
+                } catch(x) {}
+            }).catch(err => { if (window._origConsoleError) window._origConsoleError('Fullscreen error:', err); });
         }
 
         // Proctoring
@@ -1851,7 +2197,7 @@
                 startHeartbeat();
 
             } catch (error) {
-                console.error('[Proctoring] Error:', error);
+                if (window._origConsoleError) window._origConsoleError('[Proctoring] Error:', error);
             }
         }
 
@@ -1879,7 +2225,7 @@
                 document.getElementById('camera-status').classList.add('active');
                 
             } catch (error) {
-                console.error('[Camera] Error:', error);
+                if (window._origConsoleError) window._origConsoleError('[Camera] Error:', error);
                 logViolation('camera_disabled', 'Camera access denied');
             }
         }
@@ -1927,7 +2273,7 @@
                             ctx.strokeRect(d.box.x, d.box.y, d.box.width, d.box.height);
                         });
                     }
-                } catch (e) { console.error('[FaceDetection]', e); }
+                } catch (e) { if (window._origConsoleError) window._origConsoleError('[FaceDetection]', e); }
             }, 2000);
         }
 
@@ -1991,7 +2337,7 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': config.csrfToken },
                 body: JSON.stringify({ snapshot: canvas.toDataURL('image/jpeg', 0.7), violation_type: violationType, description: description })
-            }).catch(e => console.error('[Snapshot]', e));
+            }).catch(e => { if (window._origConsoleError) window._origConsoleError('[Snapshot]', e); });
         }
 
         function startHeartbeat() {
@@ -2007,7 +2353,7 @@
                     });
                     const data = await response.json();
                     if (data.should_submit) autoSubmit();
-                } catch (e) { console.error('[Heartbeat]', e); }
+                } catch (e) { if (window._origConsoleError) window._origConsoleError('[Heartbeat]', e); }
             }, 30000);
         }
 
@@ -2028,7 +2374,7 @@
                 });
                 const data = await response.json();
                 if (data.should_auto_submit) autoSubmit();
-            } catch (e) { console.error('[Violation]', e); }
+            } catch (e) { if (window._origConsoleError) window._origConsoleError('[Violation]', e); }
         }
 
         function updateViolationCounter() {
@@ -2048,26 +2394,39 @@
 
         function preventKeyboardShortcuts(e) {
             if (isSubmitting) return;
+
+            // ── Escape key (exits fullscreen) ────────────
+            if (e.key === 'Escape') {
+                if (config.requireFullscreen && document.fullscreenElement) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    // Don't log as violation, just block the key
+                    return false;
+                }
+            }
             
             // ── Function keys ────────────────────────────
-            const blockedFnKeys = ['F3', 'F5', 'F6', 'F12', 'PrintScreen'];
+            const blockedFnKeys = ['F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12', 'PrintScreen'];
             if (blockedFnKeys.includes(e.key)) {
                 e.preventDefault();
                 e.stopImmediatePropagation();
                 logViolation('keyboard_shortcut', `Blocked ${e.key}`);
-                return;
+                return false;
             }
 
             // ── Ctrl / Meta + key ────────────────────────
             if (e.ctrlKey || e.metaKey) {
                 const key = e.key.toLowerCase();
 
-                // Ctrl+Shift combos (DevTools, inspect, console)
-                if (e.shiftKey && ['i', 'j', 'c', 'k'].includes(key)) {
-                    e.preventDefault();
-                    e.stopImmediatePropagation();
-                    logViolation('keyboard_shortcut', `Blocked Ctrl+Shift+${e.key.toUpperCase()}`);
-                    return;
+                // Ctrl+Shift combos (DevTools, inspect, console, task manager)
+                if (e.shiftKey) {
+                    const blockedShift = ['i', 'j', 'c', 'k', 'm', 'b', 'n', 's', 'delete'];
+                    if (blockedShift.includes(key)) {
+                        e.preventDefault();
+                        e.stopImmediatePropagation();
+                        logViolation('keyboard_shortcut', `Blocked Ctrl+Shift+${e.key.toUpperCase()}`);
+                        return false;
+                    }
                 }
 
                 // Allow Ctrl+A only inside essay textarea
@@ -2081,23 +2440,46 @@
                     return;
                 }
 
-                // Blocked Ctrl + single key
-                const blockedCtrl = ['c', 'v', 'x', 'a', 'p', 's', 'f', 'u', 'g', 'h', 'l', 'n', 'w', 't', 'd'];
+                // Allow Ctrl+Backspace and Ctrl+Delete (word delete in essay)
+                if ((key === 'backspace' || key === 'delete') && e.target && e.target.classList && e.target.classList.contains('essay-textarea')) {
+                    return;
+                }
+
+                // Blocked Ctrl + single key (comprehensive list)
+                const blockedCtrl = ['c', 'v', 'x', 'a', 'p', 's', 'f', 'u', 'g', 'h', 'l', 'n', 'w', 't', 'd', 'e', 'k', 'o', 'r', 'j', 'b', 'q', 'i'];
                 if (blockedCtrl.includes(key)) {
                     e.preventDefault();
                     e.stopImmediatePropagation();
                     logViolation('keyboard_shortcut', `Blocked Ctrl+${e.key.toUpperCase()}`);
-                    return;
+                    return false;
+                }
+
+                // Block Ctrl+Number (switch tabs)
+                if (key >= '0' && key <= '9') {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    logViolation('keyboard_shortcut', `Blocked Ctrl+${key}`);
+                    return false;
                 }
             }
 
             // ── Alt + key ────────────────────────────────
             if (e.altKey) {
-                if (e.key === 'F4' || e.key === 'Tab' || e.key.toLowerCase() === 'd') {
+                // Block all Alt combinations that could switch windows/tabs
+                const blockedAlt = ['F4', 'Tab', 'd', 'D', 'Home', 'Left', 'Right', 'ArrowLeft', 'ArrowRight', 'F5', 'F6', 'Escape'];
+                if (blockedAlt.includes(e.key)) {
                     e.preventDefault();
                     e.stopImmediatePropagation();
                     logViolation('keyboard_shortcut', `Blocked Alt+${e.key}`);
+                    return false;
                 }
+            }
+
+            // ── Windows key / Meta key alone ─────────────
+            if (e.key === 'Meta' || e.key === 'OS') {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                return false;
             }
         }
 
@@ -2118,7 +2500,7 @@
                 const data = await response.json();
                 if (data.redirect) window.location.href = data.redirect;
             } catch (e) {
-                console.error('[AutoSubmit]', e);
+                if (window._origConsoleError) window._origConsoleError('[AutoSubmit]', e);
                 document.getElementById('submit-form').submit();
             }
         }
