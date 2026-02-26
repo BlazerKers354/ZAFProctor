@@ -372,6 +372,14 @@
                                 <span class="badge bg-light-secondary">Nonaktif</span>
                             @endif
                         </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted small">Blokir Kecurangan</span>
+                            @if($exam->settings->block_keyboard_shortcuts)
+                                <span class="badge bg-light-success">Aktif</span>
+                            @else
+                                <span class="badge bg-light-secondary">Nonaktif</span>
+                            @endif
+                        </div>
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="text-muted small">Max Tab Switch</span>
                             <span class="badge bg-light-warning">{{ $exam->settings->max_tab_switches ?? 0 }}x</span>

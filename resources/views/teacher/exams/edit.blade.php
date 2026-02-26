@@ -206,6 +206,16 @@
                             </div>
                             
                             <div class="col-md-6">
+                                <div class="form-check form-switch mb-3">
+                                    <input type="checkbox" name="block_keyboard_shortcuts" id="block_keyboard_shortcuts" value="1"
+                                           {{ old('block_keyboard_shortcuts', $exam->settings?->block_keyboard_shortcuts ?? true) ? 'checked' : '' }}
+                                           class="form-check-input">
+                                    <label for="block_keyboard_shortcuts" class="form-check-label fw-medium">Blokir Kecurangan</label>
+                                </div>
+                                <small class="text-muted">Blokir copy/paste, klik kanan, dan keyboard shortcut terlarang</small>
+                            </div>
+                            
+                            <div class="col-md-6">
                                 <label for="max_tab_switches" class="form-label">Maks Tab Switch / Pelanggaran</label>
                                 <input type="number" name="max_tab_switches" id="max_tab_switches" 
                                        value="{{ old('max_tab_switches', $exam->settings?->max_tab_switches ?? 5) }}" 
