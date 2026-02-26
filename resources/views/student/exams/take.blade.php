@@ -32,13 +32,18 @@
 
         * {
             font-family: 'Open Sans', sans-serif;
-            @if($attempt->exam->settings?->detect_copy_paste)
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-            @endif
         }
+
+        @if($attempt->exam->settings?->detect_copy_paste)
+        /* Anti-cheat: block all text selection (override UA defaults) */
+        *, *::before, *::after {
+            -webkit-user-select: none !important;
+            -moz-user-select: none !important;
+            -ms-user-select: none !important;
+            user-select: none !important;
+            -webkit-touch-callout: none !important;
+        }
+        @endif
 
         body {
             background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
@@ -275,7 +280,7 @@
         /* Option Cards */
         .option-item {
             display: flex;
-            align-items: flex-start;
+            align-items: center;
             padding: 16px 20px;
             border: 2px solid #e5e7eb;
             border-radius: 14px;
@@ -316,7 +321,6 @@
             font-size: 1rem;
             color: #374151;
             line-height: 1.6;
-            padding-top: 6px;
         }
 
         /* Essay Textarea */
@@ -330,6 +334,10 @@
             line-height: 1.7;
             resize: vertical;
             transition: all 0.2s ease;
+            -webkit-user-select: text !important;
+            -moz-user-select: text !important;
+            user-select: text !important;
+            -webkit-touch-callout: default !important;
         }
         .essay-textarea:focus {
             outline: none;
@@ -530,22 +538,69 @@
 
         /* ── Dark Mode ───────────────────────── */
         body.dark-mode .question-card { background: #1e1e2e; border-color: #2a2a3d; }
-        body.dark-mode .question-body { color: #e0e0e0; }
-        body.dark-mode .question-text { color: #e0e0e0; }
-        body.dark-mode .option-item { background: #252536; border-color: #333; color: #d0d0d0; }
-        body.dark-mode .option-item:hover { background: #2d2d44; }
-        body.dark-mode .option-item.selected { background: rgba(99,102,241,0.15); border-color: var(--exam-primary); }
-        body.dark-mode .essay-textarea { background: #252536; border-color: #333; color: #e0e0e0; }
+        body.dark-mode .question-body { color: #f0f0f5; }
+        body.dark-mode .question-text { color: #f0f0f5; }
+        body.dark-mode .option-item { background: #252536; border-color: #3a3a50; color: #e8e8f0; }
+        body.dark-mode .option-item:hover { background: #2d2d44; border-color: #5b5b7a; }
+        body.dark-mode .option-item.selected { background: rgba(124, 58, 237, 0.18); border-color: var(--exam-primary); }
+        body.dark-mode .option-text { color: #e8e8f0; }
+        body.dark-mode .option-letter { border-color: #4a4a60; color: #b0b0c8; background: rgba(255,255,255,0.04); }
+        body.dark-mode .option-item.selected .option-letter { background: var(--exam-primary); border-color: var(--exam-primary); color: #fff; }
+        body.dark-mode .essay-textarea { background: #252536; border-color: #3a3a50; color: #f0f0f5; }
+        body.dark-mode .essay-textarea::placeholder { color: #6b6b80; }
+        body.dark-mode .essay-textarea:focus { border-color: var(--exam-primary); box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.15); }
         body.dark-mode .nav-footer { background: #1a1a2a; border-color: #2a2a3d; }
+        body.dark-mode .btn-nav-outline { background: #252536; border-color: #3a3a50; color: #d0d0e0; }
+        body.dark-mode .btn-nav-outline:hover { background: #2d2d44; border-color: #505068; color: #f0f0f5; }
         body.dark-mode .exam-content { background: #141421; }
+        body.dark-mode .btn-flag { border-color: rgba(245,158,11,0.25); color: #8a8a9e; }
+        body.dark-mode .btn-flag:hover, body.dark-mode .btn-flag.active { background: rgba(245,158,11,0.12); color: #f59e0b; border-color: #f59e0b; }
+        body.dark-mode .question-body img { border-radius: 8px; border: 1px solid #3a3a50; }
+        body.dark-mode .exam-modal { background: #1e1e2e; }
+        body.dark-mode .exam-modal-body { color: #d0d0e0; }
+        body.dark-mode .exam-modal-body p { color: #d0d0e0; }
+        body.dark-mode .submit-summary { background: #252536; }
+        body.dark-mode .summary-value { color: #f0f0f5; }
+        body.dark-mode .exam-modal-footer .btn-nav-outline { background: #252536; border-color: #3a3a50; color: #d0d0e0; }
+        body.dark-mode .essay-container label.text-secondary { color: #9090a8 !important; }
+        body.dark-mode .essay-container .text-secondary { color: #808099 !important; }
+        body.dark-mode .exam-modal-body .alert { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.1); color: #d0d0e0; }
+        body.dark-mode .exam-modal-body .alert-warning { background: rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.2); color: #fbbf24; }
+        body.dark-mode .exam-modal-body .alert-success { background: rgba(34,197,94,0.1); border-color: rgba(34,197,94,0.2); color: #4ade80; }
+        body.dark-mode .exam-modal-body .text-secondary { color: #9090a8 !important; }
+        body.dark-mode .submit-summary .text-secondary { color: #9090a8 !important; }
+        body.dark-mode .submit-summary .progress { background: rgba(255,255,255,0.1); }
+        body.dark-mode { background: #141421; }
 
-        /* ── Font Size ───────────────────────── */
-        body.fs-small .question-text { font-size: 0.85rem; }
-        body.fs-small .option-text { font-size: 0.82rem; }
-        body.fs-small .essay-textarea { font-size: 0.85rem; }
-        body.fs-large .question-text { font-size: 1.15rem; }
-        body.fs-large .option-text { font-size: 1.05rem; }
-        body.fs-large .essay-textarea { font-size: 1.1rem; }
+        /* ── Font Size (4 levels with significant differences) ── */
+        /* Small: ~14px question, ~13px option */
+        body.fs-small .question-text { font-size: 0.875rem; line-height: 1.7; }
+        body.fs-small .option-text  { font-size: 0.825rem; line-height: 1.5; }
+        body.fs-small .essay-textarea { font-size: 0.875rem; line-height: 1.6; }
+        body.fs-small .option-letter { width: 32px; height: 32px; font-size: 0.8rem; }
+        body.fs-small .question-number { width: 36px; height: 36px; font-size: 1rem; }
+
+        /* Normal: default (1.15rem question, 1rem option) — no overrides needed */
+
+        /* Large: ~22px question, ~20px option */
+        body.fs-large .question-text { font-size: 1.375rem; line-height: 1.9; }
+        body.fs-large .option-text  { font-size: 1.25rem; line-height: 1.7; }
+        body.fs-large .essay-textarea { font-size: 1.3rem; line-height: 1.8; min-height: 240px; }
+        body.fs-large .option-item  { padding: 18px 22px; margin-bottom: 14px; }
+        body.fs-large .option-letter { width: 42px; height: 42px; font-size: 1rem; }
+        body.fs-large .question-number { width: 46px; height: 46px; font-size: 1.2rem; }
+        body.fs-large .question-body { padding: 32px; }
+
+        /* Extra Large: ~28px question, ~24px option — for severe visual impairment */
+        body.fs-xlarge .question-text { font-size: 1.75rem; line-height: 2; }
+        body.fs-xlarge .option-text  { font-size: 1.5rem; line-height: 1.8; }
+        body.fs-xlarge .essay-textarea { font-size: 1.6rem; line-height: 1.9; min-height: 280px; }
+        body.fs-xlarge .option-item  { padding: 20px 24px; margin-bottom: 16px; border-radius: 16px; }
+        body.fs-xlarge .option-letter { width: 48px; height: 48px; font-size: 1.15rem; border-radius: 12px; }
+        body.fs-xlarge .question-number { width: 52px; height: 52px; font-size: 1.35rem; }
+        body.fs-xlarge .question-body { padding: 36px; }
+        body.fs-xlarge .question-header { padding: 24px 28px; }
+        body.fs-xlarge .question-points { font-size: 1rem; padding: 8px 14px; }
 
         /* ── Toolbar buttons ─────────────────── */
         .exam-toolbar-btn {
@@ -591,12 +646,7 @@
             border-radius: 0 3px 3px 0;
         }
         .header-progress-text {
-            position: absolute;
-            bottom: 8px;
-            right: 12px;
-            font-size: 0.65rem;
-            color: rgba(255,255,255,0.7);
-            font-weight: 600;
+            display: none;
         }
 
         /* Responsive */
@@ -617,7 +667,16 @@
         }
     </style>
 </head>
-<body @if($attempt->exam->settings?->detect_right_click) oncontextmenu="return false;" @endif>
+<body
+    @if($attempt->exam->settings?->detect_right_click) oncontextmenu="return false;" @endif
+    @if($attempt->exam->settings?->detect_copy_paste)
+    oncopy="return false;"
+    onpaste="return false;"
+    oncut="return false;"
+    onselectstart="if(event.target.tagName!=='TEXTAREA')return false;"
+    ondragstart="return false;"
+    @endif
+>
 
     <!-- Header -->
     <header class="exam-header">
@@ -650,7 +709,7 @@
                     
                     <!-- Camera Preview -->
                     <div class="camera-box d-none d-md-block">
-                        <video id="camera-preview" autoplay muted playsinline></video>
+                        <video id="camera-preview" autoplay muted playsinline disablepictureinpicture controlslist="nodownload noplaybackrate nofullscreen"></video>
                         <canvas id="face-canvas"></canvas>
                         <div id="camera-status" class="camera-status inactive"></div>
                         <div id="camera-placeholder" class="camera-placeholder">
@@ -678,11 +737,12 @@
                         </div>
                     </div>
 
-                    <!-- Toolbar: Font Size -->
+                    <!-- Toolbar: Font Size (4 levels) -->
                     <div class="toolbar-group d-none d-md-flex">
-                        <button onclick="setFontSize('small')" class="exam-toolbar-btn" title="Font kecil" id="fs-small">A<small style="font-size:0.6em">−</small></button>
-                        <button onclick="setFontSize('normal')" class="exam-toolbar-btn active" title="Font normal" id="fs-normal">A</button>
-                        <button onclick="setFontSize('large')" class="exam-toolbar-btn" title="Font besar" id="fs-large">A<small style="font-size:0.6em">+</small></button>
+                        <button onclick="setFontSize('small')" class="exam-toolbar-btn" title="Font kecil" id="fs-small" style="font-size:0.65rem;">A</button>
+                        <button onclick="setFontSize('normal')" class="exam-toolbar-btn active" title="Font normal" id="fs-normal" style="font-size:0.8rem;">A</button>
+                        <button onclick="setFontSize('large')" class="exam-toolbar-btn" title="Font besar" id="fs-large" style="font-size:0.95rem;">A</button>
+                        <button onclick="setFontSize('xlarge')" class="exam-toolbar-btn" title="Font sangat besar" id="fs-xlarge" style="font-size:1.1rem; font-weight:700;">A</button>
                     </div>
 
                     <!-- Toolbar: Dark Mode -->
@@ -703,7 +763,6 @@
         <div class="header-progress-wrap">
             <div id="progress-bar" class="header-progress-fill"></div>
         </div>
-        <span id="header-progress-text" class="header-progress-text">0%</span>
     </header>
 
     <!-- Warning Banner -->
@@ -1061,9 +1120,91 @@
         let offlineQueue = [];
         let isOnline = navigator.onLine;
         let isSyncing = false;
+        let isSubmitting = false;
+        let lastMultipleFacesTime = 0;
 
         // Flag / Bookmark
         let flaggedQuestions = new Set();
+
+        // ══════════════════════════════════════════════════════
+        // IMMEDIATE ANTI-CHEAT: runs the MOMENT script is parsed
+        // (before DOMContentLoaded, before any async operation)
+        // ══════════════════════════════════════════════════════
+        (function() {
+            // ── Copy / Cut / Paste (capture-phase, highest priority) ──
+            if (config.detectCopyPaste) {
+                ['copy', 'cut', 'paste'].forEach(function(evt) {
+                    document.addEventListener(evt, function(e) {
+                        if (isSubmitting) return;
+                        // Allow nothing — not even inside essay
+                        // (student can TYPE but not copy/paste)
+                        e.preventDefault();
+                        e.stopImmediatePropagation();
+                        try { if (e.clipboardData) e.clipboardData.clearData(); } catch(x) {}
+                        logViolation('copy_paste', evt + ' action blocked');
+                        return false;
+                    }, true);
+                });
+
+                // Block all drag operations
+                ['dragstart', 'drop', 'dragover'].forEach(function(evt) {
+                    document.addEventListener(evt, function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (evt === 'dragstart') logViolation('copy_paste', 'Drag operation blocked');
+                    }, true);
+                });
+            }
+
+            // ── Right-click (capture-phase) ──
+            if (config.detectRightClick) {
+                document.addEventListener('contextmenu', function(e) {
+                    if (isSubmitting) return;
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    logViolation('right_click', 'Right click blocked');
+                    return false;
+                }, true);
+            }
+
+            // ── Keyboard shortcuts (capture-phase) ──
+            if (config.blockKeyboardShortcuts || config.detectCopyPaste) {
+                document.addEventListener('keydown', preventKeyboardShortcuts, true);
+            }
+
+            // ── Tab / Window visibility ──
+            if (config.detectTabSwitch) {
+                var lastSwitchTime = 0;
+                document.addEventListener('visibilitychange', function() {
+                    if (isSubmitting) return;
+                    var now = Date.now();
+                    if (document.hidden && now - lastSwitchTime > 2000) {
+                        lastSwitchTime = now;
+                        logViolation('tab_switch', 'User switched to another tab');
+                    }
+                });
+                window.addEventListener('blur', function() {
+                    if (isSubmitting) return;
+                    var now = Date.now();
+                    if (now - lastSwitchTime > 2000) {
+                        lastSwitchTime = now;
+                        logViolation('window_blur', 'Window lost focus');
+                    }
+                });
+            }
+
+            // ── Print blocking ──
+            window.addEventListener('beforeprint', function(e) { e.preventDefault(); });
+            window.addEventListener('afterprint', function() {
+                logViolation('keyboard_shortcut', 'Print attempt detected');
+            });
+
+            // ── PiP blocking ──
+            document.addEventListener('enterpictureinpicture', function(e) {
+                e.preventDefault();
+                try { document.exitPictureInPicture(); } catch(x) {}
+            }, true);
+        })();
 
         // Initialize
         document.addEventListener('DOMContentLoaded', async function() {
@@ -1080,7 +1221,7 @@
             // Start auto-save for essay answers
             startEssayAutoSave();
             
-            // Initialize proctoring
+            // Initialize advanced proctoring (camera, face detection)
             await initAdvancedProctoring();
             
             // Fullscreen
@@ -1294,10 +1435,8 @@
             
             const countEl = document.getElementById('answered-count');
             const percentEl = document.getElementById('answered-percent');
-            const headerTextEl = document.getElementById('header-progress-text');
             if (countEl) countEl.textContent = answeredQuestions.size;
             if (percentEl) percentEl.textContent = Math.round(progress) + '%';
-            if (headerTextEl) headerTextEl.textContent = answeredQuestions.size + '/' + config.totalQuestions + ' (' + Math.round(progress) + '%)';
         }
 
         // Question Navigation
@@ -1586,9 +1725,9 @@
             localStorage.setItem('exam_dark_mode', isDark ? '1' : '0');
         }
 
-        // ── Font Size ───────────────────────────────────
+        // ── Font Size (4 levels: small / normal / large / xlarge) ──
         function setFontSize(size) {
-            document.body.classList.remove('fs-small', 'fs-large');
+            document.body.classList.remove('fs-small', 'fs-large', 'fs-xlarge');
             if (size !== 'normal') document.body.classList.add('fs-' + size);
             document.querySelectorAll('.exam-toolbar-btn[id^="fs-"]').forEach(b => b.classList.remove('active'));
             const activeBtn = document.getElementById('fs-' + size);
@@ -1692,10 +1831,8 @@
 
         // Proctoring
         async function initAdvancedProctoring() {
-            if (!config.requireCamera) {
-                initBasicProctoring();
-                return;
-            }
+            // Anti-cheat listeners already active from IIFE above
+            if (!config.requireCamera) return;
 
             try {
                 // Load face-api models
@@ -1716,44 +1853,9 @@
             } catch (error) {
                 console.error('[Proctoring] Error:', error);
             }
-
-            initBasicProctoring();
         }
 
-        function initBasicProctoring() {
-            // Tab visibility
-            if (config.detectTabSwitch) {
-                document.addEventListener('visibilitychange', () => {
-                    if (document.hidden) logViolation('tab_switch', 'User switched to another tab');
-                });
-
-                // Window blur
-                window.addEventListener('blur', () => logViolation('window_blur', 'Window lost focus'));
-            }
-
-            // Prevent copy/paste
-            if (config.detectCopyPaste) {
-                ['copy', 'cut', 'paste'].forEach(event => {
-                    document.addEventListener(event, e => {
-                        e.preventDefault();
-                        logViolation('copy_paste', `${event} action detected`);
-                    });
-                });
-            }
-            
-            // Prevent right click
-            if (config.detectRightClick) {
-                document.addEventListener('contextmenu', e => {
-                    e.preventDefault();
-                    logViolation('right_click', 'Right click detected');
-                });
-            }
-            
-            // Prevent keyboard shortcuts
-            if (config.blockKeyboardShortcuts) {
-                document.addEventListener('keydown', preventKeyboardShortcuts);
-            }
-        }
+        // initBasicProctoring is now handled by the IIFE above (immediate execution)
 
         async function initCamera() {
             try {
@@ -1764,6 +1866,9 @@
                 
                 const video = document.getElementById('camera-preview');
                 video.srcObject = stream;
+                video.disablePictureInPicture = true;
+                video.setAttribute('disablepictureinpicture', '');
+                video.setAttribute('controlslist', 'nodownload noplaybackrate nofullscreen');
                 
                 await new Promise(resolve => {
                     video.onloadedmetadata = () => { video.play(); resolve(); };
@@ -1791,7 +1896,7 @@
             let consecutiveNoFace = 0;
 
             faceDetectionInterval = setInterval(async () => {
-                if (!video.videoWidth) return;
+                if (!video.videoWidth || isSubmitting) return;
 
                 try {
                     const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 }));
@@ -1809,8 +1914,13 @@
                         ctx.strokeRect(box.x, box.y, box.width, box.height);
                     } else if (detections.length > 1 && config.detectMultipleFaces) {
                         consecutiveNoFace = 0;
-                        logViolation('multiple_faces', `${detections.length} faces detected`);
-                        showMultipleFacesWarning(detections.length);
+                        // Debounce: only log once per 10 seconds
+                        const now = Date.now();
+                        if (now - lastMultipleFacesTime > 10000) {
+                            lastMultipleFacesTime = now;
+                            logViolation('multiple_faces', `${detections.length} faces detected`);
+                            showMultipleFacesWarning(detections.length);
+                        }
                         detections.forEach(d => {
                             ctx.strokeStyle = '#ef4444';
                             ctx.lineWidth = 2;
@@ -1890,7 +2000,10 @@
                     const response = await fetch(config.endpoints.heartbeat, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': config.csrfToken },
-                        body: JSON.stringify({ camera_enabled: stream !== null })
+                        body: JSON.stringify({ 
+                            camera_enabled: stream !== null,
+                            face_detected: !!(stream && faceDetectionInterval)
+                        })
                     });
                     const data = await response.json();
                     if (data.should_submit) autoSubmit();
@@ -1899,6 +2012,8 @@
         }
 
         async function logViolation(type, description) {
+            if (isSubmitting) return;
+            
             violationCount++;
             updateViolationCounter();
             showWarning(description);
@@ -1932,18 +2047,64 @@
         }
 
         function preventKeyboardShortcuts(e) {
-            const blocked = ['c', 'v', 'x', 'a', 'p', 's', 'f', 'u'];
-            if ((e.ctrlKey || e.metaKey) && blocked.includes(e.key.toLowerCase())) {
+            if (isSubmitting) return;
+            
+            // ── Function keys ────────────────────────────
+            const blockedFnKeys = ['F3', 'F5', 'F6', 'F12', 'PrintScreen'];
+            if (blockedFnKeys.includes(e.key)) {
                 e.preventDefault();
-                logViolation('keyboard_shortcut', `Blocked: Ctrl+${e.key}`);
-            }
-            if (e.key === 'F12' || e.key === 'F5') {
-                e.preventDefault();
+                e.stopImmediatePropagation();
                 logViolation('keyboard_shortcut', `Blocked ${e.key}`);
+                return;
+            }
+
+            // ── Ctrl / Meta + key ────────────────────────
+            if (e.ctrlKey || e.metaKey) {
+                const key = e.key.toLowerCase();
+
+                // Ctrl+Shift combos (DevTools, inspect, console)
+                if (e.shiftKey && ['i', 'j', 'c', 'k'].includes(key)) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    logViolation('keyboard_shortcut', `Blocked Ctrl+Shift+${e.key.toUpperCase()}`);
+                    return;
+                }
+
+                // Allow Ctrl+A only inside essay textarea
+                if (key === 'a') {
+                    const isEssay = e.target && e.target.classList && e.target.classList.contains('essay-textarea');
+                    if (isEssay) return;
+                }
+
+                // Allow Ctrl+Z/Y (undo/redo) inside essay textarea
+                if ((key === 'z' || key === 'y') && e.target && e.target.classList && e.target.classList.contains('essay-textarea')) {
+                    return;
+                }
+
+                // Blocked Ctrl + single key
+                const blockedCtrl = ['c', 'v', 'x', 'a', 'p', 's', 'f', 'u', 'g', 'h', 'l', 'n', 'w', 't', 'd'];
+                if (blockedCtrl.includes(key)) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    logViolation('keyboard_shortcut', `Blocked Ctrl+${e.key.toUpperCase()}`);
+                    return;
+                }
+            }
+
+            // ── Alt + key ────────────────────────────────
+            if (e.altKey) {
+                if (e.key === 'F4' || e.key === 'Tab' || e.key.toLowerCase() === 'd') {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    logViolation('keyboard_shortcut', `Blocked Alt+${e.key}`);
+                }
             }
         }
 
         async function autoSubmit() {
+            if (isSubmitting) return;
+            isSubmitting = true;
+            
             // Try to sync any remaining offline answers before submit
             if (offlineQueue.length > 0 && isOnline) {
                 await syncOfflineAnswers();
@@ -1964,6 +2125,12 @@
 
         // Cleanup
         window.addEventListener('beforeunload', function(e) {
+            // If submitting, let it go without warning
+            if (isSubmitting) {
+                if (stream) stream.getTracks().forEach(track => track.stop());
+                return;
+            }
+            
             // Stop camera stream
             if (stream) stream.getTracks().forEach(track => track.stop());
             
@@ -1986,6 +2153,8 @@
         
         // Clean up localStorage on successful submit
         document.getElementById('submit-form').addEventListener('submit', function() {
+            isSubmitting = true;
+            
             // Clear all answers for this attempt from localStorage
             for (let i = localStorage.length - 1; i >= 0; i--) {
                 const key = localStorage.key(i);
