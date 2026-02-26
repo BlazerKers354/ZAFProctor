@@ -149,7 +149,7 @@
                             <i class="ph ph-trash me-1"></i>Hapus Terpilih (<span id="selectedCount">0</span>)
                         </button>
                         <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+                            <input class="form-check-input" type="checkbox" id="selectAll" onchange="toggleSelectAll(this)">
                             <label class="form-check-label" for="selectAll">Pilih Semua</label>
                         </div>
                     </div>
@@ -161,7 +161,7 @@
                         <thead class="table-light">
                             <tr>
                                 <th width="50" class="text-center">
-                                    <input type="checkbox" id="selectAllHeader" onchange="toggleSelectAll()">
+                                    <input type="checkbox" id="selectAllHeader" onchange="toggleSelectAll(this)">
                                 </th>
                                 <th width="60" class="text-center">No</th>
                                 <th>Pertanyaan</th>
@@ -357,21 +357,26 @@
 
 @push('scripts')
 <script>
-    function toggleSelectAll() {
-        const selectAll = document.getElementById('selectAll').checked || document.getElementById('selectAllHeader').checked;
+    function toggleSelectAll(source) {
+        const isChecked = source.checked;
         document.querySelectorAll('.question-checkbox').forEach(checkbox => {
-            checkbox.checked = selectAll;
+            checkbox.checked = isChecked;
         });
-        document.getElementById('selectAll').checked = selectAll;
-        document.getElementById('selectAllHeader').checked = selectAll;
+        document.getElementById('selectAll').checked = isChecked;
+        document.getElementById('selectAllHeader').checked = isChecked;
         updateSelectedCount();
     }
 
     function updateSelectedCount() {
+        const all = document.querySelectorAll('.question-checkbox');
         const selected = document.querySelectorAll('.question-checkbox:checked');
         const count = selected.length;
         document.getElementById('selectedCount').textContent = count;
         document.getElementById('deleteSelectedBtn').style.display = count > 0 ? 'block' : 'none';
+        // Sync selectAll checkboxes
+        const allChecked = all.length > 0 && all.length === count;
+        document.getElementById('selectAll').checked = allChecked;
+        document.getElementById('selectAllHeader').checked = allChecked;
     }
 
     function deleteSelected() {

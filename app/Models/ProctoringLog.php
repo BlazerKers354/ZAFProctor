@@ -99,7 +99,7 @@ class ProctoringLog extends Model
     }
 
     /**
-     * Get snapshot URL
+     * Get snapshot URL (served through authenticated controller)
      */
     public function getSnapshotUrlAttribute(): ?string
     {
@@ -107,7 +107,7 @@ class ProctoringLog extends Model
             return null;
         }
 
-        return Storage::disk('public')->url($this->snapshot_path);
+        return route('proctoring.snapshot.view', $this->id);
     }
 
     /**

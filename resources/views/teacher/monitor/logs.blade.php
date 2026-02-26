@@ -140,7 +140,7 @@
                                     </td>
                                     <td>
                                         @if($log->snapshot_path)
-                                            <a href="{{ asset('storage/' . $log->snapshot_path) }}" 
+                                            <a href="{{ route('proctoring.snapshot.view', $log->id) }}" 
                                                target="_blank"
                                                class="btn btn-sm btn-light-primary">
                                                 <i class="ph ph-image me-1"></i>Lihat

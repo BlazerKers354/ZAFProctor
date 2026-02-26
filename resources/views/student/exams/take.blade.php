@@ -2337,6 +2337,8 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': config.csrfToken },
                 body: JSON.stringify({ snapshot: canvas.toDataURL('image/jpeg', 0.7), violation_type: violationType, description: description })
+            }).then(r => r.json()).then(data => {
+                if (data.should_auto_submit) autoSubmit();
             }).catch(e => { if (window._origConsoleError) window._origConsoleError('[Snapshot]', e); });
         }
 
@@ -2364,17 +2366,21 @@
             updateViolationCounter();
             showWarning(description);
             
-            if (stream) captureAndUploadSnapshot(type, description);
-            
-            try {
-                const response = await fetch(config.endpoints.logViolation, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': config.csrfToken },
-                    body: JSON.stringify({ violation_type: type, description: description })
-                });
-                const data = await response.json();
-                if (data.should_auto_submit) autoSubmit();
-            } catch (e) { if (window._origConsoleError) window._origConsoleError('[Violation]', e); }
+            // If webcam stream is active, send snapshot with violation (single log entry)
+            // Otherwise, send violation only (no snapshot)
+            if (stream) {
+                captureAndUploadSnapshot(type, description);
+            } else {
+                try {
+                    const response = await fetch(config.endpoints.logViolation, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': config.csrfToken },
+                        body: JSON.stringify({ violation_type: type, description: description })
+                    });
+                    const data = await response.json();
+                    if (data.should_auto_submit) autoSubmit();
+                } catch (e) { if (window._origConsoleError) window._origConsoleError('[Violation]', e); }
+            }
         }
 
         function updateViolationCounter() {

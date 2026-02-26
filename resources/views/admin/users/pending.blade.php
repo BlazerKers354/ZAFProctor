@@ -76,7 +76,6 @@
                                         </form>
                                         <form action="{{ route('admin.users.reject', $user) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menolak pendaftaran ini? Akun akan dihapus.')">
                                             @csrf
-                                            @method('DELETE')
                                             <button type="submit" class="btn btn-sm btn-danger" title="Tolak">
                                                 <i class="ph ph-x me-1"></i>Tolak
                                             </button>

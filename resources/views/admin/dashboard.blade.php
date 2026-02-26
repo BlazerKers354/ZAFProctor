@@ -263,9 +263,7 @@
                     <h5 class="card-title mb-0">
                         <i class="ph ph-file-text me-2"></i>Ujian Terbaru
                     </h5>
-                    <a href="#" class="btn btn-light-primary btn-sm">
-                        Lihat Semua <i class="ph ph-arrow-right ms-1"></i>
-                    </a>
+
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">

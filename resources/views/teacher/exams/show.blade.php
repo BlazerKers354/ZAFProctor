@@ -474,7 +474,7 @@
                         <input type="text" class="form-control form-control-lg text-center font-monospace" 
                                value="{{ $exam->access_token }}" id="accessToken" readonly 
                                style="letter-spacing: 2px; font-weight: bold;">
-                        <button class="btn btn-primary" type="button" onclick="copyToken()" title="Salin Token">
+                        <button class="btn btn-primary" type="button" onclick="copyToken(event)" title="Salin Token">
                             <i class="ph ph-copy"></i>
                         </button>
                     </div>
@@ -512,13 +512,13 @@
     </div>
 
     <script>
-        function copyToken() {
+        function copyToken(e) {
             const tokenInput = document.getElementById('accessToken');
             tokenInput.select();
             tokenInput.setSelectionRange(0, 99999);
             navigator.clipboard.writeText(tokenInput.value).then(() => {
                 // Show tooltip or toast
-                const btn = event.target.closest('button');
+                const btn = (e || window.event).target.closest('button');
                 const originalHTML = btn.innerHTML;
                 btn.innerHTML = '<i class="ph ph-check"></i>';
                 btn.classList.remove('btn-primary');

@@ -169,8 +169,9 @@
                             @foreach(array_slice($snapshots, 0, 8) as $snapshot)
                                 <div class="col-6 col-md-3">
                                     <div class="position-relative">
-                                        <img src="{{ asset('storage/' . ($snapshot['snapshot_path'] ?? $snapshot->snapshot_path ?? '')) }}" 
-                                             alt="Snapshot" class="img-fluid rounded" style="aspect-ratio: 4/3; object-fit: cover; width: 100%;">
+                                        <img src="{{ is_array($snapshot) ? $snapshot['url'] : route('proctoring.snapshot.view', $snapshot->id) }}" 
+                                             alt="Snapshot" class="img-fluid rounded" style="aspect-ratio: 4/3; object-fit: cover; width: 100%;"
+                                             onerror="this.style.display='none'">
                                         <small class="position-absolute bottom-0 start-0 bg-dark text-white px-2 py-1 rounded-end f-10">
                                             {{ is_array($snapshot) ? $snapshot['timestamp'] : $snapshot->created_at->format('H:i:s') }}
                                         </small>

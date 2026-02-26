@@ -29,7 +29,7 @@ ZAFProctor adalah sistem ujian online yang dirancang untuk institusi pendidikan 
 - Duplikasi soal dan ujian
 - Hapus soal secara massal (delete multiple)
 - Mengatur jadwal dan durasi ujian
-- Mengatur pengaturan proctoring per ujian (webcam, screen capture, browser lock)
+- Mengatur pengaturan proctoring per ujian (webcam, browser lock, tab switch detection, dll)
 - Publish/unpublish ujian
 - Monitoring peserta ujian secara real-time (live monitoring)
 - Melihat detail aktivitas peserta dan log pelanggaran dengan snapshot
@@ -81,7 +81,7 @@ ZAFProctor adalah sistem ujian online yang dirancang untuk institusi pendidikan 
 - **Backend**: Laravel 11 (PHP 8.2+)
 - **Frontend**: Blade Templates + Bootstrap 5.3.2 (CDN) + Alpine.js
 - **Ikon**: Phosphor Icons Web 2.1.1
-- **Font**: Open Sans (dashboard) + Inter (auth)
+- **Font**: Open Sans (dashboard) + Montserrat (auth) + Inter (exam layout) + Figtree (landing)
 - **Database**: MySQL
 - **PDF Generation**: barryvdh/laravel-dompdf
 - **Proctoring**: WebRTC (MediaDevices API) + face-api.js (TinyFaceDetector)
@@ -384,7 +384,7 @@ php artisan test
 php artisan test --coverage
 
 # Jalankan test spesifik
-php artisan test --filter=ExamTest
+php artisan test --filter=ExamServiceTest
 ```
 
 ## 🔧 Troubleshooting

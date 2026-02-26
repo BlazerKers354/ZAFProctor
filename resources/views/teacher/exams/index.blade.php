@@ -186,7 +186,7 @@
                                         <div class="d-flex align-items-center gap-2">
                                             <code class="text-primary font-monospace" style="font-size: 0.85rem; letter-spacing: 1px;">{{ $exam->access_token }}</code>
                                             <button type="button" class="btn btn-sm btn-light p-1" 
-                                                    onclick="copyToClipboard('{{ $exam->access_token }}')" title="Salin Token">
+                                                    onclick="copyToClipboard('{{ $exam->access_token }}', event)" title="Salin Token">
                                                 <i class="ph ph-copy"></i>
                                             </button>
                                         </div>
@@ -304,10 +304,10 @@
     </div>
 
     <script>
-        function copyToClipboard(text) {
+        function copyToClipboard(text, e) {
             navigator.clipboard.writeText(text).then(() => {
                 // Show temporary success feedback
-                const btn = event.target.closest('button');
+                const btn = (e || window.event).target.closest('button');
                 const originalHTML = btn.innerHTML;
                 btn.innerHTML = '<i class="ph ph-check text-success"></i>';
                 setTimeout(() => {

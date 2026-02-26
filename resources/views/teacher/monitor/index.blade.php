@@ -145,8 +145,9 @@
                                 <!-- Camera Snapshot -->
                                 <div class="position-relative" style="aspect-ratio: 4/3; background: #1f2937;">
                                     @if($attempt->latestSnapshot)
-                                        <img src="{{ asset('storage/' . $attempt->latestSnapshot->snapshot_path) }}" 
-                                             alt="Camera" class="w-100 h-100 object-fit-cover">
+                                        <img src="{{ route('proctoring.snapshot.view', $attempt->latestSnapshot->id) }}" 
+                                             alt="Camera" class="w-100 h-100 object-fit-cover"
+                                             onerror="this.parentElement.innerHTML='<div class=\'w-100 h-100 d-flex align-items-center justify-content-center text-muted\'><i class=\'ph ph-video-camera\' style=\'font-size: 40px; opacity: 0.3;\'></i></div>'">
                                     @else
                                         <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted">
                                             <i class="ph ph-video-camera" style="font-size: 40px; opacity: 0.3;"></i>
@@ -211,7 +212,8 @@
                                     <td style="width: 60px;">
                                         @if($violation->snapshot_path)
                                             <img src="{{ route('proctoring.snapshot.view', $violation->id) }}" 
-                                                 alt="Snapshot" class="rounded" width="48" height="36" style="object-fit: cover;">
+                                                 alt="Snapshot" class="rounded" width="48" height="36" style="object-fit: cover;"
+                                                 onerror="this.parentElement.innerHTML='<div class=\'bg-light rounded d-flex align-items-center justify-content-center\' style=\'width: 48px; height: 36px;\'><i class=\'ph ph-image text-muted\'></i></div>'">
                                         @else
                                             <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 48px; height: 36px;">
                                                 <i class="ph ph-image text-muted"></i>
@@ -320,7 +322,7 @@
                 violTable.innerHTML = data.violations.map(v => `
                     <tr>
                         <td style="width:50px">
-                            ${v.snapshot_url ? `<img src="${v.snapshot_url}" class="rounded" style="width:40px;height:40px;object-fit:cover" alt="snap">` : '<div class="bg-light rounded d-flex align-items-center justify-content-center" style="width:40px;height:40px"><i class="ph ph-video-camera-slash text-muted"></i></div>'}
+                            ${v.snapshot_url ? `<img src="${v.snapshot_url}" class="rounded" style="width:40px;height:40px;object-fit:cover" alt="" onerror="this.parentElement.innerHTML='<div class=\'bg-light rounded d-flex align-items-center justify-content-center\' style=\'width:40px;height:40px\'><i class=\'ph ph-image text-muted\'></i></div>'">` : '<div class="bg-light rounded d-flex align-items-center justify-content-center" style="width:40px;height:40px"><i class="ph ph-video-camera-slash text-muted"></i></div>'}
                         </td>
                         <td>
                             <div class="fw-medium">${v.user_name}</div>

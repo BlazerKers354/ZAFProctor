@@ -29,7 +29,7 @@ class MonitorController extends Controller
         $exam->load(['course', 'questions']);
 
         $attempts = ExamAttempt::where('exam_id', $exam->id)
-            ->with(['user', 'proctoringLogs' => function ($query) {
+            ->with(['user', 'latestSnapshot', 'proctoringLogs' => function ($query) {
                 $query->latest()->take(5);
             }])
             ->get();

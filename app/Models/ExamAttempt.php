@@ -99,6 +99,16 @@ class ExamAttempt extends Model
     }
 
     /**
+     * Get the latest snapshot for this attempt
+     */
+    public function latestSnapshot(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(ProctoringLog::class, 'attempt_id')
+            ->whereNotNull('snapshot_path')
+            ->latest();
+    }
+
+    /**
      * Check if attempt is in progress
      */
     public function isInProgress(): bool

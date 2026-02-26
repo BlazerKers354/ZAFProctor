@@ -868,6 +868,7 @@ function checkFullscreenSupport() {
 }
 
 // Validate all checks and toggle form
+let _formListenersAdded = false;
 function validateAllChecks() {
     allChecksPass = checks.camera && checks.face && checks.browser && checks.fullscreen;
 
@@ -893,23 +894,27 @@ function validateAllChecks() {
         tokenInput.disabled = false;
         agreeCheckbox.disabled = false;
 
-        agreeCheckbox.addEventListener('change', function() {
-            if (this.checked && tokenInput.value.trim().length > 0) {
-                startBtn.disabled = false;
-                startBtn.innerHTML = '<i class="ph ph-play me-2"></i><span>Mulai Ujian</span>';
-            } else {
-                startBtn.disabled = true;
-            }
-        });
+        if (!_formListenersAdded) {
+            agreeCheckbox.addEventListener('change', function() {
+                if (this.checked && tokenInput.value.trim().length > 0) {
+                    startBtn.disabled = false;
+                    startBtn.innerHTML = '<i class="ph ph-play me-2"></i><span>Mulai Ujian</span>';
+                } else {
+                    startBtn.disabled = true;
+                }
+            });
 
-        tokenInput.addEventListener('input', function() {
-            if (agreeCheckbox.checked && this.value.trim().length > 0) {
-                startBtn.disabled = false;
-                startBtn.innerHTML = '<i class="ph ph-play me-2"></i><span>Mulai Ujian</span>';
-            } else {
-                startBtn.disabled = true;
-            }
-        });
+            tokenInput.addEventListener('input', function() {
+                if (agreeCheckbox.checked && this.value.trim().length > 0) {
+                    startBtn.disabled = false;
+                    startBtn.innerHTML = '<i class="ph ph-play me-2"></i><span>Mulai Ujian</span>';
+                } else {
+                    startBtn.disabled = true;
+                }
+            });
+
+            _formListenersAdded = true;
+        }
 
         cameraVerifiedInput.value = '1';
 

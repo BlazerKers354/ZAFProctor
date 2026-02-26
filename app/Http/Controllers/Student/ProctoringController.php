@@ -83,23 +83,32 @@ class ProctoringController extends Controller
             $validated['snapshot']
         );
 
-        // If there's a violation, log it with the snapshot
+        // If there's a violation, log it with the snapshot in a single operation
+        $shouldAutoSubmit = false;
         if (!empty($validated['violation_type'])) {
             $log = $this->proctoringService->logViolation(
                 $attempt,
                 $validated['violation_type'],
                 $validated['description'] ?? null,
                 null,
-                null // Snapshot already stored
+                null
             );
 
-            // Update the log with snapshot path
-            $log->update(['snapshot_path' => $snapshotPath]);
+            // Immediately set snapshot path on the log
+            if ($snapshotPath) {
+                $log->update(['snapshot_path' => $snapshotPath]);
+            }
+
+            // Check if should auto-submit
+            $settings = $attempt->exam->settings;
+            $maxViolations = $settings?->auto_submit_threshold ?? $settings?->max_tab_switches ?? 5;
+            $shouldAutoSubmit = $attempt->fresh()->violation_count >= $maxViolations;
         }
 
         return response()->json([
             'success' => true,
             'snapshot_stored' => (bool) $snapshotPath,
+            'should_auto_submit' => $shouldAutoSubmit,
         ]);
     }
 
