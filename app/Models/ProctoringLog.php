@@ -44,6 +44,8 @@ class ProctoringLog extends Model
     public const TYPE_RIGHT_CLICK = 'right_click';
     public const TYPE_KEYBOARD_SHORTCUT = 'keyboard_shortcut';
     public const TYPE_WINDOW_BLUR = 'window_blur';
+    public const TYPE_DEVTOOLS = 'devtools';
+    public const TYPE_TAMPERING = 'tampering';
     public const TYPE_OTHER = 'other';
 
     /**
@@ -69,6 +71,8 @@ class ProctoringLog extends Model
             self::TYPE_RIGHT_CLICK => self::SEVERITY_LOW,
             self::TYPE_KEYBOARD_SHORTCUT => self::SEVERITY_MEDIUM,
             self::TYPE_WINDOW_BLUR => self::SEVERITY_MEDIUM,
+            self::TYPE_DEVTOOLS => self::SEVERITY_HIGH,
+            self::TYPE_TAMPERING => self::SEVERITY_HIGH,
         ];
 
         return $severityMap[$type] ?? self::SEVERITY_LOW;
@@ -154,6 +158,8 @@ class ProctoringLog extends Model
             self::TYPE_RIGHT_CLICK => 'Klik Kanan',
             self::TYPE_KEYBOARD_SHORTCUT => 'Shortcut Keyboard',
             self::TYPE_WINDOW_BLUR => 'Window Blur',
+            self::TYPE_DEVTOOLS => 'Developer Tools',
+            self::TYPE_TAMPERING => 'Tampering',
             self::TYPE_OTHER => 'Lainnya',
         ];
 

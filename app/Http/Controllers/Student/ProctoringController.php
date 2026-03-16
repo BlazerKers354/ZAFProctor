@@ -7,6 +7,7 @@ use App\Models\ExamAttempt;
 use App\Services\ProctoringService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class ProctoringController extends Controller
 {
@@ -30,7 +31,7 @@ class ProctoringController extends Controller
         }
 
         $validated = $request->validate([
-            'violation_type' => ['required', 'string', 'in:tab_switch,fullscreen_exit,camera_disabled,no_face_detected,multiple_faces,browser_refresh,copy_paste,right_click,keyboard_shortcut,window_blur,other'],
+            'violation_type' => ['required', 'string', Rule::in($this->allowedViolationTypes())],
             'description' => ['nullable', 'string', 'max:500'],
             'metadata' => ['nullable', 'array'],
         ]);
@@ -73,7 +74,7 @@ class ProctoringController extends Controller
 
         $validated = $request->validate([
             'snapshot' => ['required', 'string'], // Base64 encoded image
-            'violation_type' => ['nullable', 'string'],
+            'violation_type' => ['nullable', 'string', Rule::in($this->allowedViolationTypes())],
             'description' => ['nullable', 'string'],
         ]);
 
@@ -172,5 +173,27 @@ class ProctoringController extends Controller
             'auto_submit_threshold' => $settings->auto_submit_threshold ?? $settings->max_tab_switches ?? 5,
             'max_violations' => $settings->auto_submit_threshold ?? $settings->max_tab_switches ?? 5,
         ]);
+    }
+
+    /**
+     * Allowed violation types accepted by server-side validation.
+     */
+    protected function allowedViolationTypes(): array
+    {
+        return [
+            'tab_switch',
+            'fullscreen_exit',
+            'camera_disabled',
+            'no_face_detected',
+            'multiple_faces',
+            'browser_refresh',
+            'copy_paste',
+            'right_click',
+            'keyboard_shortcut',
+            'window_blur',
+            'devtools',
+            'tampering',
+            'other',
+        ];
     }
 }

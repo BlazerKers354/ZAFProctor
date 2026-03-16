@@ -617,15 +617,15 @@
         <div class="step">
             <div class="step-number">4</div>
             <div class="step-content">
-                <strong>Verifikasi Email</strong>
-                <p>Setelah mendaftar, cek inbox email Anda dan klik link verifikasi yang dikirimkan oleh sistem.</p>
+                <strong>Login ke Sistem</strong>
+                <p>Setelah mendaftar, Anda dapat langsung login menggunakan email dan password yang sudah dibuat.</p>
             </div>
         </div>
         <div class="step">
             <div class="step-number">5</div>
             <div class="step-content">
-                <strong>Tunggu Persetujuan Admin</strong>
-                <p>Akun baru memerlukan persetujuan Admin sebelum dapat digunakan. Anda akan menerima notifikasi setelah akun disetujui.</p>
+                <strong>Persetujuan Admin (Khusus Guru)</strong>
+                <p>Pendaftaran akun guru memerlukan persetujuan admin. Akun siswa dapat langsung digunakan setelah registrasi.</p>
             </div>
         </div>
     </div>

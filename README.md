@@ -40,7 +40,7 @@ ZAFProctor adalah sistem ujian online yang dirancang untuk institusi pendidikan 
 - Regenerate access token ujian
 
 ### 👨‍🎓 Siswa/Mahasiswa
-- Verifikasi email sebelum dapat mengakses sistem
+- Dukungan verifikasi email (opsional)
 - Melihat daftar ujian yang tersedia dan riwayat ujian
 - Pre-check kamera dan fullscreen sebelum ujian
 - Memasukkan token akses dari guru untuk memulai ujian
@@ -187,7 +187,7 @@ Fitur proctoring (webcam) memerlukan browser modern dengan dukungan WebRTC:
 
 ## 🔑 Fitur Authentication
 
-- **Email Verification**: Pengguna harus memverifikasi email sebelum dapat mengakses sistem
+- **Email Verification**: Fitur verifikasi email tersedia, namun login tidak diblokir jika belum verifikasi
 - **Sistem Approval**: Admin dapat menyetujui/menolak pendaftaran user baru
 - **Registrasi Terpisah**: Form registrasi berbeda untuk siswa dan guru
 - **Forgot Password**: Reset password melalui email
