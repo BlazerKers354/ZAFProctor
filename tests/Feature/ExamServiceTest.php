@@ -73,6 +73,7 @@ class ExamServiceTest extends TestCase
             'exam_id' => $this->exam->id,
             'shuffle_questions' => true,
             'passing_score' => 60,
+            'max_attempts' => 1,
         ]);
         
         // Create questions
@@ -147,7 +148,7 @@ class ExamServiceTest extends TestCase
         $this->examService->submitExam($attempt, false);
 
         $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('Anda sudah mengerjakan ujian ini.');
+        $this->expectExceptionMessage('Anda sudah mencapai batas maksimal percobaan untuk ujian ini.');
 
         $this->examService->startExam(
             $this->exam,

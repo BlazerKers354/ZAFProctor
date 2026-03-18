@@ -72,6 +72,7 @@ class UserController extends Controller
 
         $validated['password'] = Hash::make($validated['password']);
         $validated['is_active'] = $request->boolean('is_active', true);
+        $validated['is_approved'] = true; // Admin-created users are auto-approved
 
         User::create($validated);
 

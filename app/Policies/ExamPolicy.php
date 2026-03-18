@@ -53,7 +53,7 @@ class ExamPolicy
         // Only teacher can update their own exams that are not completed
         return $user->isTeacher() 
             && $exam->created_by === $user->id 
-            && !in_array($exam->status, [Exam::STATUS_COMPLETED, Exam::STATUS_ONGOING]);
+            && $exam->status !== Exam::STATUS_COMPLETED;
     }
 
     /**

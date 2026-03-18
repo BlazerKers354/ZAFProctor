@@ -88,6 +88,7 @@ Route::middleware(['auth', 'check.active'])->group(function () {
     // Profile
     Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::post('profile/avatar', [ProfileController::class, 'updateAvatar'])->name('profile.avatar');
     Route::put('password', [PasswordController::class, 'update'])->name('password.update');
     
     // Admin Routes
@@ -144,6 +145,7 @@ Route::middleware(['auth', 'check.active'])->group(function () {
             Route::get('attempts/{attempt}', [MonitorController::class, 'attempt'])->name('attempt');
             Route::get('attempts/{attempt}/logs', [MonitorController::class, 'logs'])->name('logs');
             Route::post('attempts/{attempt}/terminate', [MonitorController::class, 'terminate'])->name('terminate');
+            Route::post('attempts/{attempt}/logs/review', [MonitorController::class, 'reviewLogs'])->name('review-logs');
         });
         
         // Grading
@@ -151,6 +153,7 @@ Route::middleware(['auth', 'check.active'])->group(function () {
         Route::post('attempts/{attempt}/grade', [TeacherExamController::class, 'submitGrade'])->name('exams.submit-grade');
         Route::get('exams/{exam}/results', [TeacherExamController::class, 'results'])->name('exams.results');
         Route::get('exams/{exam}/export', [TeacherExamController::class, 'export'])->name('exams.export');
+        Route::patch('exams/{exam}/settings', [TeacherExamController::class, 'updateSettings'])->name('exams.update-settings');
     });
     
     // Student Routes

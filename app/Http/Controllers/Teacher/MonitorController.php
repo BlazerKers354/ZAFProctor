@@ -71,33 +71,6 @@ class MonitorController extends Controller
     }
 
     /**
-     * Get real-time status of participants (for AJAX).
-     */
-    public function status(Exam $exam): \Illuminate\Http\JsonResponse
-    {
-        $this->authorize('monitor', $exam);
-
-        $attempts = ExamAttempt::where('exam_id', $exam->id)
-            ->with('user:id,name,student_id')
-            ->get()
-            ->map(function ($attempt) {
-                return [
-                    'id' => $attempt->id,
-                    'user_id' => $attempt->user_id,
-                    'user_name' => $attempt->user->name,
-                    'student_id' => $attempt->user->student_id,
-                    'status' => $attempt->status,
-                    'violation_count' => $attempt->violation_count,
-                    'camera_enabled' => $attempt->camera_enabled,
-                    'remaining_time' => $attempt->remaining_time,
-                    'started_at' => $attempt->started_at?->format('H:i:s'),
-                ];
-            });
-
-        return response()->json($attempts);
-    }
-
-    /**
      * Live AJAX data for monitoring dashboard (no full reload).
      */
     public function liveData(Exam $exam): \Illuminate\Http\JsonResponse

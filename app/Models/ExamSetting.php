@@ -113,6 +113,8 @@ class ExamSetting extends Model
             'shuffle_options' => false,
             'show_correct_answers' => false,
             'show_score' => true,
+            'max_attempts' => 1,
+            'grade_method' => 'highest',
             'passing_score' => 60,
             'block_keyboard_shortcuts' => true,
             'warning_threshold' => 3,
