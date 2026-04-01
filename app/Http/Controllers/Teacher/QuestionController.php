@@ -261,25 +261,43 @@ class QuestionController extends Controller
     {
         $this->authorize('manageQuestions', $exam);
 
-        // Delete associated image if exists
-        if ($question->question_image) {
-            Storage::disk('public')->delete($question->question_image);
+        try {
+            // Delete associated image if exists
+            if ($question->question_image) {
+                try {
+                    Storage::disk('public')->delete($question->question_image);
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::warning('Failed to delete question image: ' . $e->getMessage());
+                }
+            }
+
+            $question->delete();
+
+            // Reorder remaining questions
+            $exam->questions()->orderBy('order')->get()->each(function ($q, $index) {
+                $q->update(['order' => $index + 1]);
+            });
+
+            // Return JSON for AJAX requests
+            if ($request->expectsJson()) {
+                return response()->json(['success' => true, 'message' => 'Soal berhasil dihapus.']);
+            }
+
+            return redirect()->route('teacher.questions.index', $exam)
+                ->with('success', 'Soal berhasil dihapus.');
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to delete question: ' . $e->getMessage(), [
+                'question_id' => $question->id,
+                'exam_id' => $exam->id,
+            ]);
+            
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'Gagal menghapus soal.'], 500);
+            }
+            
+            return redirect()->route('teacher.questions.index', $exam)
+                ->with('error', 'Gagal menghapus soal.');
         }
-
-        $question->delete();
-
-        // Reorder remaining questions
-        $exam->questions()->orderBy('order')->get()->each(function ($q, $index) {
-            $q->update(['order' => $index + 1]);
-        });
-
-        // Return JSON for AJAX requests
-        if ($request->expectsJson()) {
-            return response()->json(['success' => true, 'message' => 'Soal berhasil dihapus.']);
-        }
-
-        return redirect()->route('teacher.questions.index', $exam)
-            ->with('success', 'Soal berhasil dihapus.');
     }
 
     /**
@@ -555,18 +573,44 @@ class QuestionController extends Controller
             'csv_file' => ['required', 'file', 'mimes:csv,txt', 'max:5120'],
         ]);
 
+        $handle = null;
+        
         try {
             $file = $request->file('csv_file');
-            $handle = fopen($file->getRealPath(), 'r');
+            
+            if (!$file) {
+                return redirect()->route('teacher.questions.index', $exam)
+                    ->with('error', 'File tidak ditemukan.');
+            }
+            
+            $filePath = $file->getRealPath();
+            if (!$filePath || !file_exists($filePath)) {
+                return redirect()->route('teacher.questions.index', $exam)
+                    ->with('error', 'File tidak dapat diakses.');
+            }
+            
+            $handle = @fopen($filePath, 'r');
+            if ($handle === false) {
+                \Illuminate\Support\Facades\Log::error('Failed to open CSV file: ' . $filePath);
+                return redirect()->route('teacher.questions.index', $exam)
+                    ->with('error', 'Tidak dapat membuka file CSV.');
+            }
             
             // Skip BOM if present
-            $bom = fread($handle, 3);
+            $bom = @fread($handle, 3);
+            if ($bom === false) {
+                throw new \Exception('Gagal membaca file');
+            }
+            
             if ($bom !== chr(0xEF).chr(0xBB).chr(0xBF)) {
                 rewind($handle);
             }
             
             // Read header
-            $header = fgetcsv($handle);
+            $header = @fgetcsv($handle);
+            if ($header === false || empty($header)) {
+                throw new \Exception('File CSV kosong atau format tidak valid');
+            }
             
             $imported = 0;
             $errors = [];
@@ -574,7 +618,7 @@ class QuestionController extends Controller
 
             DB::beginTransaction();
 
-            while (($row = fgetcsv($handle)) !== false) {
+            while (($row = @fgetcsv($handle)) !== false) {
                 $lineNumber++;
                 
                 if (empty(array_filter($row))) {
@@ -582,32 +626,50 @@ class QuestionController extends Controller
                 }
 
                 try {
-                    $data = array_combine($header, $row);
+                    // Ensure row has same number of columns as header
+                    $row = array_pad($row, count($header), null);
+                    $data = @array_combine($header, $row);
+                    
+                    if ($data === false) {
+                        $errors[] = "Baris $lineNumber: Format kolom tidak sesuai";
+                        continue;
+                    }
                     
                     if (!isset($data['type']) || !isset($data['question']) || !isset($data['points'])) {
                         $errors[] = "Baris $lineNumber: Data tidak lengkap";
                         continue;
                     }
 
-                    $type = strtolower(trim($data['type']));
+                    $type = strtolower(trim($data['type'] ?? ''));
                     if (!in_array($type, ['multiple_choice', 'essay'])) {
-                        $errors[] = "Baris $lineNumber: Tipe soal tidak valid ($type)";
+                        $errors[] = "Baris $lineNumber: Tipe soal tidak valid";
+                        continue;
+                    }
+                    
+                    // Validate points
+                    $points = filter_var($data['points'], FILTER_VALIDATE_INT);
+                    if ($points === false || $points < 1 || $points > 100) {
+                        $errors[] = "Baris $lineNumber: Poin harus antara 1-100";
                         continue;
                     }
 
                     $question = Question::create([
                         'exam_id' => $exam->id,
                         'type' => $type,
-                        'question' => trim($data['question']),
-                        'points' => (int)$data['points'],
+                        'question' => trim($data['question'] ?? ''),
+                        'points' => $points,
                         'explanation' => !empty($data['explanation']) && $data['explanation'] !== '-' ? trim($data['explanation']) : null,
                         'order' => $exam->questions()->max('order') + 1 + $imported,
                     ]);
+                    
+                    if (!$question) {
+                        throw new \Exception('Gagal membuat soal');
+                    }
 
                     if ($type === 'multiple_choice') {
-                        $options = [];
                         $labels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
                         $correctAnswer = strtoupper(trim($data['correct_answer'] ?? ''));
+                        $optionCount = 0;
 
                         foreach (['option_a', 'option_b', 'option_c', 'option_d', 'option_e'] as $index => $optionKey) {
                             if (isset($data[$optionKey]) && !empty(trim($data[$optionKey])) && trim($data[$optionKey]) !== '-') {
@@ -618,24 +680,31 @@ class QuestionController extends Controller
                                     'is_correct' => $labels[$index] === $correctAnswer,
                                     'order' => $index,
                                 ]);
+                                $optionCount++;
                             }
+                        }
+                        
+                        // Validate minimum options
+                        if ($optionCount < 2) {
+                            $errors[] = "Baris $lineNumber: Minimal 2 pilihan jawaban";
+                            $question->delete();
+                            continue;
                         }
                     }
 
                     $imported++;
 
                 } catch (\Exception $e) {
-                    $errors[] = "Baris $lineNumber: " . $e->getMessage();
+                    \Illuminate\Support\Facades\Log::error("Import error at line $lineNumber: " . $e->getMessage());
+                    $errors[] = "Baris $lineNumber: Format tidak valid";
                 }
             }
-
-            fclose($handle);
 
             if ($imported > 0) {
                 DB::commit();
                 $message = "$imported soal berhasil diimport.";
                 if (count($errors) > 0) {
-                    $message .= " " . count($errors) . " baris gagal diimport.";
+                    $message .= " " . count($errors) . " baris tidak dapat diproses.";
                 }
                 return redirect()->route('teacher.questions.index', $exam)
                     ->with('success', $message)
@@ -648,9 +717,20 @@ class QuestionController extends Controller
             }
 
         } catch (\Exception $e) {
-            DB::rollBack();
+            if (DB::transactionLevel() > 0) {
+                DB::rollBack();
+            }
+            
+            \Illuminate\Support\Facades\Log::error('CSV import failed: ' . $e->getMessage(), [
+                'exam_id' => $exam->id,
+            ]);
+            
             return redirect()->route('teacher.questions.index', $exam)
-                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+                ->with('error', 'Gagal mengimport soal. Silakan periksa format file CSV Anda.');
+        } finally {
+            if ($handle && is_resource($handle)) {
+                @fclose($handle);
+            }
         }
     }
 }

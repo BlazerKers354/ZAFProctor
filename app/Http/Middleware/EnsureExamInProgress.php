@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Models\ExamAttempt;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class EnsureExamInProgress
@@ -47,12 +48,23 @@ class EnsureExamInProgress
 
         // Check if time has expired
         if ($attempt->hasTimeExpired()) {
-            // Auto-submit the exam using ExamService for proper score calculation
-            $examService = app(\App\Services\ExamService::class);
-            $examService->submitExam($attempt, true);
+            try {
+                // Auto-submit the exam using ExamService for proper score calculation
+                $examService = app(\App\Services\ExamService::class);
+                $examService->submitExam($attempt, true);
 
-            return redirect()->route('student.exams.result', $attempt->id)
-                ->with('info', 'Waktu ujian telah habis. Jawaban Anda telah dikumpulkan secara otomatis.');
+                return redirect()->route('student.exams.result', $attempt->id)
+                    ->with('info', 'Waktu ujian telah habis. Jawaban Anda telah dikumpulkan secara otomatis.');
+            } catch (\Exception $e) {
+                Log::error('Auto-submit on time expiry failed: ' . $e->getMessage(), [
+                    'attempt_id' => $attempt->id,
+                    'user_id' => $attempt->user_id,
+                ]);
+
+                // Still redirect to result page even if auto-submit failed
+                return redirect()->route('student.exams.result', $attempt->id)
+                    ->with('warning', 'Waktu ujian telah habis. Jawaban Anda sedang diproses.');
+            }
         }
 
         // Attach attempt to request for use in controller

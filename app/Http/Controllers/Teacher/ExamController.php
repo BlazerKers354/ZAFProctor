@@ -379,58 +379,74 @@ class ExamController extends Controller
      */
     public function export(Exam $exam)
     {
-        $this->authorize('view', $exam);
+        try {
+            $this->authorize('view', $exam);
 
-        $exam->load(['course', 'questions.options', 'attempts.student.class', 'attempts.answers']);
-        
-        $data = [];
-        
-        foreach ($exam->attempts as $attempt) {
-            $row = [
-                'Nama Siswa' => $attempt->student->name,
-                'NIS' => $attempt->student->student_id ?? '-',
-                'Kelas' => $attempt->student->class?->name ?? '-',
-                'Waktu Mulai' => $attempt->started_at?->format('d/m/Y H:i:s') ?? '-',
-                'Waktu Selesai' => $attempt->finished_at?->format('d/m/Y H:i:s') ?? '-',
-                'Durasi (menit)' => $attempt->started_at && $attempt->finished_at 
-                    ? round($attempt->started_at->diffInMinutes($attempt->finished_at), 1) 
-                    : '-',
-                'Nilai' => $attempt->score ?? '-',
-                'Status' => ucfirst($attempt->status),
-                'Total Pelanggaran' => $attempt->violation_count ?? 0,
+            $exam->load(['course', 'questions.options', 'attempts.student.class', 'attempts.answers']);
+            
+            $data = [];
+            
+            foreach ($exam->attempts as $attempt) {
+                $row = [
+                    'Nama Siswa' => $attempt->student->name ?? '-',
+                    'NIS' => $attempt->student->student_id ?? '-',
+                    'Kelas' => $attempt->student->class?->name ?? '-',
+                    'Waktu Mulai' => $attempt->started_at?->format('d/m/Y H:i:s') ?? '-',
+                    'Waktu Selesai' => $attempt->finished_at?->format('d/m/Y H:i:s') ?? '-',
+                    'Durasi (menit)' => $attempt->started_at && $attempt->finished_at 
+                        ? round($attempt->started_at->diffInMinutes($attempt->finished_at), 1) 
+                        : '-',
+                    'Nilai' => $attempt->score ?? '-',
+                    'Status' => ucfirst($attempt->status ?? 'unknown'),
+                    'Total Pelanggaran' => $attempt->violation_count ?? 0,
+                ];
+                
+                $data[] = $row;
+            }
+            
+            // Generate CSV
+            $filename = 'hasil_' . Str::slug($exam->title) . '_' . now()->format('YmdHis') . '.csv';
+            
+            $headers = [
+                'Content-Type' => 'text/csv; charset=UTF-8',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
             ];
             
-            $data[] = $row;
+            $callback = function () use ($data) {
+                try {
+                    $file = fopen('php://output', 'w');
+                    
+                    if (!$file) {
+                        throw new \Exception('Failed to open output stream');
+                    }
+                    
+                    // Add BOM for UTF-8
+                    fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+                    
+                    // Headers
+                    if (!empty($data)) {
+                        fputcsv($file, array_keys($data[0]));
+                    }
+                    
+                    // Data rows
+                    foreach ($data as $row) {
+                        fputcsv($file, $row);
+                    }
+                    
+                    fclose($file);
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error('CSV export stream error: ' . $e->getMessage());
+                }
+            };
+            
+            return response()->stream($callback, 200, $headers);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Exam export failed: ' . $e->getMessage(), [
+                'exam_id' => $exam->id,
+            ]);
+            
+            return back()->with('error', 'Gagal mengekspor hasil ujian. Silakan coba lagi.');
         }
-        
-        // Generate CSV
-        $filename = 'hasil_' . Str::slug($exam->title) . '_' . now()->format('YmdHis') . '.csv';
-        
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-        ];
-        
-        $callback = function () use ($data) {
-            $file = fopen('php://output', 'w');
-            
-            // Add BOM for UTF-8
-            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
-            
-            // Headers
-            if (!empty($data)) {
-                fputcsv($file, array_keys($data[0]));
-            }
-            
-            // Data rows
-            foreach ($data as $row) {
-                fputcsv($file, $row);
-            }
-            
-            fclose($file);
-        };
-        
-        return response()->stream($callback, 200, $headers);
     }
 
     /**
@@ -451,41 +467,53 @@ class ExamController extends Controller
      */
     public function submitGrade(Request $request, ExamAttempt $attempt): RedirectResponse
     {
-        $exam = $attempt->exam;
-        $this->authorize('update', $exam);
+        try {
+            $exam = $attempt->exam;
+            $this->authorize('update', $exam);
 
-        $validated = $request->validate([
-            'scores' => ['required', 'array'],
-            'scores.*' => ['required', 'numeric', 'min:0'],
-            'feedback' => ['nullable', 'string', 'max:1000'],
-        ]);
+            $validated = $request->validate([
+                'scores' => ['required', 'array'],
+                'scores.*' => ['required', 'numeric', 'min:0'],
+                'feedback' => ['nullable', 'string', 'max:1000'],
+            ]);
 
-        foreach ($validated['scores'] as $answerId => $score) {
-            $answer = $attempt->answers()->find($answerId);
-            if ($answer) {
-                // Get max points for this question
-                $maxPoints = $answer->question->points ?? 1;
-                $earnedPoints = min($score, $maxPoints);
+            DB::transaction(function () use ($validated, $attempt) {
+                foreach ($validated['scores'] as $answerId => $score) {
+                    $answer = $attempt->answers()->find($answerId);
+                    if ($answer) {
+                        // Get max points for this question
+                        $maxPoints = $answer->question->points ?? 1;
+                        $earnedPoints = min($score, $maxPoints);
+                        
+                        // Update answer with correct field (points_earned)
+                        $answer->update([
+                            'points_earned' => $earnedPoints,
+                            'is_correct' => $earnedPoints >= ($maxPoints * 0.5), // 50% threshold
+                        ]);
+                    }
+                }
+
+                // Recalculate attempt score using the model method
+                $attempt->calculateScore();
                 
-                // Update answer with correct field (points_earned)
-                $answer->update([
-                    'points_earned' => $earnedPoints,
-                    'is_correct' => $earnedPoints >= ($maxPoints * 0.5), // 50% threshold
+                // Update attempt status and feedback
+                $attempt->update([
+                    'status' => ExamAttempt::STATUS_GRADED,
+                    'feedback' => $validated['feedback'] ?? null,
                 ]);
-            }
+            });
+
+            return redirect()->route('teacher.exams.results', $exam)
+                ->with('success', 'Nilai berhasil disimpan.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to submit grade: ' . $e->getMessage(), [
+                'attempt_id' => $attempt->id,
+            ]);
+            
+            return back()->with('error', 'Gagal menyimpan nilai. Silakan coba lagi.');
         }
-
-        // Recalculate attempt score using the model method
-        $attempt->calculateScore();
-        
-        // Update attempt status and feedback
-        $attempt->update([
-            'status' => ExamAttempt::STATUS_GRADED,
-            'feedback' => $validated['feedback'] ?? null,
-        ]);
-
-        return redirect()->route('teacher.exams.results', $exam)
-            ->with('success', 'Nilai berhasil disimpan.');
     }
 
     /**

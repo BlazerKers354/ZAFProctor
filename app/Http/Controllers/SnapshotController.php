@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ProctoringLog;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -28,12 +29,26 @@ class SnapshotController extends Controller
             abort(404, 'Snapshot tidak ditemukan.');
         }
 
-        $file = Storage::disk('local')->get($log->snapshot_path);
-        $mimeType = Storage::disk('local')->mimeType($log->snapshot_path);
+        try {
+            $file = Storage::disk('local')->get($log->snapshot_path);
+            $mimeType = Storage::disk('local')->mimeType($log->snapshot_path);
 
-        return response($file, 200, [
-            'Content-Type' => $mimeType ?? 'image/jpeg',
-            'Cache-Control' => 'private, max-age=3600',
-        ]);
+            if (!$file) {
+                Log::warning('Snapshot file empty or unreadable: ' . $log->snapshot_path);
+                abort(500, 'Snapshot tidak dapat dibaca.');
+            }
+
+            return response($file, 200, [
+                'Content-Type' => $mimeType ?? 'image/jpeg',
+                'Cache-Control' => 'private, max-age=3600',
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to retrieve snapshot: ' . $e->getMessage(), [
+                'log_id' => $log->id,
+                'path' => $log->snapshot_path,
+            ]);
+            
+            abort(500, 'Gagal memuat snapshot. Silakan coba lagi.');
+        }
     }
 }

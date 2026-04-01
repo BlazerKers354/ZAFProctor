@@ -181,7 +181,13 @@ class ExamController extends Controller
             return redirect()->route('student.exams.take', $attempt);
 
         } catch (\Exception $e) {
-            return back()->withErrors(['error' => $e->getMessage()]);
+            \Illuminate\Support\Facades\Log::error('Failed to start exam: ' . $e->getMessage(), [
+                'exam_id' => $exam->id,
+                'user_id' => $user->id,
+            ]);
+            
+            // Don't expose internal error details to user
+            return back()->withErrors(['error' => 'Gagal memulai ujian. Silakan coba lagi atau hubungi administrator.']);
         }
     }
 
@@ -226,10 +232,15 @@ class ExamController extends Controller
                 'answer_id' => $answer->id,
             ]);
         } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to save answer: ' . $e->getMessage(), [
+                'attempt_id' => $attempt->id,
+                'question_id' => $validated['question_id'] ?? null,
+            ]);
+            
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage(),
-            ], 400);
+                'message' => 'Gagal menyimpan jawaban. Silakan coba lagi.',
+            ], 500);
         }
     }
 
@@ -238,10 +249,18 @@ class ExamController extends Controller
      */
     public function submit(Request $request, ExamAttempt $attempt): RedirectResponse
     {
-        $attempt = $this->examService->submitExam($attempt, false);
+        try {
+            $attempt = $this->examService->submitExam($attempt, false);
 
-        return redirect()->route('student.exams.result', $attempt)
-            ->with('success', 'Ujian berhasil dikumpulkan.');
+            return redirect()->route('student.exams.result', $attempt)
+                ->with('success', 'Ujian berhasil dikumpulkan.');
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to submit exam: ' . $e->getMessage(), [
+                'attempt_id' => $attempt->id,
+            ]);
+            
+            return back()->withErrors(['error' => 'Gagal mengumpulkan ujian. Silakan coba lagi.']);
+        }
     }
 
     /**
@@ -249,13 +268,24 @@ class ExamController extends Controller
      */
     public function autoSubmit(ExamAttempt $attempt): JsonResponse
     {
-        $attempt = $this->examService->submitExam($attempt, true);
+        try {
+            $attempt = $this->examService->submitExam($attempt, true);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Ujian dikumpulkan secara otomatis.',
-            'redirect' => route('student.exams.result', $attempt),
-        ]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Ujian dikumpulkan secara otomatis.',
+                'redirect' => route('student.exams.result', $attempt),
+            ]);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to auto-submit exam: ' . $e->getMessage(), [
+                'attempt_id' => $attempt->id,
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengumpulkan ujian secara otomatis.',
+            ], 500);
+        }
     }
 
     /**
@@ -277,10 +307,17 @@ class ExamController extends Controller
      */
     public function timeRemaining(ExamAttempt $attempt): JsonResponse
     {
-        return response()->json([
-            'remaining' => $attempt->remaining_time,
-            'expired' => $attempt->hasTimeExpired(),
-        ]);
+        try {
+            return response()->json([
+                'remaining' => $attempt->remaining_time ?? 0,
+                'expired' => $attempt->hasTimeExpired(),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'remaining' => 0,
+                'expired' => true,
+            ]);
+        }
     }
 
     /**
@@ -288,25 +325,36 @@ class ExamController extends Controller
      */
     public function syncTime(Request $request, ExamAttempt $attempt): JsonResponse
     {
-        $serverTime = now()->timestamp;
-        $clientTime = $request->input('client_time');
-        
-        // Calculate time drift
-        $drift = abs($serverTime - $clientTime);
-        
-        // If drift is more than 30 seconds, log as suspicious
-        if ($drift > 30) {
-            $this->proctoringService->logViolation(
-                $attempt,
-                'other',
-                'Suspected time manipulation. Server-client drift: ' . $drift . ' seconds',
-                ['drift' => $drift, 'client_time' => $clientTime, 'server_time' => $serverTime]
-            );
-        }
+        try {
+            $serverTime = now()->timestamp;
+            $clientTime = $request->input('client_time');
+            
+            // Calculate time drift
+            $drift = abs($serverTime - ($clientTime ?? $serverTime));
+            
+            // If drift is more than 30 seconds, log as suspicious
+            if ($drift > 30) {
+                $this->proctoringService->logViolation(
+                    $attempt,
+                    'other',
+                    'Suspected time manipulation. Server-client drift: ' . $drift . ' seconds',
+                    ['drift' => $drift, 'client_time' => $clientTime, 'server_time' => $serverTime]
+                );
+            }
 
-        return response()->json([
-            'server_time' => $serverTime,
-            'remaining' => $attempt->remaining_time,
-        ]);
+            return response()->json([
+                'server_time' => $serverTime,
+                'remaining' => $attempt->remaining_time ?? 0,
+            ]);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to sync time: ' . $e->getMessage(), [
+                'attempt_id' => $attempt->id,
+            ]);
+            
+            return response()->json([
+                'server_time' => now()->timestamp,
+                'remaining' => $attempt->remaining_time ?? 0,
+            ]);
+        }
     }
 }
