@@ -7,6 +7,8 @@
     <!-- Bootstrap 5.3.2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <!-- AOS - Animate On Scroll -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <!-- Phosphor Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -339,6 +341,20 @@
         @media (max-width: 767.98px) {
             .hero-title { font-size: 2.25rem !important; }
         }
+
+        /* ===== FAQ Accordion ===== */
+        .accordion-item { border: none !important; }
+        .accordion-button { padding: 1.25rem 1.5rem; font-size: 0.95rem; }
+        .accordion-button:not(.collapsed) { background: transparent; color: #fff; }
+        .accordion-button:focus { box-shadow: none; border-color: transparent; }
+        .accordion-button::after {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23818cf8'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+            transition: transform 0.2s ease-in-out;
+        }
+        .accordion-button:not(.collapsed)::after {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23818cf8'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+        }
+        .accordion-body { padding: 0 1.5rem 1.25rem 3.5rem; line-height: 1.7; }
     </style>
 </head>
 <body class="antialiased">
@@ -359,11 +375,11 @@
                     <a href="#features" class="nav-link-landing">Fitur</a>
                     <a href="#how-it-works" class="nav-link-landing">Cara Kerja</a>
                     <a href="#roles" class="nav-link-landing">Peran</a>
-                    <a href="#stats" class="nav-link-landing">Statistik</a>
+                    <a href="#faq" class="nav-link-landing">FAQ</a>
                 </div>
                 <div class="d-flex align-items-center gap-2">
                     <a href="{{ route('login') }}" class="text-sm text-slate-300 fw-medium px-3 py-2" style="transition:color .2s;">Masuk</a>
-                    <a href="{{ route('register') }}" class="btn btn-sm btn-indigo rounded-xl fw-semibold px-3 py-2 text-sm">
+                    <a href="{{ route('login') }}?mode=register" class="btn btn-sm btn-indigo rounded-xl fw-semibold px-3 py-2 text-sm">
                         Daftar
                     </a>
                 </div>
@@ -412,7 +428,7 @@
                     </p>
 
                     <div class="d-flex flex-wrap gap-3 mb-4">
-                        <a href="{{ route('register') }}"
+                        <a href="{{ route('login') }}?mode=register"
                            class="btn btn-indigo rounded-xl fw-semibold px-4 py-3 d-inline-flex align-items-center gap-2">
                             Mulai Sekarang
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -429,25 +445,31 @@
                         </a>
                     </div>
 
-                    <!-- Trust badges -->
-                    <div class="d-flex align-items-center gap-4 text-sm text-slate-500">
+                    <!-- Trust badges - Enhanced with stats info -->
+                    <div class="d-flex flex-wrap align-items-center gap-3 gap-md-4 text-sm text-slate-500">
                         <div class="d-flex align-items-center gap-2">
                             <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                             </svg>
-                            <span>Gratis</span>
+                            <span>100% Gratis</span>
                         </div>
                         <div class="d-flex align-items-center gap-2">
                             <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                             </svg>
-                            <span>Tanpa Setup Ribet</span>
+                            <span>Akses 24/7</span>
                         </div>
                         <div class="d-flex align-items-center gap-2">
                             <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                             </svg>
-                            <span>Aman</span>
+                            <span>Monitoring Real-time</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>Penilaian Otomatis</span>
                         </div>
                     </div>
                 </div>
@@ -573,45 +595,13 @@
         </div>
     </section>
 
-    <!-- Stats Section -->
-    <section id="stats" class="position-relative py-16 border-top border-bottom border-slate-800-50">
-        <div class="container">
-            <div class="row g-3">
-                <div class="col-6 col-md-3">
-                    <div class="stat-card text-center p-4 rounded-2xl bg-slate-900-50 border border-slate-800-50">
-                        <div class="text-3xl text-md-4xl fw-bolder gradient-text mb-1">100%</div>
-                        <div class="text-sm text-slate-500">Gratis Digunakan</div>
-                    </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="stat-card text-center p-4 rounded-2xl bg-slate-900-50 border border-slate-800-50">
-                        <div class="text-3xl text-md-4xl fw-bolder text-indigo-400 mb-1">24/7</div>
-                        <div class="text-sm text-slate-500">Akses Kapan Saja</div>
-                    </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="stat-card text-center p-4 rounded-2xl bg-slate-900-50 border border-slate-800-50">
-                        <div class="text-3xl text-md-4xl fw-bolder text-purple-400 mb-1">Real-time</div>
-                        <div class="text-sm text-slate-500">Monitoring Langsung</div>
-                    </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="stat-card text-center p-4 rounded-2xl bg-slate-900-50 border border-slate-800-50">
-                        <div class="text-3xl text-md-4xl fw-bolder text-emerald-400 mb-1">Auto</div>
-                        <div class="text-sm text-slate-500">Penilaian Otomatis</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <!-- Features Section -->
     <section id="features" class="position-relative section-py overflow-hidden">
         <div class="position-absolute blur-3xl bg-indigo-600-5 rounded-circle" style="top:0;right:0;width:24rem;height:24rem;"></div>
         <div class="position-absolute blur-3xl bg-purple-600-5 rounded-circle" style="bottom:0;left:0;width:24rem;height:24rem;"></div>
 
         <div class="container position-relative">
-            <div class="text-center mb-16">
+            <div class="text-center mb-16" data-aos="fade-up">
                 <div class="section-badge bg-indigo-500-10 border border-indigo-500-20 mb-3">
                     <span class="text-sm text-indigo-400">Fitur Unggulan</span>
                 </div>
@@ -626,7 +616,7 @@
 
             <div class="row g-4">
                 <!-- Feature 1 -->
-                <div class="col-md-6 col-lg-4">
+                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="0">
                     <div class="feature-card bg-slate-900-50 border border-slate-800-50 rounded-2xl p-4 h-100" style="transition:all .3s;border-width:1px;">
                         <div class="w-12 h-12 bg-gradient-indigo rounded-xl d-flex align-items-center justify-content-center mb-3">
                             <svg class="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -641,7 +631,7 @@
                 </div>
 
                 <!-- Feature 2 -->
-                <div class="col-md-6 col-lg-4">
+                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="100">
                     <div class="feature-card bg-slate-900-50 border border-slate-800-50 rounded-2xl p-4 h-100" style="transition:all .3s;border-width:1px;">
                         <div class="w-12 h-12 bg-gradient-emerald rounded-xl d-flex align-items-center justify-content-center mb-3">
                             <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -656,7 +646,7 @@
                 </div>
 
                 <!-- Feature 3 -->
-                <div class="col-md-6 col-lg-4">
+                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="200">
                     <div class="feature-card bg-slate-900-50 border border-slate-800-50 rounded-2xl p-4 h-100" style="transition:all .3s;border-width:1px;">
                         <div class="w-12 h-12 bg-gradient-purple rounded-xl d-flex align-items-center justify-content-center mb-3">
                             <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -671,7 +661,7 @@
                 </div>
 
                 <!-- Feature 4 -->
-                <div class="col-md-6 col-lg-4">
+                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="0">
                     <div class="feature-card bg-slate-900-50 border border-slate-800-50 rounded-2xl p-4 h-100" style="transition:all .3s;border-width:1px;">
                         <div class="w-12 h-12 bg-gradient-amber rounded-xl d-flex align-items-center justify-content-center mb-3">
                             <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -686,7 +676,7 @@
                 </div>
 
                 <!-- Feature 5 -->
-                <div class="col-md-6 col-lg-4">
+                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="100">
                     <div class="feature-card bg-slate-900-50 border border-slate-800-50 rounded-2xl p-4 h-100" style="transition:all .3s;border-width:1px;">
                         <div class="w-12 h-12 bg-gradient-rose rounded-xl d-flex align-items-center justify-content-center mb-3">
                             <svg class="w-6 h-6 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -702,7 +692,7 @@
                 </div>
 
                 <!-- Feature 6 -->
-                <div class="col-md-6 col-lg-4">
+                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="200">
                     <div class="feature-card bg-slate-900-50 border border-slate-800-50 rounded-2xl p-4 h-100" style="transition:all .3s;border-width:1px;">
                         <div class="w-12 h-12 bg-gradient-sky rounded-xl d-flex align-items-center justify-content-center mb-3">
                             <svg class="w-6 h-6 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -722,7 +712,7 @@
     <!-- How it Works -->
     <section id="how-it-works" class="position-relative section-py bg-slate-900-30">
         <div class="container">
-            <div class="text-center mb-16">
+            <div class="text-center mb-16" data-aos="fade-up">
                 <div class="section-badge bg-purple-500-10 border border-purple-500-20 mb-3">
                     <span class="text-sm text-purple-400">Langkah Mudah</span>
                 </div>
@@ -739,7 +729,7 @@
                 <div class="connection-line d-none d-md-block"></div>
 
                 <!-- Step 1 -->
-                <div class="col-md-4 text-center position-relative">
+                <div class="col-md-4 text-center position-relative" data-aos="fade-up" data-aos-delay="0">
                     <div class="d-inline-flex mb-4">
                         <div class="w-16 h-16 bg-gradient-step1 rounded-2xl d-flex align-items-center justify-content-center text-white fs-4 fw-bolder shadow-indigo-step rotate-3 hover-rotate-0" style="transition:transform .3s;">
                             1
@@ -758,7 +748,7 @@
                 </div>
 
                 <!-- Step 2 -->
-                <div class="col-md-4 text-center position-relative">
+                <div class="col-md-4 text-center position-relative" data-aos="fade-up" data-aos-delay="150">
                     <div class="d-inline-flex mb-4">
                         <div class="w-16 h-16 bg-gradient-step2 rounded-2xl d-flex align-items-center justify-content-center text-white fs-4 fw-bolder shadow-purple-step rotate-n3 hover-rotate-0" style="transition:transform .3s;">
                             2
@@ -777,7 +767,7 @@
                 </div>
 
                 <!-- Step 3 -->
-                <div class="col-md-4 text-center position-relative">
+                <div class="col-md-4 text-center position-relative" data-aos="fade-up" data-aos-delay="300">
                     <div class="d-inline-flex mb-4">
                         <div class="w-16 h-16 bg-gradient-step3 rounded-2xl d-flex align-items-center justify-content-center text-white fs-4 fw-bolder shadow-pink-step rotate-3 hover-rotate-0" style="transition:transform .3s;">
                             3
@@ -801,7 +791,7 @@
     <!-- Roles Section -->
     <section id="roles" class="position-relative section-py">
         <div class="container">
-            <div class="text-center mb-16">
+            <div class="text-center mb-16" data-aos="fade-up">
                 <div class="section-badge bg-emerald-500-10 border border-emerald-500-20 mb-3">
                     <span class="text-sm text-emerald-400">Tiga Peran Utama</span>
                 </div>
@@ -815,7 +805,7 @@
 
             <div class="row g-4">
                 <!-- Admin -->
-                <div class="col-md-4">
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="0">
                     <div class="role-card hover-blue position-relative bg-slate-900-50 border border-slate-800-50 rounded-2xl p-4 h-100" style="transition:all .3s;border-width:1px;">
                         <div class="position-absolute top-0 end-0 px-3 py-1 bg-blue-500-20 rounded-2xl" style="border-bottom-left-radius:0.75rem;border-top-right-radius:1rem;border-top-left-radius:0;border-bottom-right-radius:0;border-left:1px solid rgba(59,130,246,0.2);border-bottom:1px solid rgba(59,130,246,0.2);">
                             <span class="text-xs text-blue-400 fw-semibold">ADMIN</span>
@@ -850,7 +840,7 @@
                 </div>
 
                 <!-- Teacher -->
-                <div class="col-md-4">
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="150">
                     <div class="role-card hover-emerald position-relative bg-slate-900-50 border border-slate-800-50 rounded-2xl p-4 h-100 translate-y-n4" style="transition:all .3s;border-width:1px;">
                         <div class="position-absolute top-0 end-0 px-3 py-1 bg-emerald-500-10 rounded-2xl" style="border-bottom-left-radius:0.75rem;border-top-right-radius:1rem;border-top-left-radius:0;border-bottom-right-radius:0;border-left:1px solid rgba(16,185,129,0.2);border-bottom:1px solid rgba(16,185,129,0.2);">
                             <span class="text-xs text-emerald-400 fw-semibold">GURU</span>
@@ -888,7 +878,7 @@
                 </div>
 
                 <!-- Student -->
-                <div class="col-md-4">
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
                     <div class="role-card hover-violet position-relative bg-slate-900-50 border border-slate-800-50 rounded-2xl p-4 h-100" style="transition:all .3s;border-width:1px;">
                         <div class="position-absolute top-0 end-0 px-3 py-1 bg-violet-500-20 rounded-2xl" style="border-bottom-left-radius:0.75rem;border-top-right-radius:1rem;border-top-left-radius:0;border-bottom-right-radius:0;border-left:1px solid rgba(139,92,246,0.2);border-bottom:1px solid rgba(139,92,246,0.2);">
                             <span class="text-xs text-violet-400 fw-semibold">SISWA</span>
@@ -924,9 +914,181 @@
         </div>
     </section>
 
+    <!-- FAQ Section -->
+    <section id="faq" class="position-relative section-py bg-slate-900-30">
+        <div class="position-absolute blur-3xl bg-indigo-600-5 rounded-circle" style="top:10%;left:5%;width:20rem;height:20rem;"></div>
+        <div class="position-absolute blur-3xl bg-purple-600-5 rounded-circle" style="bottom:10%;right:5%;width:20rem;height:20rem;"></div>
+
+        <div class="container position-relative">
+            <div class="text-center mb-16" data-aos="fade-up">
+                <div class="section-badge bg-emerald-500-10 border border-emerald-500-20 mb-3">
+                    <span class="text-sm text-emerald-400">Pertanyaan Umum</span>
+                </div>
+                <h2 class="text-3xl text-md-4xl fw-bolder text-white mb-3">
+                    Frequently Asked <span class="gradient-text">Questions</span>
+                </h2>
+                <p class="text-slate-400 mx-auto" style="max-width:42rem;">
+                    Temukan jawaban untuk pertanyaan yang sering ditanyakan tentang ZAFProctor
+                </p>
+            </div>
+
+            <div class="row justify-content-center">
+                <div class="col-lg-10" data-aos="fade-up" data-aos-delay="100">
+                    <div class="accordion" id="faqAccordion">
+                        <!-- FAQ 1 -->
+                        <div class="accordion-item bg-slate-900-50 border border-slate-800-50 rounded-2xl mb-3" style="overflow:hidden;">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed bg-transparent text-white fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#faq1" style="box-shadow:none;">
+                                    <svg class="w-5 h-5 text-indigo-400 me-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                    </svg>
+                                    Apakah perlu menginstal aplikasi untuk menggunakan ZAFProctor?
+                                </button>
+                            </h2>
+                            <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body text-slate-400 pt-0">
+                                    <strong class="text-emerald-400">Tidak perlu!</strong> ZAFProctor adalah aplikasi berbasis web yang berjalan langsung di browser. Anda hanya memerlukan browser modern (Chrome, Edge, Firefox, atau Safari) dan koneksi internet. Tidak perlu mengunduh atau menginstal aplikasi apapun.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- FAQ 2 -->
+                        <div class="accordion-item bg-slate-900-50 border border-slate-800-50 rounded-2xl mb-3" style="overflow:hidden;">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed bg-transparent text-white fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#faq2" style="box-shadow:none;">
+                                    <svg class="w-5 h-5 text-indigo-400 me-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"/>
+                                    </svg>
+                                    Bagaimana jika koneksi internet terputus saat mengerjakan ujian?
+                                </button>
+                            </h2>
+                            <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body text-slate-400 pt-0">
+                                    Jawaban Anda akan tersimpan secara otomatis setiap beberapa detik (auto-save). Jika koneksi terputus sementara, jawaban yang sudah disimpan akan tetap aman. Waktu ujian tetap berjalan di server, sehingga tidak bisa dimanipulasi. Ketika koneksi kembali, Anda dapat melanjutkan ujian dari jawaban terakhir yang tersimpan.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- FAQ 3 -->
+                        <div class="accordion-item bg-slate-900-50 border border-slate-800-50 rounded-2xl mb-3" style="overflow:hidden;">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed bg-transparent text-white fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#faq3" style="box-shadow:none;">
+                                    <svg class="w-5 h-5 text-indigo-400 me-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                                    </svg>
+                                    Jenis kecurangan apa saja yang bisa dideteksi?
+                                </button>
+                            </h2>
+                            <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body text-slate-400 pt-0">
+                                    ZAFProctor mendeteksi berbagai aktivitas mencurigakan, termasuk:
+                                    <ul class="mt-2 mb-0 ps-3">
+                                        <li>Pergantian tab atau jendela browser</li>
+                                        <li>Keluar dari mode fullscreen</li>
+                                        <li>Copy, paste, atau drag & drop teks</li>
+                                        <li>Klik kanan dan shortcut keyboard (Ctrl+C, Ctrl+V, dll)</li>
+                                        <li>Membuka Developer Tools</li>
+                                        <li>Kamera dimatikan atau tidak mendeteksi wajah</li>
+                                        <li>Terdeteksi lebih dari satu wajah</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- FAQ 4 -->
+                        <div class="accordion-item bg-slate-900-50 border border-slate-800-50 rounded-2xl mb-3" style="overflow:hidden;">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed bg-transparent text-white fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#faq4" style="box-shadow:none;">
+                                    <svg class="w-5 h-5 text-indigo-400 me-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                                    </svg>
+                                    Bagaimana sistem penilaian otomatis bekerja?
+                                </button>
+                            </h2>
+                            <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body text-slate-400 pt-0">
+                                    <strong class="text-white">Soal Pilihan Ganda:</strong> Dinilai secara otomatis dan instan saat ujian selesai. Sistem mencocokkan jawaban siswa dengan kunci jawaban yang telah ditentukan.<br><br>
+                                    <strong class="text-white">Soal Essay:</strong> Memerlukan penilaian manual oleh guru. Guru dapat memberikan skor dan feedback untuk setiap jawaban essay melalui dashboard penilaian.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- FAQ 5 -->
+                        <div class="accordion-item bg-slate-900-50 border border-slate-800-50 rounded-2xl mb-3" style="overflow:hidden;">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed bg-transparent text-white fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#faq5" style="box-shadow:none;">
+                                    <svg class="w-5 h-5 text-indigo-400 me-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                    </svg>
+                                    Apakah kamera wajib diaktifkan selama ujian?
+                                </button>
+                            </h2>
+                            <div id="faq5" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body text-slate-400 pt-0">
+                                    Pengaturan kamera tergantung pada konfigurasi ujian yang dibuat oleh guru. Jika proctoring diaktifkan, maka kamera wajib diaktifkan dan siswa harus melewati pre-check kamera sebelum memulai ujian. Sistem akan mengambil snapshot secara berkala dan mencatat jika kamera dimatikan sebagai pelanggaran.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- FAQ 6 -->
+                        <div class="accordion-item bg-slate-900-50 border border-slate-800-50 rounded-2xl mb-3" style="overflow:hidden;">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed bg-transparent text-white fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#faq6" style="box-shadow:none;">
+                                    <svg class="w-5 h-5 text-indigo-400 me-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    Apakah ZAFProctor gratis digunakan?
+                                </button>
+                            </h2>
+                            <div id="faq6" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body text-slate-400 pt-0">
+                                    <strong class="text-emerald-400">Ya, 100% gratis!</strong> ZAFProctor dapat digunakan tanpa biaya apapun. Tidak ada biaya langganan, tidak perlu kartu kredit, dan semua fitur tersedia secara penuh untuk semua pengguna.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- FAQ 7 -->
+                        <div class="accordion-item bg-slate-900-50 border border-slate-800-50 rounded-2xl mb-3" style="overflow:hidden;">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed bg-transparent text-white fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#faq7" style="box-shadow:none;">
+                                    <svg class="w-5 h-5 text-indigo-400 me-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    Apa yang terjadi jika waktu ujian habis?
+                                </button>
+                            </h2>
+                            <div id="faq7" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body text-slate-400 pt-0">
+                                    Ujian akan otomatis di-submit (auto-submit) ketika waktu habis. Semua jawaban yang sudah disimpan akan dikumpulkan secara otomatis. Selain itu, ujian juga dapat di-submit otomatis jika jumlah pelanggaran melebihi batas yang ditentukan oleh guru.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- FAQ 8 -->
+                        <div class="accordion-item bg-slate-900-50 border border-slate-800-50 rounded-2xl" style="overflow:hidden;">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed bg-transparent text-white fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#faq8" style="box-shadow:none;">
+                                    <svg class="w-5 h-5 text-indigo-400 me-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                                    </svg>
+                                    Apakah hasil ujian bisa di-export?
+                                </button>
+                            </h2>
+                            <div id="faq8" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body text-slate-400 pt-0">
+                                    Ya, guru dapat mengexport hasil ujian ke format <strong class="text-white">CSV</strong>. File export berisi data lengkap termasuk nama siswa, waktu mulai dan selesai, skor, persentase, status kelulusan, jumlah pelanggaran, dan status auto-submit.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Download Guide Banner -->
     <section class="position-relative py-20">
-        <div class="container" style="max-width:64rem;">
+        <div class="container" style="max-width:64rem;" data-aos="zoom-in" data-aos-duration="600">
             <div class="position-relative overflow-hidden bg-gradient-banner rounded-3xl p-5" style="padding:2.5rem 3.5rem;">
                 <!-- Background decoration -->
                 <div class="position-absolute rounded-circle" style="top:0;right:0;width:16rem;height:16rem;background:rgba(255,255,255,0.05);transform:translate(25%,-50%);"></div>
@@ -1016,7 +1178,7 @@
         <div class="position-absolute hero-pattern" style="inset:0;"></div>
         <div class="position-absolute rounded-circle blur-3xl" style="top:50%;left:50%;transform:translate(-50%,-50%);width:31rem;height:31rem;background:rgba(79,70,229,0.1);"></div>
 
-        <div class="container position-relative text-center" style="max-width:56rem;">
+        <div class="container position-relative text-center" style="max-width:56rem;" data-aos="fade-up">
             <h2 class="text-3xl text-md-5xl fw-bolder text-white mb-4">
                 Siap Memulai Ujian Online<br>
                 <span class="gradient-text">yang Aman &amp; Terpercaya?</span>
@@ -1025,8 +1187,8 @@
                 Daftar sekarang dan nikmati semua fitur ZAFProctor secara gratis.
                 Tidak perlu kartu kredit, langsung bisa digunakan.
             </p>
-            <div class="d-flex flex-wrap justify-content-center gap-3">
-                <a href="{{ route('register') }}"
+            <div class="d-flex flex-wrap justify-content-center gap-3" data-aos="fade-up" data-aos-delay="150">
+                <a href="{{ route('login') }}?mode=register"
                    class="btn btn-indigo rounded-xl fw-bold text-lg px-5 py-3 d-inline-flex align-items-center gap-2">
                     Daftar Gratis Sekarang
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1065,6 +1227,7 @@
                         <li><a href="#features" class="text-sm text-slate-500" style="transition:color .2s;">Fitur</a></li>
                         <li><a href="#how-it-works" class="text-sm text-slate-500" style="transition:color .2s;">Cara Kerja</a></li>
                         <li><a href="#roles" class="text-sm text-slate-500" style="transition:color .2s;">Peran Pengguna</a></li>
+                        <li><a href="#faq" class="text-sm text-slate-500" style="transition:color .2s;">FAQ</a></li>
                         <li><a href="{{ route('guide.download') }}" class="text-sm text-slate-500" style="transition:color .2s;">Panduan Pengguna (PDF)</a></li>
                     </ul>
                 </div>
@@ -1072,7 +1235,7 @@
                     <h4 class="text-sm fw-semibold text-slate-300 mb-3">Akses</h4>
                     <ul class="list-unstyled d-flex flex-column gap-2">
                         <li><a href="{{ route('login') }}" class="text-sm text-slate-500" style="transition:color .2s;">Login</a></li>
-                        <li><a href="{{ route('register') }}" class="text-sm text-slate-500" style="transition:color .2s;">Daftar</a></li>
+                        <li><a href="{{ route('login') }}?mode=register" class="text-sm text-slate-500" style="transition:color .2s;">Daftar</a></li>
                     </ul>
                 </div>
             </div>
@@ -1089,9 +1252,19 @@
     <!-- Bootstrap 5.3.2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <!-- AOS - Animate On Scroll -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 
     <!-- Navbar scroll effect -->
     <script>
+        // Initialize AOS
+        AOS.init({
+            duration: 800,
+            easing: 'ease-out-cubic',
+            once: true,
+            offset: 50
+        });
+
         window.addEventListener('scroll', function() {
             const navbar = document.getElementById('navbar');
             if (window.scrollY > 50) {

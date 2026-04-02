@@ -1378,6 +1378,12 @@
         const studentForm = document.getElementById('student-form');
         const teacherForm = document.getElementById('teacher-form');
 
+        // Auto-switch to register mode if URL has ?mode=register
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('mode') === 'register') {
+            container.classList.add("active");
+        }
+
         registerBtn.addEventListener('click', () => {
             container.classList.add("active");
         });
