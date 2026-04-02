@@ -1020,12 +1020,12 @@
                                     <svg class="w-5 h-5 text-indigo-400 me-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                                     </svg>
-                                    Apakah kamera wajib diaktifkan selama ujian?
+                                    Bagaimana sistem proctoring memantau peserta?
                                 </button>
                             </h2>
                             <div id="faq5" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                                 <div class="accordion-body text-slate-400 pt-0">
-                                    Pengaturan kamera tergantung pada konfigurasi ujian yang dibuat oleh guru. Jika proctoring diaktifkan, maka kamera wajib diaktifkan dan siswa harus melewati pre-check kamera sebelum memulai ujian. Sistem akan mengambil snapshot secara berkala dan mencatat jika kamera dimatikan sebagai pelanggaran.
+                                    Sistem proctoring ZAFProctor menggunakan <strong class="text-white">webcam monitoring</strong> yang wajib aktif selama ujian. Siswa harus melewati pre-check kamera sebelum memulai. Sistem akan mengambil snapshot secara berkala, mendeteksi wajah tidak terlihat, dan mencatat berbagai pelanggaran seperti pindah tab, keluar fullscreen, atau mencoba copy-paste.
                                 </div>
                             </div>
                         </div>
@@ -1261,8 +1261,9 @@
         AOS.init({
             duration: 800,
             easing: 'ease-out-cubic',
-            once: true,
-            offset: 50
+            once: false,
+            offset: 50,
+            mirror: true
         });
 
         window.addEventListener('scroll', function() {

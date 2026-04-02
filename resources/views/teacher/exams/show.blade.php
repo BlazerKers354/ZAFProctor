@@ -350,11 +350,7 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <span class="text-muted small">Webcam Monitor</span>
-                            @if($exam->settings->webcam_enabled)
-                                <span class="badge bg-light-success">Aktif</span>
-                            @else
-                                <span class="badge bg-light-secondary">Nonaktif</span>
-                            @endif
+                            <span class="badge bg-light-success">Selalu Aktif</span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <span class="text-muted small">Browser Lock</span>

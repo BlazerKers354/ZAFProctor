@@ -176,13 +176,13 @@
                     <div class="card-body">
                         <div class="row g-4">
                             <div class="col-md-6">
-                                <div class="form-check form-switch mb-3">
-                                    <input type="checkbox" name="webcam_enabled" id="webcam_enabled" value="1"
-                                           {{ old('webcam_enabled', $exam->settings?->webcam_enabled ?? true) ? 'checked' : '' }}
-                                           class="form-check-input">
-                                    <label for="webcam_enabled" class="form-check-label fw-medium">Monitor Webcam</label>
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="ph ph-video-camera text-success me-2 fs-5"></i>
+                                    <span class="fw-medium">Monitor Webcam</span>
+                                    <span class="badge bg-success ms-2">Selalu Aktif</span>
                                 </div>
-                                <small class="text-muted">Rekam aktivitas peserta via webcam</small>
+                                <small class="text-muted">Webcam wajib aktif untuk semua ujian. Sistem akan mengambil snapshot berkala dan mendeteksi wajah peserta.</small>
+                                <input type="hidden" name="webcam_enabled" value="1">
                             </div>
                             
                             <div class="col-md-6">

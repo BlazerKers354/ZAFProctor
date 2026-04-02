@@ -169,6 +169,12 @@
             color: #fff;
             position: relative;
             z-index: 1;
+            text-decoration: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .brand:hover {
+            opacity: 0.85;
         }
 
         .brand-logo {
@@ -1093,7 +1099,7 @@
     </div>
     <div class="grid-pattern"></div>
 
-    <div class="brand">
+    <a href="{{ route('home') }}" class="brand" title="Kembali ke Beranda">
         <div class="brand-logo">
             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12 2L3 7v10l9 5 9-5V7l-9-5zm0 2.18l6.2 3.45v2.3L12 13.36 5.8 9.93v-2.3L12 4.18zM5.8 11.64L12 15.05l6.2-3.41v4.73L12 19.82l-6.2-3.45v-4.73z"/>
@@ -1109,7 +1115,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </a>
 
     <div class="container" id="container">
         <!-- Sign Up Panel -->
