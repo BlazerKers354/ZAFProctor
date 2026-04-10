@@ -15,6 +15,7 @@
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800&display=swap" rel="stylesheet" />
     <style>
         /* ===== Base ===== */
+        html, body { width: 100%; max-width: 100%; overflow-x: hidden; }
         body { font-family: 'Figtree', sans-serif; scroll-behavior: smooth; background-color: #020617; color: #fff; }
         a { text-decoration: none; }
 
@@ -70,6 +71,59 @@
         .animate-slide-up { animation: slide-up 0.6s ease-out; }
         .animate-fade-in { animation: fade-in 0.8s ease-out; }
         .animate-pulse { animation: pulse-soft 2s ease-in-out infinite; }
+
+        /* ===== Premium Motion ===== */
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            z-index: 1080;
+            background: rgba(15,23,42,0.35);
+            pointer-events: none;
+        }
+        .scroll-progress-bar {
+            height: 100%;
+            width: 100%;
+            transform: scaleX(0);
+            transform-origin: left center;
+            background: linear-gradient(90deg, #818cf8, #c084fc, #f472b6);
+            box-shadow: 0 0 16px rgba(192,132,252,0.45);
+            will-change: transform;
+            transition: transform 0.12s linear;
+        }
+        .parallax-orb { pointer-events: none; will-change: transform; }
+        .reveal-both {
+            opacity: 0;
+            transform: translate3d(0, 42px, 0) scale(0.985);
+            transition: opacity 0.75s ease, transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+            will-change: opacity, transform;
+        }
+        body[data-scroll-direction="up"] .reveal-both:not(.is-visible) {
+            transform: translate3d(0, -42px, 0) scale(0.985);
+        }
+        .reveal-both.is-visible {
+            opacity: 1;
+            transform: translate3d(0, 0, 0) scale(1);
+        }
+
+        .stagger-group .stagger-item {
+            opacity: 0;
+            filter: blur(6px);
+            transform: translate3d(0, 38px, 0) scale(0.985);
+            transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.7s ease, filter 0.6s ease;
+            transition-delay: calc(var(--stagger-order, 0) * 90ms);
+            will-change: transform, opacity, filter;
+        }
+        body[data-scroll-direction="up"] .stagger-group:not(.is-visible) .stagger-item {
+            transform: translate3d(0, -38px, 0) scale(0.985);
+        }
+        .stagger-group.is-visible .stagger-item {
+            opacity: 1;
+            filter: blur(0);
+            transform: translate3d(0, 0, 0) scale(1);
+        }
 
         /* ===== Component Styles ===== */
         .feature-card { transition: all 0.3s ease; }
@@ -173,7 +227,14 @@
         .bg-gradient-step1 { background: linear-gradient(to bottom right, #6366f1, #4f46e5); }
         .bg-gradient-step2 { background: linear-gradient(to bottom right, #a855f7, #9333ea); }
         .bg-gradient-step3 { background: linear-gradient(to bottom right, #ec4899, #e11d48); }
-        .bg-gradient-banner { background: linear-gradient(to bottom right, #4f46e5, #9333ea, #ec4899); }
+        .bg-gradient-banner {
+            background:
+                radial-gradient(120% 120% at 0% 100%, rgba(56,189,248,0.16) 0%, rgba(56,189,248,0) 48%),
+                radial-gradient(90% 110% at 100% 0%, rgba(129,140,248,0.24) 0%, rgba(129,140,248,0) 55%),
+                linear-gradient(130deg, #0b122f 0%, #1a1f4d 45%, #28184e 100%);
+            border: 1px solid rgba(129,140,248,0.25);
+            box-shadow: 0 25px 60px rgba(2,6,23,0.45);
+        }
         .bg-gradient-logo { background: linear-gradient(to bottom right, #3b82f6, #7c3aed); }
         .bg-gradient-logo-hero { background: linear-gradient(to bottom right, #3b82f6, #8b5cf6); }
 
@@ -322,9 +383,71 @@
 
         /* ===== Connection Line ===== */
         .connection-line {
-            position: absolute; top: 4rem; left: 16.67%; right: 16.67%; height: 2px;
-            background: linear-gradient(to right, rgba(99,102,241,0.5), rgba(168,85,247,0.5), rgba(236,72,153,0.5));
+            position: absolute;
+            top: 4.2rem;
+            left: 16.67%;
+            width: 66.66%;
+            height: 2px;
+            border-radius: 9999px;
+            background:
+                linear-gradient(90deg, rgba(129,140,248,0.42), rgba(168,85,247,0.86)) left center / 46% 100% no-repeat,
+                linear-gradient(90deg, rgba(168,85,247,0.72), rgba(244,114,182,0.82)) right center / 46% 100% no-repeat;
+            box-shadow: 0 0 18px rgba(99,102,241,0.15);
         }
+        .connection-line::after {
+            content: '';
+            position: absolute;
+            inset: -2px 0;
+            border-radius: inherit;
+            background:
+                linear-gradient(90deg, rgba(129,140,248,0.25), rgba(168,85,247,0.55)) left center / 46% 100% no-repeat,
+                linear-gradient(90deg, rgba(168,85,247,0.45), rgba(244,114,182,0.55)) right center / 46% 100% no-repeat;
+            filter: blur(3px);
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .how-step-badge {
+            transition: transform .25s ease, box-shadow .25s ease;
+        }
+        .how-step-badge:hover {
+            transform: translateY(-2px) scale(1.02);
+        }
+
+        /* ===== Guide Banner Theme ===== */
+        .guide-badge {
+            background: rgba(129,140,248,0.16);
+            border: 1px solid rgba(129,140,248,0.28);
+        }
+        .guide-text-soft { color: rgba(226,232,240,0.82); }
+        .btn-guide-download {
+            background: linear-gradient(135deg, #dbeafe, #c7d2fe);
+            color: #312e81 !important;
+            border: 1px solid rgba(219,234,254,0.8);
+            box-shadow: 0 10px 22px rgba(79,70,229,0.24);
+            transition: transform .2s ease, box-shadow .2s ease;
+        }
+        .btn-guide-download:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 26px rgba(99,102,241,0.3);
+        }
+        .btn-guide-download:focus-visible {
+            outline: 2px solid rgba(165,180,252,0.8);
+            outline-offset: 2px;
+        }
+        .guide-panel {
+            background: linear-gradient(160deg, rgba(30,41,59,0.7), rgba(49,46,129,0.45));
+            border: 1px solid rgba(148,163,184,0.26);
+            backdrop-filter: blur(10px);
+        }
+        .guide-panel-icon {
+            background: linear-gradient(145deg, rgba(129,140,248,0.35), rgba(56,189,248,0.26));
+        }
+        .guide-item {
+            background: rgba(15,23,42,0.36);
+            border: 1px solid rgba(148,163,184,0.18);
+        }
+        .guide-item-subtext { color: rgba(203,213,225,0.65); }
 
         /* ===== Check list item ===== */
         .check-list li { display: flex; align-items: center; font-size: 0.875rem; color: #cbd5e1; }
@@ -340,6 +463,32 @@
         }
         @media (max-width: 767.98px) {
             .hero-title { font-size: 2.25rem !important; }
+            .reveal-both {
+                transform: translate3d(0, 24px, 0) scale(0.99);
+                transition-duration: 0.55s;
+            }
+            body[data-scroll-direction="up"] .reveal-both:not(.is-visible) {
+                transform: translate3d(0, -24px, 0) scale(0.99);
+            }
+            .stagger-group .stagger-item {
+                filter: blur(3px);
+                transform: translate3d(0, 22px, 0) scale(0.992);
+                transition-duration: 0.5s;
+                transition-delay: calc(var(--stagger-order, 0) * 55ms);
+            }
+            body[data-scroll-direction="up"] .stagger-group:not(.is-visible) .stagger-item {
+                transform: translate3d(0, -22px, 0) scale(0.992);
+            }
+        }
+        @media (min-width: 768px) and (max-width: 991.98px) {
+            .connection-line {
+                left: 14%;
+                width: 72%;
+                top: 4.1rem;
+            }
+        }
+        @media (min-width: 1200px) {
+            .connection-line { width: 66.66%; }
         }
 
         /* ===== FAQ Accordion ===== */
@@ -355,9 +504,29 @@
             background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23818cf8'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
         }
         .accordion-body { padding: 0 1.5rem 1.25rem 3.5rem; line-height: 1.7; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .scroll-progress { display: none; }
+            .reveal-both {
+                opacity: 1;
+                transform: none;
+                transition: none;
+            }
+            .stagger-group .stagger-item {
+                opacity: 1;
+                filter: none;
+                transform: none;
+                transition: none;
+            }
+            .parallax-orb { transform: none !important; }
+        }
     </style>
 </head>
 <body class="antialiased">
+
+    <div class="scroll-progress" aria-hidden="true">
+        <div class="scroll-progress-bar" id="scrollIndicator"></div>
+    </div>
 
     <!-- Navigation -->
     <nav class="landing-nav" id="navbar">
@@ -393,9 +562,11 @@
         <div class="position-absolute blur-3xl animate-float morph bg-indigo-600-20 rounded-circle" style="top:5rem;left:2.5rem;width:18rem;height:18rem;"></div>
         <div class="position-absolute blur-3xl animate-float-delay morph bg-purple-600-5 rounded-circle" style="bottom:5rem;right:2.5rem;width:24rem;height:24rem;opacity:0.15;"></div>
         <div class="position-absolute blur-3xl animate-float-slow rounded-circle" style="top:50%;left:50%;transform:translate(-50%,-50%);width:37.5rem;height:37.5rem;background:rgba(99,102,241,0.05);"></div>
+        <div class="position-absolute rounded-circle blur-3xl parallax-orb bg-indigo-500-10" data-parallax="0.1" style="top:20%;right:8%;width:14rem;height:14rem;"></div>
+        <div class="position-absolute rounded-circle blur-3xl parallax-orb bg-purple-500-10" data-parallax="-0.08" style="bottom:18%;left:10%;width:12rem;height:12rem;"></div>
 
         <!-- Grid pattern -->
-        <div class="grid-pattern">
+        <div class="grid-pattern parallax-orb" data-parallax="0.04">
             <svg width="100%" height="100%">
                 <defs>
                     <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
@@ -600,7 +771,7 @@
         <div class="position-absolute blur-3xl bg-indigo-600-5 rounded-circle" style="top:0;right:0;width:24rem;height:24rem;"></div>
         <div class="position-absolute blur-3xl bg-purple-600-5 rounded-circle" style="bottom:0;left:0;width:24rem;height:24rem;"></div>
 
-        <div class="container position-relative">
+        <div class="container position-relative reveal-both">
             <div class="text-center mb-16" data-aos="fade-up">
                 <div class="section-badge bg-indigo-500-10 border border-indigo-500-20 mb-3">
                     <span class="text-sm text-indigo-400">Fitur Unggulan</span>
@@ -614,9 +785,9 @@
                 </p>
             </div>
 
-            <div class="row g-4">
+            <div class="row g-4 stagger-group">
                 <!-- Feature 1 -->
-                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="0">
+                <div class="col-md-6 col-lg-4 stagger-item">
                     <div class="feature-card bg-slate-900-50 border border-slate-800-50 rounded-2xl p-4 h-100" style="transition:all .3s;border-width:1px;">
                         <div class="w-12 h-12 bg-gradient-indigo rounded-xl d-flex align-items-center justify-content-center mb-3">
                             <svg class="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -631,7 +802,7 @@
                 </div>
 
                 <!-- Feature 2 -->
-                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="100">
+                <div class="col-md-6 col-lg-4 stagger-item">
                     <div class="feature-card bg-slate-900-50 border border-slate-800-50 rounded-2xl p-4 h-100" style="transition:all .3s;border-width:1px;">
                         <div class="w-12 h-12 bg-gradient-emerald rounded-xl d-flex align-items-center justify-content-center mb-3">
                             <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -646,7 +817,7 @@
                 </div>
 
                 <!-- Feature 3 -->
-                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="col-md-6 col-lg-4 stagger-item">
                     <div class="feature-card bg-slate-900-50 border border-slate-800-50 rounded-2xl p-4 h-100" style="transition:all .3s;border-width:1px;">
                         <div class="w-12 h-12 bg-gradient-purple rounded-xl d-flex align-items-center justify-content-center mb-3">
                             <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -661,7 +832,7 @@
                 </div>
 
                 <!-- Feature 4 -->
-                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="0">
+                <div class="col-md-6 col-lg-4 stagger-item">
                     <div class="feature-card bg-slate-900-50 border border-slate-800-50 rounded-2xl p-4 h-100" style="transition:all .3s;border-width:1px;">
                         <div class="w-12 h-12 bg-gradient-amber rounded-xl d-flex align-items-center justify-content-center mb-3">
                             <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -676,7 +847,7 @@
                 </div>
 
                 <!-- Feature 5 -->
-                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="100">
+                <div class="col-md-6 col-lg-4 stagger-item">
                     <div class="feature-card bg-slate-900-50 border border-slate-800-50 rounded-2xl p-4 h-100" style="transition:all .3s;border-width:1px;">
                         <div class="w-12 h-12 bg-gradient-rose rounded-xl d-flex align-items-center justify-content-center mb-3">
                             <svg class="w-6 h-6 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -692,7 +863,7 @@
                 </div>
 
                 <!-- Feature 6 -->
-                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="col-md-6 col-lg-4 stagger-item">
                     <div class="feature-card bg-slate-900-50 border border-slate-800-50 rounded-2xl p-4 h-100" style="transition:all .3s;border-width:1px;">
                         <div class="w-12 h-12 bg-gradient-sky rounded-xl d-flex align-items-center justify-content-center mb-3">
                             <svg class="w-6 h-6 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -711,7 +882,7 @@
 
     <!-- How it Works -->
     <section id="how-it-works" class="position-relative section-py bg-slate-900-30">
-        <div class="container">
+        <div class="container reveal-both">
             <div class="text-center mb-16" data-aos="fade-up">
                 <div class="section-badge bg-purple-500-10 border border-purple-500-20 mb-3">
                     <span class="text-sm text-purple-400">Langkah Mudah</span>
@@ -731,7 +902,7 @@
                 <!-- Step 1 -->
                 <div class="col-md-4 text-center position-relative" data-aos="fade-up" data-aos-delay="0">
                     <div class="d-inline-flex mb-4">
-                        <div class="w-16 h-16 bg-gradient-step1 rounded-2xl d-flex align-items-center justify-content-center text-white fs-4 fw-bolder shadow-indigo-step rotate-3 hover-rotate-0" style="transition:transform .3s;">
+                        <div class="how-step-badge w-16 h-16 bg-gradient-step1 rounded-2xl d-flex align-items-center justify-content-center text-white fs-4 fw-bolder shadow-indigo-step">
                             1
                         </div>
                     </div>
@@ -750,7 +921,7 @@
                 <!-- Step 2 -->
                 <div class="col-md-4 text-center position-relative" data-aos="fade-up" data-aos-delay="150">
                     <div class="d-inline-flex mb-4">
-                        <div class="w-16 h-16 bg-gradient-step2 rounded-2xl d-flex align-items-center justify-content-center text-white fs-4 fw-bolder shadow-purple-step rotate-n3 hover-rotate-0" style="transition:transform .3s;">
+                        <div class="how-step-badge w-16 h-16 bg-gradient-step2 rounded-2xl d-flex align-items-center justify-content-center text-white fs-4 fw-bolder shadow-purple-step">
                             2
                         </div>
                     </div>
@@ -769,7 +940,7 @@
                 <!-- Step 3 -->
                 <div class="col-md-4 text-center position-relative" data-aos="fade-up" data-aos-delay="300">
                     <div class="d-inline-flex mb-4">
-                        <div class="w-16 h-16 bg-gradient-step3 rounded-2xl d-flex align-items-center justify-content-center text-white fs-4 fw-bolder shadow-pink-step rotate-3 hover-rotate-0" style="transition:transform .3s;">
+                        <div class="how-step-badge w-16 h-16 bg-gradient-step3 rounded-2xl d-flex align-items-center justify-content-center text-white fs-4 fw-bolder shadow-pink-step">
                             3
                         </div>
                     </div>
@@ -790,7 +961,7 @@
 
     <!-- Roles Section -->
     <section id="roles" class="position-relative section-py">
-        <div class="container">
+        <div class="container reveal-both">
             <div class="text-center mb-16" data-aos="fade-up">
                 <div class="section-badge bg-emerald-500-10 border border-emerald-500-20 mb-3">
                     <span class="text-sm text-emerald-400">Tiga Peran Utama</span>
@@ -803,9 +974,9 @@
                 </p>
             </div>
 
-            <div class="row g-4">
+            <div class="row g-4 stagger-group">
                 <!-- Admin -->
-                <div class="col-md-4" data-aos="fade-up" data-aos-delay="0">
+                <div class="col-md-4 stagger-item">
                     <div class="role-card hover-blue position-relative bg-slate-900-50 border border-slate-800-50 rounded-2xl p-4 h-100" style="transition:all .3s;border-width:1px;">
                         <div class="position-absolute top-0 end-0 px-3 py-1 bg-blue-500-20 rounded-2xl" style="border-bottom-left-radius:0.75rem;border-top-right-radius:1rem;border-top-left-radius:0;border-bottom-right-radius:0;border-left:1px solid rgba(59,130,246,0.2);border-bottom:1px solid rgba(59,130,246,0.2);">
                             <span class="text-xs text-blue-400 fw-semibold">ADMIN</span>
@@ -840,7 +1011,7 @@
                 </div>
 
                 <!-- Teacher -->
-                <div class="col-md-4" data-aos="fade-up" data-aos-delay="150">
+                <div class="col-md-4 stagger-item">
                     <div class="role-card hover-emerald position-relative bg-slate-900-50 border border-slate-800-50 rounded-2xl p-4 h-100 translate-y-n4" style="transition:all .3s;border-width:1px;">
                         <div class="position-absolute top-0 end-0 px-3 py-1 bg-emerald-500-10 rounded-2xl" style="border-bottom-left-radius:0.75rem;border-top-right-radius:1rem;border-top-left-radius:0;border-bottom-right-radius:0;border-left:1px solid rgba(16,185,129,0.2);border-bottom:1px solid rgba(16,185,129,0.2);">
                             <span class="text-xs text-emerald-400 fw-semibold">GURU</span>
@@ -878,7 +1049,7 @@
                 </div>
 
                 <!-- Student -->
-                <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
+                <div class="col-md-4 stagger-item">
                     <div class="role-card hover-violet position-relative bg-slate-900-50 border border-slate-800-50 rounded-2xl p-4 h-100" style="transition:all .3s;border-width:1px;">
                         <div class="position-absolute top-0 end-0 px-3 py-1 bg-violet-500-20 rounded-2xl" style="border-bottom-left-radius:0.75rem;border-top-right-radius:1rem;border-top-left-radius:0;border-bottom-right-radius:0;border-left:1px solid rgba(139,92,246,0.2);border-bottom:1px solid rgba(139,92,246,0.2);">
                             <span class="text-xs text-violet-400 fw-semibold">SISWA</span>
@@ -919,7 +1090,7 @@
         <div class="position-absolute blur-3xl bg-indigo-600-5 rounded-circle" style="top:10%;left:5%;width:20rem;height:20rem;"></div>
         <div class="position-absolute blur-3xl bg-purple-600-5 rounded-circle" style="bottom:10%;right:5%;width:20rem;height:20rem;"></div>
 
-        <div class="container position-relative">
+        <div class="container position-relative reveal-both">
             <div class="text-center mb-16" data-aos="fade-up">
                 <div class="section-badge bg-emerald-500-10 border border-emerald-500-20 mb-3">
                     <span class="text-sm text-emerald-400">Pertanyaan Umum</span>
@@ -1088,29 +1259,29 @@
 
     <!-- Download Guide Banner -->
     <section class="position-relative py-20">
-        <div class="container" style="max-width:64rem;" data-aos="zoom-in" data-aos-duration="600">
+        <div class="container reveal-both" style="max-width:64rem;">
             <div class="position-relative overflow-hidden bg-gradient-banner rounded-3xl p-5" style="padding:2.5rem 3.5rem;">
                 <!-- Background decoration -->
-                <div class="position-absolute rounded-circle" style="top:0;right:0;width:16rem;height:16rem;background:rgba(255,255,255,0.05);transform:translate(25%,-50%);"></div>
-                <div class="position-absolute rounded-circle" style="bottom:0;left:0;width:12rem;height:12rem;background:rgba(255,255,255,0.05);transform:translate(-25%,33%);"></div>
+                <div class="position-absolute rounded-circle" style="top:0;right:0;width:16rem;height:16rem;background:rgba(129,140,248,0.16);transform:translate(25%,-50%);"></div>
+                <div class="position-absolute rounded-circle" style="bottom:0;left:0;width:12rem;height:12rem;background:rgba(56,189,248,0.14);transform:translate(-25%,33%);"></div>
 
                 <div class="row align-items-center position-relative g-4">
                     <div class="col-md-6">
-                        <div class="section-badge bg-white-10 mb-3">
+                        <div class="section-badge guide-badge mb-3">
                             <svg class="w-4 h-4 text-yellow-300" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                             </svg>
-                            <span class="text-sm fw-medium" style="color:rgba(255,255,255,0.9);">Panduan Lengkap</span>
+                            <span class="text-sm fw-medium" style="color:rgba(224,231,255,0.95);">Panduan Lengkap</span>
                         </div>
                         <h3 class="text-2xl text-md-4xl fw-bolder text-white mb-3">
                             Download Panduan Pengguna
                         </h3>
-                        <p class="leading-relaxed mb-4" style="color:rgba(255,255,255,0.7);">
+                        <p class="leading-relaxed mb-4 guide-text-soft">
                             Panduan PDF lengkap untuk Admin, Guru, dan Siswa.
                             Berisi langkah-langkah penggunaan, tips, screenshot, dan FAQ.
                         </p>
                         <a href="{{ route('guide.download') }}"
-                           class="d-inline-flex align-items-center bg-white px-4 py-3 rounded-xl fw-bold shadow-lg gap-2" style="color:#4338ca;transition:all .2s;">
+                           class="d-inline-flex align-items-center btn-guide-download px-4 py-3 rounded-xl fw-bold gap-2">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                             </svg>
@@ -1121,9 +1292,9 @@
                         </a>
                     </div>
                     <div class="col-md-6 d-none d-md-block">
-                        <div class="bg-white-10 backdrop-blur rounded-2xl p-4 border border-white-10">
+                        <div class="guide-panel rounded-2xl p-4">
                             <div class="text-center mb-3">
-                                <div class="d-inline-flex align-items-center justify-content-center w-14 h-14 bg-white-20 rounded-xl mb-2">
+                                <div class="d-inline-flex align-items-center justify-content-center w-14 h-14 guide-panel-icon rounded-xl mb-2">
                                     <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                                     </svg>
@@ -1131,7 +1302,7 @@
                                 <div class="text-sm fw-bold text-white">Isi Panduan</div>
                             </div>
                             <div class="d-flex flex-column gap-2">
-                                <div class="d-flex align-items-center gap-3 bg-white-5 rounded-xl px-3 py-2">
+                                <div class="d-flex align-items-center gap-3 guide-item rounded-xl px-3 py-2">
                                     <div class="w-8 h-8 bg-red-500-20 rounded-lg d-flex align-items-center justify-content-center flex-shrink-0">
                                         <svg class="w-4 h-4 text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
@@ -1140,10 +1311,10 @@
                                     </div>
                                     <div>
                                         <div class="text-xs fw-semibold text-white">Panduan Admin</div>
-                                        <div class="text-xxs" style="color:rgba(255,255,255,0.6);">Kelola user, kelas, mapel</div>
+                                        <div class="text-xxs guide-item-subtext">Kelola user, kelas, mapel</div>
                                     </div>
                                 </div>
-                                <div class="d-flex align-items-center gap-3 bg-white-5 rounded-xl px-3 py-2">
+                                <div class="d-flex align-items-center gap-3 guide-item rounded-xl px-3 py-2">
                                     <div class="w-8 h-8 bg-blue-500-20 rounded-lg d-flex align-items-center justify-content-center flex-shrink-0">
                                         <svg class="w-4 h-4 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
@@ -1151,10 +1322,10 @@
                                     </div>
                                     <div>
                                         <div class="text-xs fw-semibold text-white">Panduan Guru</div>
-                                        <div class="text-xxs" style="color:rgba(255,255,255,0.6);">Buat ujian, soal, monitoring</div>
+                                        <div class="text-xxs guide-item-subtext">Buat ujian, soal, monitoring</div>
                                     </div>
                                 </div>
-                                <div class="d-flex align-items-center gap-3 bg-white-5 rounded-xl px-3 py-2">
+                                <div class="d-flex align-items-center gap-3 guide-item rounded-xl px-3 py-2">
                                     <div class="w-8 h-8 bg-emerald-500-20 rounded-lg d-flex align-items-center justify-content-center flex-shrink-0">
                                         <svg class="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
@@ -1162,7 +1333,7 @@
                                     </div>
                                     <div>
                                         <div class="text-xs fw-semibold text-white">Panduan Siswa</div>
-                                        <div class="text-xxs" style="color:rgba(255,255,255,0.6);">Ikuti ujian, kamera, hasil</div>
+                                        <div class="text-xxs guide-item-subtext">Ikuti ujian, kamera, hasil</div>
                                     </div>
                                 </div>
                             </div>
@@ -1178,7 +1349,7 @@
         <div class="position-absolute hero-pattern" style="inset:0;"></div>
         <div class="position-absolute rounded-circle blur-3xl" style="top:50%;left:50%;transform:translate(-50%,-50%);width:31rem;height:31rem;background:rgba(79,70,229,0.1);"></div>
 
-        <div class="container position-relative text-center" style="max-width:56rem;" data-aos="fade-up">
+        <div class="container position-relative text-center reveal-both" style="max-width:56rem;">
             <h2 class="text-3xl text-md-5xl fw-bolder text-white mb-4">
                 Siap Memulai Ujian Online<br>
                 <span class="gradient-text">yang Aman &amp; Terpercaya?</span>
@@ -1257,23 +1428,130 @@
 
     <!-- Navbar scroll effect -->
     <script>
+        const isMobileViewport = () => window.matchMedia('(max-width: 767.98px)').matches;
+
         // Initialize AOS
         AOS.init({
-            duration: 800,
+            duration: isMobileViewport() ? 620 : 800,
             easing: 'ease-out-cubic',
             once: false,
-            offset: 50,
+            offset: isMobileViewport() ? 35 : 50,
             mirror: true
         });
 
-        window.addEventListener('scroll', function() {
-            const navbar = document.getElementById('navbar');
-            if (window.scrollY > 50) {
+        const navbar = document.getElementById('navbar');
+        const scrollIndicator = document.getElementById('scrollIndicator');
+        const parallaxOrbs = document.querySelectorAll('[data-parallax]');
+        const revealTargets = document.querySelectorAll('.reveal-both');
+        const staggerGroups = document.querySelectorAll('.stagger-group');
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        let lastScrollY = window.pageYOffset;
+        let currentScrollDirection = 'down';
+        let ticking = false;
+
+        const revealObserver = prefersReducedMotion
+            ? null
+            : new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (entry.intersectionRatio >= 0.22) {
+                        entry.target.classList.add('is-visible');
+                    } else if (entry.intersectionRatio <= 0.04) {
+                        entry.target.classList.remove('is-visible');
+                    }
+                });
+            }, {
+                threshold: [0, 0.04, 0.22, 1],
+                rootMargin: '0px 0px -12% 0px'
+            });
+
+        if (revealObserver) {
+            revealTargets.forEach((target) => revealObserver.observe(target));
+        } else {
+            revealTargets.forEach((target) => target.classList.add('is-visible'));
+        }
+
+        const staggerObserver = prefersReducedMotion
+            ? null
+            : new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (entry.intersectionRatio >= 0.2) {
+                        entry.target.classList.add('is-visible');
+                    } else if (entry.intersectionRatio <= 0.03) {
+                        entry.target.classList.remove('is-visible');
+                    }
+                });
+            }, {
+                threshold: [0, 0.03, 0.2, 1],
+                rootMargin: '0px 0px -8% 0px'
+            });
+
+        staggerGroups.forEach((group) => {
+            group.querySelectorAll('.stagger-item').forEach((item, index) => {
+                item.style.setProperty('--stagger-order', index);
+            });
+
+            if (staggerObserver) {
+                staggerObserver.observe(group);
+            } else {
+                group.classList.add('is-visible');
+            }
+        });
+
+        function updateScrollProgress() {
+            const maxScrollable = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = maxScrollable > 0 ? window.pageYOffset / maxScrollable : 0;
+            if (scrollIndicator) {
+                scrollIndicator.style.transform = `scaleX(${Math.min(Math.max(progress, 0), 1)})`;
+            }
+        }
+
+        function updateParallax() {
+            if (prefersReducedMotion) return;
+
+            const currentY = Math.max(window.pageYOffset, 0);
+            const motionFactor = isMobileViewport() ? 0.52 : 1;
+            parallaxOrbs.forEach((orb) => {
+                const speed = parseFloat(orb.dataset.parallax || '0');
+                const translateY = currentY * speed * motionFactor;
+                orb.style.transform = `translate3d(0, ${translateY}px, 0)`;
+            });
+        }
+
+        function handleScrollEffects() {
+            const currentY = Math.max(window.scrollY, 0);
+
+            if (currentY > 50) {
                 navbar.classList.add('scrolled');
             } else {
                 navbar.classList.remove('scrolled');
             }
-        });
+
+            const deltaY = currentY - lastScrollY;
+            if (Math.abs(deltaY) > 3) {
+                currentScrollDirection = deltaY > 0 ? 'down' : 'up';
+                document.body.setAttribute('data-scroll-direction', currentScrollDirection);
+            }
+            lastScrollY = currentY;
+
+            updateScrollProgress();
+            updateParallax();
+        }
+
+        function onScroll() {
+            if (ticking) return;
+
+            ticking = true;
+            window.requestAnimationFrame(() => {
+                handleScrollEffects();
+                ticking = false;
+            });
+        }
+
+        handleScrollEffects();
+
+        window.addEventListener('scroll', onScroll, { passive: true });
+        window.addEventListener('resize', updateScrollProgress);
 
         // Smooth scroll
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
