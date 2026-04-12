@@ -35,13 +35,13 @@
                 <div class="card-body text-center">
                     <div class="user-avatar mb-4">
                         @php
-                            $avatarGradient = match(true) {
-                                auth()->user()->isAdmin() => 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-                                auth()->user()->isTeacher() => 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                                default => 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)',
+                            $avatarBgClass = match(true) {
+                                auth()->user()->isAdmin() => 'bg-primary',
+                                auth()->user()->isTeacher() => 'bg-success',
+                                default => 'bg-secondary',
                             };
                         @endphp
-                        <div class="avatar-circle mx-auto" style="width: 120px; height: 120px; background: {{ $avatarGradient }}; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <div class="avatar-circle mx-auto {{ $avatarBgClass }}" style="width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
                             <span style="font-size: 48px; color: white; font-weight: 600;">{{ strtoupper(substr($user->name, 0, 1)) }}</span>
                         </div>
                     </div>
@@ -73,6 +73,14 @@
                             @endif
                         </li>
                         <li class="list-group-item d-flex justify-content-between px-0">
+                            <span class="text-muted">Verifikasi Email</span>
+                            @if($user->hasVerifiedEmail())
+                                <span class="badge bg-success">Terverifikasi</span>
+                            @else
+                                <span class="badge bg-warning text-dark">Belum Verifikasi</span>
+                            @endif
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between px-0">
                             <span class="text-muted">Terdaftar sejak</span>
                             <span class="fw-medium">{{ $user->created_at->format('d M Y') }}</span>
                         </li>
@@ -86,6 +94,30 @@
         </div>
 
         <div class="col-lg-8">
+            @if (session('status') === 'profile-updated')
+                <div class="alert alert-success" role="alert">
+                    Profil berhasil diperbarui.
+                </div>
+            @endif
+
+            @if (session('status') === 'profile-updated-verification-sent')
+                <div class="alert alert-success" role="alert">
+                    Profil berhasil diperbarui. Karena email diubah, link verifikasi baru telah dikirim ke email Anda.
+                </div>
+            @endif
+
+            @if (session('status') === 'verification-link-sent')
+                <div class="alert alert-success" role="alert">
+                    Link verifikasi email berhasil dikirim ulang.
+                </div>
+            @endif
+
+            @if (session('status') === 'password-updated')
+                <div class="alert alert-success" role="alert">
+                    Password berhasil diperbarui.
+                </div>
+            @endif
+
             <!-- Profile Information -->
             <div class="card">
                 <div class="card-header">
@@ -95,6 +127,21 @@
                     <p class="text-muted mb-0 mt-1 small">Perbarui informasi profil dan alamat email Anda.</p>
                 </div>
                 <div class="card-body">
+                    @if (!$user->hasVerifiedEmail())
+                        <div class="alert alert-warning d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3" role="alert">
+                            <div>
+                                <i class="ph ph-warning-circle me-1"></i>
+                                Email Anda belum terverifikasi.
+                            </div>
+                            <form action="{{ route('verification.send') }}" method="POST" class="m-0">
+                                @csrf
+                                <button type="submit" class="btn btn-warning btn-sm">
+                                    <i class="ph ph-paper-plane-tilt me-1"></i>Kirim Ulang Verifikasi
+                                </button>
+                            </form>
+                        </div>
+                    @endif
+
                     <form action="{{ route('profile.update') }}" method="POST">
                         @csrf
                         @method('PATCH')

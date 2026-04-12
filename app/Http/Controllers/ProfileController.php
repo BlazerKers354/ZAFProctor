@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
@@ -18,7 +19,7 @@ class ProfileController extends Controller
     public function edit(): View
     {
         return view('profile.edit', [
-            'user' => auth()->user(),
+            'user' => Auth::user(),
         ]);
     }
 
@@ -36,10 +37,25 @@ class ProfileController extends Controller
                 'phone' => ['nullable', 'string', 'max:20'],
             ]);
 
-            $user->update($validated);
+            $emailChanged = $validated['email'] !== $user->email;
+
+            $user->fill($validated);
+
+            if ($emailChanged) {
+                $user->email_verified_at = null;
+            }
+
+            $user->save();
+
+            $status = 'profile-updated';
+
+            if ($emailChanged) {
+                $user->sendEmailVerificationNotification();
+                $status = 'profile-updated-verification-sent';
+            }
 
             return redirect()->route('profile.edit')
-                ->with('status', 'profile-updated');
+                ->with('status', $status);
         } catch (\Illuminate\Validation\ValidationException $e) {
             throw $e;
         } catch (\Exception $e) {

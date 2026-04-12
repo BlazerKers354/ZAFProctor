@@ -1474,16 +1474,17 @@
         }
 
         // Auto activate and show correct form if there are register errors
-        @if(old('_register'))
+        const oldRegisterType = "{{ old('_register', '') }}";
+        if (oldRegisterType) {
             container.classList.add("active");
-            @if(old('_register') === 'student')
-                roleSelection.style.display = 'none';
+            roleSelection.style.display = 'none';
+
+            if (oldRegisterType === 'student') {
                 studentForm.style.display = 'flex';
-            @elseif(old('_register') === 'teacher')
-                roleSelection.style.display = 'none';
+            } else if (oldRegisterType === 'teacher') {
                 teacherForm.style.display = 'flex';
-            @endif
-        @endif
+            }
+        }
 
         // Forgot Password Functions
         const loginForm = document.getElementById('login-form');
