@@ -3,6 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="ZAFProctor adalah platform CBT dengan AI proctoring untuk ujian online yang aman, terpantau, dan terukur.">
+    <meta name="theme-color" content="#020617">
     <title>ZAFProctor - Sistem Ujian Online dengan Pengawasan Kamera</title>
     <!-- Bootstrap 5.3.2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
@@ -529,7 +531,7 @@
     </div>
 
     <!-- Navigation -->
-    <nav class="landing-nav" id="navbar">
+    <nav class="landing-nav" id="navbar" aria-label="Navigasi utama">
         <div class="container">
             <div class="d-flex justify-content-between align-items-center" style="height: 4rem;">
                 <a href="{{ route('home') }}" class="d-flex align-items-center gap-2 text-white">
@@ -1414,8 +1416,7 @@
                 <p class="text-sm text-slate-600 mb-2 mb-md-0">
                     &copy; {{ date('Y') }} ZAFProctor. All rights reserved.
                 </p>
-                <p class="text-sm text-slate-700 mb-0">
-                </p>
+                <p class="text-sm text-slate-700 mb-0">Versi platform stabil untuk penggunaan harian sekolah.</p>
             </div>
         </div>
     </footer>
@@ -1429,14 +1430,16 @@
     <!-- Navbar scroll effect -->
     <script>
         const isMobileViewport = () => window.matchMedia('(max-width: 767.98px)').matches;
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
         // Initialize AOS
         AOS.init({
-            duration: isMobileViewport() ? 620 : 800,
+            duration: isMobileViewport() ? 450 : 650,
             easing: 'ease-out-cubic',
             once: false,
             offset: isMobileViewport() ? 35 : 50,
-            mirror: true
+            mirror: true,
+            disable: prefersReducedMotion
         });
 
         const navbar = document.getElementById('navbar');
@@ -1444,7 +1447,6 @@
         const parallaxOrbs = document.querySelectorAll('[data-parallax]');
         const revealTargets = document.querySelectorAll('.reveal-both');
         const staggerGroups = document.querySelectorAll('.stagger-group');
-        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
         let lastScrollY = window.pageYOffset;
         let currentScrollDirection = 'down';
@@ -1559,7 +1561,7 @@
                 e.preventDefault();
                 const target = document.querySelector(this.getAttribute('href'));
                 if (target) {
-                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    target.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'start' });
                 }
             });
         });
