@@ -13,6 +13,7 @@ use App\Services\ExamService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -87,7 +88,7 @@ class ExamController extends Controller
         ];
 
         if ($isScheduled) {
-            $rules['start_time'] = ['required', 'date'];
+            $rules['start_time'] = ['required', 'date', 'after_or_equal:now'];
             $rules['end_time'] = ['required', 'date', 'after:start_time'];
         } else {
             $rules['start_time'] = ['nullable', 'date'];
@@ -278,10 +279,18 @@ class ExamController extends Controller
     {
         $this->authorize('delete', $exam);
 
-        $exam->delete();
+        try {
+            DB::transaction(function () use ($exam) {
+                $exam->delete();
+            });
 
-        return redirect()->route('teacher.exams.index')
-            ->with('success', 'Ujian berhasil dihapus.');
+            return redirect()->route('teacher.exams.index')
+                ->with('success', 'Ujian berhasil dihapus.');
+        } catch (\Exception $e) {
+            Log::error('Failed to delete exam: ' . $e->getMessage(), ['exam_id' => $exam->id]);
+            
+            return back()->with('error', 'Gagal menghapus ujian. Silakan coba lagi.');
+        }
     }
 
     /**

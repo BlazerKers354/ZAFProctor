@@ -9,6 +9,7 @@ use App\Models\ExamAttempt;
 use App\Models\Question;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ExamService
 {
@@ -139,19 +140,29 @@ class ExamService
             throw new \Exception('Soal tidak valid untuk ujian ini.');
         }
         
-        $answer = Answer::updateOrCreate(
-            [
+        try {
+            $answer = DB::transaction(function () use ($attempt, $questionId, $optionId, $essayAnswer) {
+                return Answer::updateOrCreate(
+                    [
+                        'attempt_id' => $attempt->id,
+                        'question_id' => $questionId,
+                    ],
+                    [
+                        'selected_option_id' => $optionId,
+                        'essay_answer' => $essayAnswer,
+                        'answered_at' => now(),
+                    ]
+                );
+            });
+
+            return $answer;
+        } catch (\Exception $e) {
+            Log::error('Failed to save answer: ' . $e->getMessage(), [
                 'attempt_id' => $attempt->id,
                 'question_id' => $questionId,
-            ],
-            [
-                'selected_option_id' => $optionId,
-                'essay_answer' => $essayAnswer,
-                'answered_at' => now(),
-            ]
-        );
-
-        return $answer;
+            ]);
+            throw new \Exception('Gagal menyimpan jawaban. Silakan coba lagi.');
+        }
     }
 
     /**

@@ -10,6 +10,7 @@ use App\Services\ExamService;
 use App\Services\ProctoringService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 class MonitorController extends Controller
@@ -28,23 +29,36 @@ class MonitorController extends Controller
 
         $exam->load(['course', 'questions']);
 
-        $attempts = ExamAttempt::where('exam_id', $exam->id)
+        $attemptsQuery = ExamAttempt::where('exam_id', $exam->id);
+        
+        $activeAttempts = (clone $attemptsQuery)
+            ->where('status', ExamAttempt::STATUS_IN_PROGRESS)
+            ->with(['user', 'latestSnapshot'])
+            ->withCount('answers')
+            ->latest('started_at')
+            ->get();
+        
+        $submittedCount = (clone $attemptsQuery)
+            ->whereIn('status', [ExamAttempt::STATUS_SUBMITTED, ExamAttempt::STATUS_GRADED])
+            ->count();
+        
+        $totalViolations = (clone $attemptsQuery)->sum('violation_count');
+        $notStartedCount = (clone $attemptsQuery)
+            ->where('status', ExamAttempt::STATUS_NOT_STARTED)
+            ->count();
+
+        // Paginated list for display
+        $attempts = (clone $attemptsQuery)
             ->with(['user', 'latestSnapshot', 'proctoringLogs' => function ($query) {
                 $query->latest()->take(5);
             }])
-            ->get();
+            ->latest('started_at')
+            ->paginate(20);
 
-        // Active attempts (in progress)
-        $activeAttempts = $attempts->where('status', ExamAttempt::STATUS_IN_PROGRESS);
-        
-        // Submitted count
-        $submittedCount = $attempts->whereIn('status', [ExamAttempt::STATUS_SUBMITTED, ExamAttempt::STATUS_GRADED])->count();
-        
-        // Total violations
-        $totalViolations = $attempts->sum('violation_count');
-        
         // Recent violations
-        $recentViolations = \App\Models\ProctoringLog::whereIn('attempt_id', $attempts->pluck('id'))
+        $recentViolations = \App\Models\ProctoringLog::whereHas('attempt', function ($query) use ($exam) {
+                $query->where('exam_id', $exam->id);
+            })
             ->with('attempt.user')
             ->latest()
             ->take(10)
@@ -53,9 +67,9 @@ class MonitorController extends Controller
         $statistics = $this->examService->getExamStatistics($exam);
 
         $statusCounts = [
-            'not_started' => $attempts->where('status', ExamAttempt::STATUS_NOT_STARTED)->count(),
-            'in_progress' => $attempts->where('status', ExamAttempt::STATUS_IN_PROGRESS)->count(),
-            'submitted' => $attempts->whereIn('status', [ExamAttempt::STATUS_SUBMITTED, ExamAttempt::STATUS_GRADED])->count(),
+            'not_started' => $notStartedCount,
+            'in_progress' => $activeAttempts->count(),
+            'submitted' => $submittedCount,
         ];
 
         return view('teacher.monitor.index', compact(
@@ -175,7 +189,7 @@ class MonitorController extends Controller
 
         $this->proctoringService->markAsReviewed(
             $validated['log_ids'],
-            auth()->id(),
+            Auth::id(),
             $validated['notes'] ?? null
         );
 

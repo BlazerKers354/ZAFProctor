@@ -105,10 +105,10 @@ class QuestionController extends Controller
             $question = Question::create([
                 'exam_id' => $exam->id,
                 'type' => $validated['question_type'],
-                'question' => $validated['question'],
+                'question' => strip_tags($validated['question']),
                 'question_image' => $imagePath,
                 'points' => $validated['points'],
-                'explanation' => $validated['explanation'] ?? null,
+                'explanation' => isset($validated['explanation']) ? strip_tags($validated['explanation']) : null,
                 'order' => $exam->questions()->max('order') + 1,
             ]);
 
@@ -120,7 +120,7 @@ class QuestionController extends Controller
                     QuestionOption::create([
                         'question_id' => $question->id,
                         'option_label' => $labels[$index] ?? chr(65 + $index),
-                        'option_text' => $option['text'],
+                        'option_text' => strip_tags($option['text']),
                         'is_correct' => $index == $validated['correct_option'],
                         'order' => $index,
                     ]);
@@ -226,10 +226,10 @@ class QuestionController extends Controller
             }
 
             $question->update([
-                'question' => $validated['question'],
+                'question' => strip_tags($validated['question']),
                 'question_image' => $imagePath,
                 'points' => $validated['points'],
-                'explanation' => $validated['explanation'] ?? null,
+                'explanation' => isset($validated['explanation']) ? strip_tags($validated['explanation']) : null,
             ]);
 
             // Update options for multiple choice
@@ -242,7 +242,7 @@ class QuestionController extends Controller
                     QuestionOption::create([
                         'question_id' => $question->id,
                         'option_label' => $labels[$index] ?? chr(65 + $index),
-                        'option_text' => $option['text'],
+                        'option_text' => strip_tags($option['text']),
                         'is_correct' => $index == $validated['correct_option'],
                         'order' => $index,
                     ]);

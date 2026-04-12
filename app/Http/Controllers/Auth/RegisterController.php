@@ -26,7 +26,7 @@ class RegisterController extends Controller
             'student_id' => ['nullable', 'string', 'max:50', 'unique:users,student_id'],
             'class_id' => ['nullable', 'exists:classes,id'],
             'phone' => ['nullable', 'string', 'max:20'],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'password' => ['required', 'confirmed', Rules\Password::min(8)->letters()->mixedCase()->numbers()->symbols()],
         ], [], [
             'name' => 'Nama',
             'email' => 'Email',
@@ -73,7 +73,7 @@ class RegisterController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'phone' => ['nullable', 'string', 'max:20'],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'password' => ['required', 'confirmed', Rules\Password::min(8)->letters()->mixedCase()->numbers()->symbols()],
         ]);
 
         $teacherRole = Role::where('name', Role::TEACHER)->first();

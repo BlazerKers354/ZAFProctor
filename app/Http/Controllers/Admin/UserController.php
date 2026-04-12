@@ -7,9 +7,11 @@ use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 
@@ -72,13 +74,16 @@ class UserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         try {
+            // Only allow assigning teacher and student roles (prevent creating new admins)
+            $allowedRoleIds = Role::whereIn('name', [Role::TEACHER, Role::STUDENT])->pluck('id')->toArray();
+
             $validated = $request->validate([
                 'name' => ['required', 'string', 'max:255'],
                 'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
                 'student_id' => ['nullable', 'string', 'max:50', 'unique:users'],
                 'phone' => ['nullable', 'string', 'max:20'],
-                'role_id' => ['required', 'exists:roles,id'],
-                'password' => ['required', 'confirmed', Rules\Password::defaults()],
+                'role_id' => ['required', 'exists:roles,id', Rule::in($allowedRoleIds)],
+                'password' => ['required', 'confirmed', Rules\Password::min(8)->letters()->mixedCase()->numbers()->symbols()],
                 'is_active' => ['boolean'],
             ]);
 
@@ -133,13 +138,16 @@ class UserController extends Controller
     public function update(Request $request, User $user): RedirectResponse
     {
         try {
+            // Only allow assigning teacher and student roles (prevent privilege escalation)
+            $allowedRoleIds = Role::whereIn('name', [Role::TEACHER, Role::STUDENT])->pluck('id')->toArray();
+
             $rules = [
                 'name' => ['required', 'string', 'max:255'],
                 'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
                 'student_id' => ['nullable', 'string', 'max:50', 'unique:users,student_id,' . $user->id],
                 'phone' => ['nullable', 'string', 'max:20'],
-                'role_id' => ['required', 'exists:roles,id'],
-                'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
+                'role_id' => ['required', 'exists:roles,id', Rule::in($allowedRoleIds)],
+                'password' => ['nullable', 'confirmed', Rules\Password::min(8)->letters()->mixedCase()->numbers()->symbols()],
                 'is_active' => ['boolean'],
             ];
 
@@ -186,7 +194,7 @@ class UserController extends Controller
     public function destroy(User $user): RedirectResponse
     {
         try {
-            if ($user->id === auth()->id()) {
+            if ($user->id === Auth::id()) {
                 return back()->with('error', 'Tidak dapat menghapus akun sendiri.');
             }
 
@@ -207,7 +215,7 @@ class UserController extends Controller
     public function toggleStatus(User $user): RedirectResponse
     {
         try {
-            if ($user->id === auth()->id()) {
+            if ($user->id === Auth::id()) {
                 return back()->with('error', 'Tidak dapat menonaktifkan akun sendiri.');
             }
 

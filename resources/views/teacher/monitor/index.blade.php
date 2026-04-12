@@ -260,7 +260,7 @@
         });
     }
 
-    let previousViolationCount = {{ $totalViolations ?? 0 }};
+    let previousViolationCount = Number('{{ $totalViolations ?? 0 }}');
 
     async function refreshData() {
         try {

@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Auth\LoginController;
@@ -27,7 +28,7 @@ use App\Http\Controllers\GuideController;
 
 // Public Routes
 Route::get('/', function () {
-    if (auth()->check()) {
+    if (Auth::check()) {
         return redirect()->route('dashboard');
     }
     return view('landing');
@@ -58,9 +59,9 @@ Route::middleware('guest')->group(function () {
     Route::get('forgot-password', function() {
         return redirect()->route('login');
     })->name('password.request');
-    Route::post('forgot-password', [ForgotPasswordController::class, 'store'])->name('password.email');
+    Route::post('forgot-password', [ForgotPasswordController::class, 'store'])->middleware('throttle:5,1')->name('password.email');
     Route::get('reset-password/{token}', [ForgotPasswordController::class, 'reset'])->name('password.reset');
-    Route::post('reset-password', [ForgotPasswordController::class, 'update'])->name('password.update.reset');
+    Route::post('reset-password', [ForgotPasswordController::class, 'update'])->middleware('throttle:5,1')->name('password.update.reset');
 });
 
 // Email Verification Routes (harus diluar auth middleware agar URL bisa digenerate)

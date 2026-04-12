@@ -59,25 +59,31 @@ class Exam extends Model
             if ($exam->isForceDeleting()) {
                 return; // Let DB cascade handle hard deletes
             }
-            // Soft delete: manually clean up related records
+            // Soft delete children — they now all support SoftDeletes
             $exam->questions()->each(function ($question) {
-                $question->options()->delete();
-                $question->answers()->delete();
-                $question->delete();
+                $question->options()->delete(); // QuestionOption has no SoftDeletes (disposable)
+                $question->answers()->delete(); // Soft delete answers tied to this question
+                $question->delete();            // Soft delete question
             });
             $exam->attempts()->each(function ($attempt) {
-                $attempt->answers()->delete();
-                $attempt->proctoringLogs()->delete();
-                $attempt->delete();
+                $attempt->answers()->delete();        // Soft delete answers
+                $attempt->proctoringLogs()->delete();  // Hard delete logs (disposable)
+                $attempt->delete();                    // Soft delete attempt
             });
-            $exam->settings()->delete();
+            // Keep settings so restored exams retain their original configuration.
         });
 
         // Restore cascaded records when exam is restored
         static::restoring(function ($exam) {
-            // Note: Cascaded records cannot be automatically restored
-            // since child models don't use SoftDeletes.
-            // Consider using SoftDeletes on Question/ExamAttempt if restore is needed.
+            // Cascade restore children that were soft-deleted with the exam
+            $exam->questions()->onlyTrashed()->each(function ($question) {
+                $question->restore();
+                $question->answers()->onlyTrashed()->restore();
+            });
+            $exam->attempts()->onlyTrashed()->each(function ($attempt) {
+                $attempt->restore();
+                $attempt->answers()->onlyTrashed()->restore();
+            });
         });
     }
 
