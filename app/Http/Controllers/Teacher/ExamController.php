@@ -110,9 +110,17 @@ class ExamController extends Controller
             }
         }
 
+        $requestedStatus = $validated['status'] ?? Exam::STATUS_DRAFT;
+        $finalStatus = $requestedStatus === Exam::STATUS_PUBLISHED
+            ? Exam::STATUS_DRAFT
+            : $requestedStatus;
+
         $exam = null;
+        $maxViolationsInput = $request->filled('max_tab_switches')
+            ? (int) $request->input('max_tab_switches')
+            : 5;
         
-        DB::transaction(function () use ($validated, $request, &$exam, $isScheduled) {
+        DB::transaction(function () use ($validated, $request, &$exam, $isScheduled, $maxViolationsInput, $finalStatus) {
             // Create exam
             $exam = Exam::create([
                 'course_id' => $validated['course_id'],
@@ -122,7 +130,7 @@ class ExamController extends Controller
                 'start_time' => $isScheduled ? $validated['start_time'] : null,
                 'end_time' => $isScheduled ? $validated['end_time'] : null,
                 'duration' => $validated['duration'],
-                'status' => $validated['status'] ?? 'draft',
+                'status' => $finalStatus,
                 'created_by' => auth()->id(),
                 'access_token' => $validated['access_token'] ?? strtoupper(Str::random(8)),
             ]);
@@ -134,7 +142,8 @@ class ExamController extends Controller
                 'webcam_enabled' => $request->boolean('webcam_enabled', true),
                 'browser_lock_enabled' => $request->boolean('browser_lock_enabled', true),
                 'tab_switch_detection' => $request->boolean('tab_switch_detection', true),
-                'max_tab_switches' => $request->input('max_tab_switches', 5),
+                'max_tab_switches' => $maxViolationsInput,
+                'auto_submit_threshold' => $maxViolationsInput,
                 'block_keyboard_shortcuts' => $request->boolean('block_keyboard_shortcuts', true),
                 
                 // Display settings
@@ -152,8 +161,14 @@ class ExamController extends Controller
             ]);
         });
 
-        return redirect()->route('teacher.questions.index', $exam)
+        $redirect = redirect()->route('teacher.questions.index', $exam)
             ->with('success', 'Ujian berhasil dibuat. Silakan tambahkan soal.');
+
+        if ($requestedStatus === Exam::STATUS_PUBLISHED) {
+            $redirect->with('warning', 'Ujian otomatis disimpan sebagai draft. Tambahkan minimal 1 soal sebelum dipublikasikan.');
+        }
+
+        return $redirect;
     }
 
     /**
@@ -228,7 +243,18 @@ class ExamController extends Controller
             }
         }
 
-        DB::transaction(function () use ($validated, $request, $exam, $isScheduled) {
+        $requestedStatus = $validated['status'];
+        if ($requestedStatus === Exam::STATUS_PUBLISHED && !$exam->questions()->exists()) {
+            return back()->withErrors([
+                'status' => 'Ujian tidak dapat dipublikasikan karena belum memiliki soal. Tambahkan minimal 1 soal terlebih dahulu.',
+            ])->withInput();
+        }
+
+        $maxViolationsInput = $request->filled('max_tab_switches')
+            ? (int) $request->input('max_tab_switches')
+            : 5;
+
+        DB::transaction(function () use ($validated, $request, $exam, $isScheduled, $maxViolationsInput, $requestedStatus) {
             // Update exam basic info
             $exam->update([
                 'course_id' => $validated['course_id'],
@@ -238,7 +264,7 @@ class ExamController extends Controller
                 'start_time' => $isScheduled ? $validated['start_time'] : null,
                 'end_time' => $isScheduled ? $validated['end_time'] : null,
                 'duration' => $validated['duration'],
-                'status' => $validated['status'],
+                'status' => $requestedStatus,
             ]);
 
             // Update or create exam settings
@@ -249,7 +275,8 @@ class ExamController extends Controller
                     'webcam_enabled' => $request->boolean('webcam_enabled'),
                     'browser_lock_enabled' => $request->boolean('browser_lock_enabled'),
                     'tab_switch_detection' => $request->boolean('tab_switch_detection'),
-                    'max_tab_switches' => $request->input('max_tab_switches', 5),
+                    'max_tab_switches' => $maxViolationsInput,
+                    'auto_submit_threshold' => $maxViolationsInput,
                     'block_keyboard_shortcuts' => $request->boolean('block_keyboard_shortcuts'),
                     
                     // Display settings
@@ -538,13 +565,17 @@ class ExamController extends Controller
             'browser_lock_enabled' => ['boolean'],
             'tab_switch_detection' => ['boolean'],
             'block_keyboard_shortcuts' => ['boolean'],
-            'warning_threshold' => ['integer', 'min:1', 'max:10'],
-            'auto_submit_threshold' => ['integer', 'min:1', 'max:20'],
+            'auto_submit_threshold' => ['integer', 'min:0', 'max:20'],
         ]);
 
         // Convert checkboxes to boolean
         foreach (['webcam_enabled', 'browser_lock_enabled', 'tab_switch_detection', 'block_keyboard_shortcuts'] as $field) {
             $validated[$field] = $request->boolean($field);
+        }
+
+        // Keep both legacy and new threshold fields synchronized.
+        if (array_key_exists('auto_submit_threshold', $validated)) {
+            $validated['max_tab_switches'] = $validated['auto_submit_threshold'];
         }
 
         $exam->settings()->updateOrCreate(

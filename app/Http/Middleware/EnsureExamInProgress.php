@@ -42,6 +42,22 @@ class EnsureExamInProgress
 
         // Check if attempt is in progress
         if (!$attempt->isInProgress()) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Ujian sudah selesai atau belum dimulai.',
+                    'attempt_submitted' => $attempt->isSubmitted(),
+                    'redirect' => $attempt->isSubmitted()
+                        ? route('student.exams.result', $attempt->id)
+                        : route('student.exams.index'),
+                ], 409);
+            }
+
+            if ($attempt->isSubmitted()) {
+                return redirect()->route('student.exams.result', $attempt->id)
+                    ->with('info', 'Ujian sudah dikumpulkan. Berikut halaman hasil ujian Anda.');
+            }
+
             return redirect()->route('student.exams.index')
                 ->with('error', 'Ujian sudah selesai atau belum dimulai.');
         }
@@ -53,6 +69,16 @@ class EnsureExamInProgress
                 $examService = app(\App\Services\ExamService::class);
                 $examService->submitExam($attempt, true);
 
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Waktu ujian telah habis. Jawaban Anda telah dikumpulkan secara otomatis.',
+                        'attempt_submitted' => true,
+                        'should_submit' => true,
+                        'redirect' => route('student.exams.result', $attempt->id),
+                    ], 409);
+                }
+
                 return redirect()->route('student.exams.result', $attempt->id)
                     ->with('info', 'Waktu ujian telah habis. Jawaban Anda telah dikumpulkan secara otomatis.');
             } catch (\Exception $e) {
@@ -61,9 +87,59 @@ class EnsureExamInProgress
                     'user_id' => $attempt->user_id,
                 ]);
 
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Waktu ujian telah habis. Jawaban Anda sedang diproses.',
+                        'attempt_submitted' => true,
+                        'should_submit' => true,
+                        'redirect' => route('student.exams.result', $attempt->id),
+                    ], 409);
+                }
+
                 // Still redirect to result page even if auto-submit failed
                 return redirect()->route('student.exams.result', $attempt->id)
                     ->with('warning', 'Waktu ujian telah habis. Jawaban Anda sedang diproses.');
+            }
+        }
+
+        // Check if violations exceeded the limit (server-side enforcement)
+        if ($attempt->hasExceededViolations()) {
+            try {
+                $examService = app(\App\Services\ExamService::class);
+                $examService->submitExam($attempt, true);
+
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Ujian telah dikumpulkan secara otomatis karena jumlah pelanggaran mencapai batas yang ditentukan.',
+                        'attempt_submitted' => true,
+                        'should_submit' => true,
+                        'redirect' => route('student.exams.result', $attempt->id),
+                    ], 409);
+                }
+
+                return redirect()->route('student.exams.result', $attempt->id)
+                    ->with('info', 'Ujian telah dikumpulkan secara otomatis karena jumlah pelanggaran mencapai batas yang ditentukan.');
+            } catch (\Exception $e) {
+                Log::error('Auto-submit on violation limit failed: ' . $e->getMessage(), [
+                    'attempt_id' => $attempt->id,
+                    'user_id' => $attempt->user_id,
+                    'violation_count' => $attempt->violation_count,
+                ]);
+
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Ujian telah dikumpulkan karena pelanggaran mencapai batas.',
+                        'attempt_submitted' => true,
+                        'should_submit' => true,
+                        'redirect' => route('student.exams.result', $attempt->id),
+                    ], 409);
+                }
+
+                return redirect()->route('student.exams.result', $attempt->id)
+                    ->with('warning', 'Ujian telah dikumpulkan karena pelanggaran mencapai batas.');
             }
         }
 

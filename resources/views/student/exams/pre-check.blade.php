@@ -593,12 +593,19 @@
                     <div class="mb-3">
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="agree" name="agree" disabled>
+                            @php
+                                $maxViolations = $exam->settings?->auto_submit_threshold ?? $exam->settings?->max_tab_switches ?? 5;
+                            @endphp
                             <label class="form-check-label" for="agree" style="font-size: 12.5px; color: #64748b;">
                                 Saya memahami bahwa ujian ini
                                 @if($exam->settings?->webcam_enabled) dipantau dengan kamera @endif
                                 @if($exam->settings?->detect_copy_paste || $exam->settings?->detect_tab_switch || $exam->settings?->detect_right_click) dan aktivitas saya akan diawasi @endif
                                 — pelanggaran akan dicatat
-                                @if($exam->settings?->auto_submit_threshold) (maks {{ $exam->settings->auto_submit_threshold }} pelanggaran) @endif
+                                @if($maxViolations > 0)
+                                    (maks {{ $maxViolations }} pelanggaran)
+                                @else
+                                    (tanpa batas pelanggaran)
+                                @endif
                             </label>
                         </div>
                     </div>
@@ -616,6 +623,14 @@
 <!-- Face-api.js -->
 <script src="{{ asset('assets/proctoring/face-api.min.js') }}"></script>
 
+<div id="precheck-state"
+    class="d-none"
+    data-has-token-error="{{ $errors->has('access_token') ? '1' : '0' }}"
+    data-has-any-error="{{ $errors->any() ? '1' : '0' }}"
+    data-previous-pre-check-passed="{{ session('pre_check_passed') ? '1' : '0' }}"
+    data-previous-camera-verified="{{ session('camera_verified') ? '1' : '0' }}"
+    data-previous-face-verified="{{ session('face_verified') ? '1' : '0' }}"></div>
+
 <script>
 // Configuration
 const CONFIG = {
@@ -626,11 +641,12 @@ const CONFIG = {
 };
 
 // Check if returning from token error
-const hasTokenError = {{ $errors->has('access_token') ? 'true' : 'false' }};
-const hasAnyError = {{ $errors->any() ? 'true' : 'false' }};
-const previousPreCheckPassed = {{ session('pre_check_passed') ? 'true' : 'false' }};
-const previousCameraVerified = {{ session('camera_verified') ? 'true' : 'false' }};
-const previousFaceVerified = {{ session('face_verified') ? 'true' : 'false' }};
+const precheckStateEl = document.getElementById('precheck-state');
+const hasTokenError = precheckStateEl?.dataset.hasTokenError === '1';
+const hasAnyError = precheckStateEl?.dataset.hasAnyError === '1';
+const previousPreCheckPassed = precheckStateEl?.dataset.previousPreCheckPassed === '1';
+const previousCameraVerified = precheckStateEl?.dataset.previousCameraVerified === '1';
+const previousFaceVerified = precheckStateEl?.dataset.previousFaceVerified === '1';
 
 // State
 let stream = null;

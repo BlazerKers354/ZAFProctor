@@ -23,6 +23,121 @@ class Question extends Model
     ];
 
     /**
+     * Normalize image path before saving.
+     */
+    public function setQuestionImageAttribute($value): void
+    {
+        if (!is_string($value)) {
+            $this->attributes['question_image'] = $value;
+            return;
+        }
+
+        $value = trim($value);
+        if ($value === '') {
+            $this->attributes['question_image'] = null;
+            return;
+        }
+
+        if (preg_match('/^https?:\/\//i', $value)) {
+            $normalizedFromUrl = $this->extractNormalizedStoragePathFromUrl($value);
+            if ($normalizedFromUrl !== null) {
+                $this->attributes['question_image'] = $normalizedFromUrl;
+                return;
+            }
+
+            $this->attributes['question_image'] = $value;
+            return;
+        }
+
+        $this->attributes['question_image'] = $this->normalizeLocalStoragePath($value);
+    }
+
+    /**
+     * Get normalized local path for image operations.
+     */
+    public function getNormalizedQuestionImagePathAttribute(): ?string
+    {
+        $path = $this->attributes['question_image'] ?? null;
+        if (!is_string($path) || trim($path) === '') {
+            return null;
+        }
+
+        $path = trim($path);
+        if (preg_match('/^https?:\/\//i', $path)) {
+            return $this->extractNormalizedStoragePathFromUrl($path);
+        }
+
+        return $this->normalizeLocalStoragePath($path);
+    }
+
+    /**
+     * Get question image URL for display.
+     */
+    public function getQuestionImageUrlAttribute(): ?string
+    {
+        $path = $this->attributes['question_image'] ?? null;
+        if (!is_string($path) || trim($path) === '') {
+            return null;
+        }
+
+        $path = trim($path);
+        if (preg_match('/^https?:\/\//i', $path)) {
+            $normalizedFromUrl = $this->extractNormalizedStoragePathFromUrl($path);
+            if ($normalizedFromUrl !== null) {
+                return asset('storage/' . ltrim($normalizedFromUrl, '/'));
+            }
+
+            return $path;
+        }
+
+        $normalizedPath = $this->normalized_question_image_path;
+        if (!$normalizedPath) {
+            return null;
+        }
+
+        return asset('storage/' . ltrim($normalizedPath, '/'));
+    }
+
+    /**
+     * Normalize local storage path to database-friendly format.
+     */
+    protected function normalizeLocalStoragePath(string $path): ?string
+    {
+        $path = trim($path);
+        if ($path === '') {
+            return null;
+        }
+
+        $path = ltrim($path, '/');
+        if (str_starts_with($path, 'storage/')) {
+            $path = substr($path, 8);
+        }
+        if (str_starts_with($path, 'public/')) {
+            $path = substr($path, 7);
+        }
+
+        return $path ?: null;
+    }
+
+    /**
+     * Extract normalized local storage path from an absolute URL.
+     */
+    protected function extractNormalizedStoragePathFromUrl(string $url): ?string
+    {
+        $pathFromUrl = parse_url($url, PHP_URL_PATH);
+        if (!is_string($pathFromUrl) || trim($pathFromUrl) === '') {
+            return null;
+        }
+
+        $trimmedPath = ltrim(trim($pathFromUrl), '/');
+        if (!str_starts_with($trimmedPath, 'storage/') && !str_starts_with($trimmedPath, 'public/')) {
+            return null;
+        }
+
+        return $this->normalizeLocalStoragePath($trimmedPath);
+    }
+
+    /**
      * Question type constants
      */
     public const TYPE_MULTIPLE_CHOICE = 'multiple_choice';

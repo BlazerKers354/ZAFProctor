@@ -25,8 +25,7 @@ return new class extends Migration
             $table->boolean('detect_right_click')->default(true);
             $table->boolean('block_keyboard_shortcuts')->default(true);
             
-            // Warning thresholds
-            $table->integer('warning_threshold')->default(3); // Peringatan setelah x pelanggaran
+            // Violation threshold
             $table->integer('auto_submit_threshold')->default(5); // Auto-submit setelah x pelanggaran
             
             $table->timestamps();

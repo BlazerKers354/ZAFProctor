@@ -140,44 +140,13 @@
                     @endif
                     
                     <!-- Proctoring Requirements -->
-                    @php
-                        $settings = $exam->settings;
-                        $hasProctoringRules = $settings?->webcam_enabled || $settings?->browser_lock_enabled || $settings?->detect_tab_switch || $settings?->detect_copy_paste || $settings?->detect_right_click || $settings?->block_keyboard_shortcuts || $settings?->detect_fullscreen_exit;
-                    @endphp
-                    @if($hasProctoringRules)
+                    @if($hasProctoringRequirements)
                     <div class="alert alert-warning mb-4">
                         <h6 class="f-w-600 mb-2"><i class="ph ph-warning me-1"></i>Persyaratan Proctoring</h6>
                         <ul class="mb-0 ps-3 f-14">
-                            @if($settings->webcam_enabled)
-                                <li>Akses kamera diperlukan untuk pengawasan</li>
-                                @if($settings->detect_face)
-                                    <li>Wajah harus terdeteksi selama ujian berlangsung</li>
-                                @endif
-                                @if($settings->detect_multiple_faces)
-                                    <li>Hanya 1 wajah yang diperbolehkan di depan kamera</li>
-                                @endif
-                            @endif
-                            @if($settings->browser_lock_enabled)
-                                <li>Mode fullscreen akan diaktifkan</li>
-                            @endif
-                            @if($settings->detect_fullscreen_exit)
-                                <li>Keluar dari fullscreen akan dicatat sebagai pelanggaran</li>
-                            @endif
-                            @if($settings->detect_tab_switch)
-                                <li>Dilarang membuka tab/aplikasi lain (maks {{ $settings->max_tab_switches ?? 5 }} pelanggaran)</li>
-                            @endif
-                            @if($settings->detect_copy_paste)
-                                <li>Dilarang melakukan copy/paste</li>
-                            @endif
-                            @if($settings->detect_right_click)
-                                <li>Klik kanan tidak diizinkan</li>
-                            @endif
-                            @if($settings->block_keyboard_shortcuts)
-                                <li>Shortcut keyboard tertentu diblokir</li>
-                            @endif
-                            @if($settings->auto_submit_threshold)
-                                <li>Maksimal {{ $settings->auto_submit_threshold }} pelanggaran sebelum ujian otomatis disubmit</li>
-                            @endif
+                            @foreach($proctoringRequirements as $requirement)
+                                <li>{{ $requirement }}</li>
+                            @endforeach
                         </ul>
                     </div>
                     @endif

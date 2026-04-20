@@ -133,6 +133,14 @@ class ExamService
         if (!$attempt->isInProgress()) {
             throw new \Exception('Ujian sudah selesai. Tidak dapat menyimpan jawaban.');
         }
+
+        // Block saving if violations exceeded the limit
+        $attempt->refresh();
+        if ($attempt->hasExceededViolations()) {
+            // Auto-submit the exam
+            $this->submitExam($attempt, true);
+            throw new \Exception('Ujian telah dikumpulkan otomatis karena pelanggaran mencapai batas.');
+        }
         
         // Validate question belongs to this exam
         $questionExists = $attempt->exam->questions()->where('id', $questionId)->exists();
@@ -242,9 +250,14 @@ class ExamService
     public function shouldAutoSubmitDueToViolations(ExamAttempt $attempt): bool
     {
         $settings = $attempt->exam->settings;
-        $maxViolations = $settings?->auto_submit_threshold 
-            ?? $settings?->max_tab_switches 
+        $maxViolations = $settings?->auto_submit_threshold
+            ?? $settings?->max_tab_switches
             ?? 5;
+
+        $maxViolations = is_numeric($maxViolations) ? (int) $maxViolations : 5;
+        if ($maxViolations <= 0) {
+            return false;
+        }
 
         return $attempt->violation_count >= $maxViolations;
     }

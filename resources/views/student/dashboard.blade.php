@@ -154,6 +154,11 @@
                                         <span class="badge bg-light text-dark">
                                             <i class="ph ph-question me-1"></i>{{ $exam->questions_count ?? $exam->questions()->count() }} Soal
                                         </span>
+                                        @if(($exam->attempt_count ?? 0) > 0)
+                                            <span class="badge badge-soft-primary">
+                                                <i class="ph ph-repeat me-1"></i>{{ $exam->attempt_count }}/{{ ($exam->max_attempts ?? 1) === 0 ? '∞' : $exam->max_attempts }} percobaan
+                                            </span>
+                                        @endif
                                         @if($exam->start_time)
                                             <span class="badge badge-soft-success">
                                                 <span class="pulse-dot me-1"></span>Aktif hingga {{ $exam->end_time?->format('H:i') }}
@@ -161,9 +166,19 @@
                                         @endif
                                     </div>
                                 </div>
-                                <a href="{{ route('student.exams.show', $exam) }}" class="btn btn-primary">
-                                    <i class="ph ph-play me-1"></i>Mulai
-                                </a>
+                                @if(!empty($exam->in_progress_attempt))
+                                    <a href="{{ route('student.exams.take', $exam->in_progress_attempt) }}" class="btn btn-warning">
+                                        <i class="ph ph-play me-1"></i>Lanjutkan
+                                    </a>
+                                @elseif(($exam->attempt_count ?? 0) > 0 && ($exam->can_retry ?? false))
+                                    <a href="{{ route('student.exams.show', $exam) }}" class="btn btn-primary">
+                                        <i class="ph ph-arrow-clockwise me-1"></i>Coba Lagi
+                                    </a>
+                                @else
+                                    <a href="{{ route('student.exams.show', $exam) }}" class="btn btn-primary">
+                                        <i class="ph ph-play me-1"></i>Mulai
+                                    </a>
+                                @endif
                             </div>
                         </div>
                     @empty

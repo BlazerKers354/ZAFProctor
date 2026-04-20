@@ -873,11 +873,12 @@
                                             {!! nl2br(e($question->question)) !!}
                                         </div>
                                         
-                                        @if($question->question_image)
+                                        @if($question->question_image_url)
                                             <div class="mb-4">
-                                                <img src="{{ asset('storage/' . $question->question_image) }}" 
+                                                <img src="{{ $question->question_image_url }}" 
                                                      alt="Gambar Soal" 
-                                                     class="img-fluid rounded-3" style="max-width: 500px;">
+                                                     class="img-fluid rounded-3" style="max-width: 500px;"
+                                                     onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'alert alert-warning py-2 px-3 small\'><i class=\'ph ph-image-broken me-1\'></i>Gambar tidak dapat dimuat</div>';">
                                             </div>
                                         @endif
                                         
@@ -1004,7 +1005,17 @@
                 <div class="alert alert-warning mb-3">
                     <div class="d-flex align-items-start gap-2">
                         <i class="ph ph-info fs-5 mt-1"></i>
-                        <p class="mb-0" style="font-size: 0.9rem;">Keluar dari mode fullscreen akan dicatat sebagai pelanggaran. Maksimal {{ $attempt->exam->settings?->auto_submit_threshold ?? 5 }} pelanggaran sebelum ujian otomatis disubmit.</p>
+                        @php
+                            $maxViolations = $attempt->exam->settings?->auto_submit_threshold ?? $attempt->exam->settings?->max_tab_switches ?? 5;
+                        @endphp
+                        <p class="mb-0" style="font-size: 0.9rem;">
+                            Keluar dari mode fullscreen akan dicatat sebagai pelanggaran.
+                            @if($maxViolations > 0)
+                                Maksimal {{ $maxViolations }} pelanggaran sebelum ujian otomatis disubmit.
+                            @else
+                                Pelanggaran tetap dicatat tanpa auto-submit berdasarkan jumlah pelanggaran.
+                            @endif
+                        </p>
                     </div>
                 </div>
             </div>
@@ -1088,7 +1099,6 @@
             detectFullscreenExit: {{ $attempt->exam->settings?->detect_fullscreen_exit ? 'true' : 'false' }},
             snapshotInterval: {{ $attempt->exam->settings?->snapshot_interval ?? 30 }},
             maxViolations: {{ $attempt->exam->settings?->auto_submit_threshold ?? $attempt->exam->settings?->max_tab_switches ?? 5 }},
-            warningThreshold: {{ $attempt->exam->settings?->warning_threshold ?? 3 }},
             csrfToken: '{{ csrf_token() }}',
             modelPath: '{{ asset("assets/proctoring/models") }}',
             endpoints: Object.freeze({
@@ -1103,6 +1113,7 @@
         // State
         let currentQuestion = 0;
         let violationCount = {{ $attempt->violation_count }};
+        let maxViolations = Number.isFinite(Number(config.maxViolations)) ? Number(config.maxViolations) : 0;
         let answeredQuestions = new Set([
             @foreach($answeredQuestions as $questionId => $answer)
                 {{ $questionId }},
@@ -1122,6 +1133,7 @@
         let isSyncing = false;
         let isSubmitting = false;
         let lastMultipleFacesTime = 0;
+        let lastViolationSnapshotTime = 0;
 
         // Flag / Bookmark
         let flaggedQuestions = new Set();
@@ -1591,6 +1603,43 @@
                 banner.style.background = '';
             }, 3000);
         }
+
+        async function parseJsonResponse(response) {
+            const contentType = response.headers.get('content-type') || '';
+            if (!contentType.includes('application/json')) {
+                return null;
+            }
+
+            try {
+                return await response.json();
+            } catch (e) {
+                return null;
+            }
+        }
+
+        async function handleSaveAnswerResponse(response) {
+            if (response.redirected) {
+                window.location.href = response.url;
+                return { success: false, terminal: true };
+            }
+
+            const data = await parseJsonResponse(response);
+
+            if (!response.ok) {
+                if (data && data.attempt_submitted && data.redirect) {
+                    window.location.href = data.redirect;
+                    return { success: false, terminal: true };
+                }
+
+                return {
+                    success: false,
+                    terminal: Boolean(data && data.attempt_submitted),
+                    message: (data && data.message) || 'Gagal menyimpan jawaban. Silakan coba lagi.',
+                };
+            }
+
+            return { success: true, data };
+        }
         
         async function syncOfflineAnswers() {
             if (isSyncing || offlineQueue.length === 0) return;
@@ -1605,12 +1654,19 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
+                            'Accept': 'application/json',
                             'X-CSRF-TOKEN': config.csrfToken,
                         },
                         body: JSON.stringify(data.payload)
                     });
-                    
-                    if (response.ok) {
+
+                    const result = await handleSaveAnswerResponse(response);
+                    if (result.terminal) {
+                        isSyncing = false;
+                        return;
+                    }
+
+                    if (result.success) {
                         // Remove from queue and localStorage
                         offlineQueue.shift();
                         localStorage.removeItem(`answer_${config.attemptId}_${data.payload.question_id}`);
@@ -1808,18 +1864,27 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Accept': 'application/json',
                         'X-CSRF-TOKEN': config.csrfToken,
                     },
                     body: JSON.stringify(payload)
                 });
-                
-                if (response.ok) {
+
+                const result = await handleSaveAnswerResponse(response);
+                if (result.terminal) {
+                    return;
+                }
+
+                if (result.success) {
                     // Remove from localStorage after successful save
                     localStorage.removeItem(`answer_${config.attemptId}_${questionId}`);
                     answeredQuestions.add(questionId);
                     updateNavButton(questionIndex, true);
                     updateProgressBar();
+                    return;
                 }
+
+                throw new Error(result.message || 'Gagal menyimpan jawaban ke server.');
             } catch (err) {
                 if (window._origConsoleError) window._origConsoleError('Error saving answer:', err);
                 // Queue for later retry
@@ -1861,18 +1926,27 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Accept': 'application/json',
                         'X-CSRF-TOKEN': config.csrfToken,
                     },
                     body: JSON.stringify(payload)
                 });
-                
-                if (response.ok) {
+
+                const result = await handleSaveAnswerResponse(response);
+                if (result.terminal) {
+                    return;
+                }
+
+                if (result.success) {
                     localStorage.removeItem(`answer_${config.attemptId}_${questionId}`);
                     answeredQuestions.add(questionId);
                     updateNavButton(questionIndex, true);
                     updateProgressBar();
                     showEssayStatus(questionId, 'saved');
+                    return;
                 }
+
+                throw new Error(result.message || 'Gagal menyimpan jawaban essay ke server.');
             } catch (err) {
                 if (window._origConsoleError) window._origConsoleError('Error saving essay:', err);
                 offlineQueue.push(queueData);
@@ -1943,19 +2017,30 @@
                         const payload = { question_id: questionId, essay_answer: answer };
                         
                         // Save to server
-                        const savePromise = fetch(config.endpoints.saveAnswer, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': config.csrfToken,
-                            },
-                            body: JSON.stringify(payload)
-                        }).then(response => {
-                            if (response.ok) {
+                        const savePromise = (async () => {
+                            const response = await fetch(config.endpoints.saveAnswer, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/json',
+                                    'X-CSRF-TOKEN': config.csrfToken,
+                                },
+                                body: JSON.stringify(payload)
+                            });
+
+                            const result = await handleSaveAnswerResponse(response);
+                            if (result.terminal) {
+                                return;
+                            }
+
+                            if (result.success) {
                                 answeredQuestions.add(questionId);
                                 localStorage.removeItem(`answer_${config.attemptId}_${questionId}`);
+                                return;
                             }
-                        }).catch(err => {
+
+                            throw new Error(result.message || 'Gagal menyimpan jawaban sebelum submit.');
+                        })().catch(err => {
                             if (window._origConsoleError) window._origConsoleError('Error saving essay on submit:', err);
                             // Save to localStorage as backup
                             localStorage.setItem(`answer_${config.attemptId}_${questionId}`, JSON.stringify({ payload, questionIndex: index }));
@@ -2292,7 +2377,6 @@
                     noFaceWarningTimeout = null;
                     modal.classList.remove('show');
                     logViolation('no_face_detected', 'Face not detected');
-                    captureAndUploadSnapshot('no_face_detected', 'No face detected');
                 }
             }, 1000);
         }
@@ -2316,9 +2400,9 @@
             snapshotInterval = setInterval(() => captureAndUploadSnapshot(), config.snapshotInterval * 1000);
         }
 
-        function captureAndUploadSnapshot(violationType = null, description = null) {
+        async function captureAndUploadSnapshot(violationType = null, description = null) {
             const video = document.getElementById('camera-preview');
-            if (!video || !stream) return;
+            if (!video || !stream) return null;
 
             const canvas = document.createElement('canvas');
             canvas.width = video.videoWidth || 320;
@@ -2333,13 +2417,33 @@
             ctx.font = '11px Arial';
             ctx.fillText(new Date().toLocaleString('id-ID'), 4, canvas.height - 6);
             
-            fetch(config.endpoints.uploadSnapshot, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': config.csrfToken },
-                body: JSON.stringify({ snapshot: canvas.toDataURL('image/jpeg', 0.7), violation_type: violationType, description: description })
-            }).then(r => r.json()).then(data => {
-                if (data.should_auto_submit) autoSubmit();
-            }).catch(e => { if (window._origConsoleError) window._origConsoleError('[Snapshot]', e); });
+            try {
+                const response = await fetch(config.endpoints.uploadSnapshot, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': config.csrfToken },
+                    body: JSON.stringify({ snapshot: canvas.toDataURL('image/jpeg', 0.7), violation_type: violationType, description: description })
+                });
+
+                if (response.redirected) {
+                    window.location.href = response.url;
+                    return null;
+                }
+
+                const data = await response.json().catch(() => null);
+                if (!response.ok) {
+                    if (data && data.attempt_submitted && data.redirect) {
+                        window.location.href = data.redirect;
+                        return null;
+                    }
+
+                    throw new Error((data && data.message) || 'Gagal upload snapshot.');
+                }
+
+                return data;
+            } catch (e) {
+                if (window._origConsoleError) window._origConsoleError('[Snapshot]', e);
+                return null;
+            }
         }
 
         function startHeartbeat() {
@@ -2347,7 +2451,7 @@
                 try {
                     const response = await fetch(config.endpoints.heartbeat, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': config.csrfToken },
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': config.csrfToken },
                         body: JSON.stringify({ 
                             camera_enabled: stream !== null,
                             face_detected: !!(stream && faceDetectionInterval)
@@ -2359,27 +2463,79 @@
             }, 30000);
         }
 
+        function canCaptureViolationSnapshot() {
+            const now = Date.now();
+
+            // Keep violation snapshots sparse so heavy uploads do not saturate the endpoint.
+            if (now - lastViolationSnapshotTime < 5000) {
+                return false;
+            }
+
+            lastViolationSnapshotTime = now;
+            return true;
+        }
+
+        async function persistViolation(type, description) {
+            try {
+                const response = await fetch(config.endpoints.logViolation, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': config.csrfToken,
+                    },
+                    body: JSON.stringify({ violation_type: type, description: description })
+                });
+
+                if (response.redirected) {
+                    window.location.href = response.url;
+                    return null;
+                }
+
+                const data = await response.json().catch(() => null);
+                if (!response.ok) {
+                    if (data && data.attempt_submitted && data.redirect) {
+                        window.location.href = data.redirect;
+                        return null;
+                    }
+
+                    throw new Error((data && data.message) || 'Gagal mencatat pelanggaran.');
+                }
+
+                return data;
+            } catch (e) {
+                if (window._origConsoleError) window._origConsoleError('[Violation]', e);
+                return null;
+            }
+        }
+
         async function logViolation(type, description) {
             if (isSubmitting) return;
             
             violationCount++;
             updateViolationCounter();
             showWarning(description);
-            
-            // If webcam stream is active, send snapshot with violation (single log entry)
-            // Otherwise, send violation only (no snapshot)
-            if (stream) {
-                captureAndUploadSnapshot(type, description);
-            } else {
-                try {
-                    const response = await fetch(config.endpoints.logViolation, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': config.csrfToken },
-                        body: JSON.stringify({ violation_type: type, description: description })
-                    });
-                    const data = await response.json();
-                    if (data.should_auto_submit) autoSubmit();
-                } catch (e) { if (window._origConsoleError) window._origConsoleError('[Violation]', e); }
+
+            // Violation count must always come from the dedicated log endpoint.
+            const data = await persistViolation(type, description);
+
+            // Snapshot is best-effort evidence only and must not affect violation counting.
+            if (stream && canCaptureViolationSnapshot()) {
+                captureAndUploadSnapshot(null, `Violation snapshot: ${type}`);
+            }
+
+            // Sync counters from server to avoid client/server drift.
+            if (data && Number.isFinite(Number(data.violation_count))) {
+                violationCount = Number(data.violation_count);
+                updateViolationCounter();
+            }
+            if (data && Number.isFinite(Number(data.max_violations))) {
+                maxViolations = Number(data.max_violations);
+            }
+
+            if (data && data.should_auto_submit) {
+                autoSubmit();
+                return;
             }
         }
 
@@ -2393,7 +2549,10 @@
         function showWarning(message) {
             const banner = document.getElementById('warning-banner');
             const msg = document.getElementById('warning-message');
-            msg.textContent = `⚠️ ${message} (${violationCount}/${config.maxViolations})`;
+            const violationLabel = maxViolations > 0
+                ? `${violationCount}/${maxViolations}`
+                : `${violationCount}/tanpa batas`;
+            msg.textContent = `⚠️ ${message} (${violationLabel})`;
             banner.classList.add('show');
             setTimeout(() => banner.classList.remove('show'), 5000);
         }
@@ -2501,12 +2660,34 @@
             try {
                 const response = await fetch(config.endpoints.autoSubmit, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': config.csrfToken }
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': config.csrfToken,
+                    }
                 });
-                const data = await response.json();
-                if (data.redirect) window.location.href = data.redirect;
+
+                if (response.redirected) {
+                    window.location.href = response.url;
+                    return;
+                }
+
+                const data = await response.json().catch(() => null);
+                if (data && data.redirect) {
+                    window.location.href = data.redirect;
+                    return;
+                }
+
+                if (!response.ok) {
+                    throw new Error((data && data.message) || 'Auto-submit gagal.');
+                }
+
+                // Defensive fallback if server responds without redirect.
+                window.location.href = '{{ route("student.exams.result", $attempt) }}';
             } catch (e) {
                 if (window._origConsoleError) window._origConsoleError('[AutoSubmit]', e);
+
+                // Last fallback: try normal submit flow.
                 document.getElementById('submit-form').submit();
             }
         }

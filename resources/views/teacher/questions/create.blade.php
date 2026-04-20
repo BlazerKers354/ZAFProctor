@@ -144,7 +144,7 @@
                              @dragleave.prevent="dragover = false"
                              @drop.prevent="handleDrop($event)"
                              :class="{'border-primary bg-light-primary': dragover}">
-                            <template x-if="!imagePreview">
+                            <div x-show="!imagePreview">
                                 <div>
                                     <i class="ph ph-image mb-2" style="font-size: 48px; color: #ccc;"></i>
                                     <div class="mb-2">
@@ -156,8 +156,8 @@
                                     </div>
                                     <small class="text-muted">PNG, JPG, GIF maksimal 2MB<br>Drag & drop atau klik untuk upload</small>
                                 </div>
-                            </template>
-                            <template x-if="imagePreview">
+                            </div>
+                            <div x-show="imagePreview">
                                 <div>
                                     <img :src="imagePreview" class="img-fluid rounded mb-2" style="max-height: 200px;">
                                     <div>
@@ -166,7 +166,7 @@
                                         </button>
                                     </div>
                                 </div>
-                            </template>
+                            </div>
                         </div>
                         @error('question_image')
                             <div class="text-danger small mt-2">{{ $message }}</div>
@@ -399,17 +399,49 @@
 @endpush
 
 @push('scripts')
+<script id="question-create-initial-data" type="application/json">
+{!! json_encode([
+    'questionType' => old('question_type', 'multiple_choice'),
+    'correctOption' => (int) old('correct_option', 0),
+    'options' => [
+        ['text' => old('options.0.text', '')],
+        ['text' => old('options.1.text', '')],
+        ['text' => old('options.2.text', '')],
+        ['text' => old('options.3.text', '')],
+    ],
+], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!}
+</script>
 <script>
     function questionForm() {
+        const initialDataEl = document.getElementById('question-create-initial-data');
+        let initialData = {};
+        if (initialDataEl) {
+            try {
+                initialData = JSON.parse(initialDataEl.textContent || '{}');
+            } catch (error) {
+                initialData = {};
+            }
+        }
+
+        const parsedCorrectOption = Number(initialData.correctOption);
+        const normalizedCorrectOption = Number.isInteger(parsedCorrectOption) ? parsedCorrectOption : 0;
+        const normalizedOptions = Array.isArray(initialData.options) && initialData.options.length > 0
+            ? initialData.options.map((option) => ({
+                text: option && typeof option.text === 'string' ? option.text : ''
+            }))
+            : [
+                { text: '' },
+                { text: '' },
+                { text: '' },
+                { text: '' }
+            ];
+
         return {
-            questionType: '{{ old('question_type', 'multiple_choice') }}',
-            correctOption: {{ old('correct_option', 0) }},
-            options: [
-                { text: '{{ old('options.0.text', '') }}' },
-                { text: '{{ old('options.1.text', '') }}' },
-                { text: '{{ old('options.2.text', '') }}' },
-                { text: '{{ old('options.3.text', '') }}' }
-            ],
+            questionType: typeof initialData.questionType === 'string'
+                ? initialData.questionType
+                : 'multiple_choice',
+            correctOption: normalizedCorrectOption,
+            options: normalizedOptions,
             imagePreview: null,
             dragover: false,
             showOptionError: false,

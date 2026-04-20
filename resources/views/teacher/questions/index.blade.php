@@ -32,6 +32,12 @@
         </div>
     </div>
 
+    <div id="question-page-data"
+         data-reorder-url="{{ route('teacher.questions.reorder', $exam) }}"
+         data-delete-multiple-url="{{ route('teacher.questions.delete-multiple', $exam) }}"
+         data-duplicate-url="{{ route('teacher.questions.duplicate', $exam) }}"
+         data-question-base-url="{{ route('teacher.questions.index', $exam) }}"></div>
+
     <!-- Import Errors (specific to import feature) -->
     @if(session('import_errors'))
         <div class="alert alert-warning alert-dismissible fade show" role="alert">
@@ -145,6 +151,9 @@
                         <i class="ph ph-list-numbers text-primary me-2"></i>Daftar Soal
                     </h5>
                     <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="saveQuestionOrder()" id="saveOrderBtn" style="display: none;">
+                            <i class="ph ph-floppy-disk me-1"></i>Simpan Urutan
+                        </button>
                         <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteSelected()" id="deleteSelectedBtn" style="display: none;">
                             <i class="ph ph-trash me-1"></i>Hapus Terpilih (<span id="selectedCount">0</span>)
                         </button>
@@ -163,7 +172,7 @@
                                 <th width="50" class="text-center">
                                     <input type="checkbox" id="selectAllHeader" onchange="toggleSelectAll(this)">
                                 </th>
-                                <th width="60" class="text-center">No</th>
+                                <th width="180" class="text-center">No / Urutan</th>
                                 <th>Pertanyaan</th>
                                 <th width="150">Tipe</th>
                                 <th width="100" class="text-center">Poin</th>
@@ -172,16 +181,39 @@
                         </thead>
                         <tbody>
                             @foreach($questions as $index => $question)
-                                <tr id="question-row-{{ $question->id }}" class="question-row">
+                                <tr id="question-row-{{ $question->id }}" class="question-row" data-question-id="{{ $question->id }}">
                                     <td class="text-center">
                                         <input type="checkbox" class="question-checkbox" value="{{ $question->id }}" onchange="updateSelectedCount()">
                                     </td>
                                     <td class="text-center">
-                                        <span class="badge bg-light-primary">{{ $index + 1 }}</span>
+                                        <div class="d-flex align-items-center justify-content-center gap-1">
+                                            <button type="button" class="btn btn-sm btn-light-secondary px-2 py-1" onclick="moveRow(this, -1)" title="Naikkan nomor">
+                                                <i class="ph ph-caret-up"></i>
+                                            </button>
+                                            <input type="number"
+                                                   class="form-control form-control-sm text-center question-order-input"
+                                                   style="width: 68px;"
+                                                   min="1"
+                                                   max="{{ $questions->count() }}"
+                                                   value="{{ $index + 1 }}"
+                                                   onchange="moveRowTo(this)">
+                                            <button type="button" class="btn btn-sm btn-light-secondary px-2 py-1" onclick="moveRow(this, 1)" title="Turunkan nomor">
+                                                <i class="ph ph-caret-down"></i>
+                                            </button>
+                                        </div>
                                     </td>
                                     <td>
                                         <div class="question-preview">
                                             <p class="mb-1 fw-semibold">{{ Str::limit($question->question, 100) }}</p>
+                                            @if($question->question_image_url)
+                                                <div class="mt-2">
+                                                    <img src="{{ $question->question_image_url }}"
+                                                         alt="Gambar Soal"
+                                                         class="img-fluid rounded border"
+                                                         style="max-height: 72px;"
+                                                         onerror="this.style.display='none';">
+                                                </div>
+                                            @endif
                                             @if($question->type === 'multiple_choice' && $question->options->isNotEmpty())
                                                 <div class="options-preview mt-2">
                                                     <div class="row g-2">
@@ -214,16 +246,16 @@
                                     </td>
                                     <td class="text-center">
                                         <div class="btn-group btn-group-sm">
-                                            <button type="button" class="btn btn-sm btn-light-info" onclick="viewQuestion({{ $question->id }})" title="Lihat Detail">
+                                            <button type="button" class="btn btn-sm btn-light-info" onclick="viewQuestion(this)" data-question-id="{{ $question->id }}" title="Lihat Detail">
                                                 <i class="ph ph-eye"></i>
                                             </button>
                                             <a href="{{ route('teacher.questions.edit', [$exam, $question]) }}" class="btn btn-sm btn-light-warning" title="Edit">
                                                 <i class="ph ph-pencil-simple"></i>
                                             </a>
-                                            <button type="button" class="btn btn-sm btn-light-primary" onclick="duplicateQuestion({{ $question->id }})" title="Duplikat">
+                                            <button type="button" class="btn btn-sm btn-light-primary" onclick="duplicateQuestion(this)" data-question-id="{{ $question->id }}" title="Duplikat">
                                                 <i class="ph ph-copy"></i>
                                             </button>
-                                            <button type="button" class="btn btn-sm btn-light-danger" onclick="deleteQuestion({{ $question->id }})" title="Hapus">
+                                            <button type="button" class="btn btn-sm btn-light-danger" onclick="deleteQuestion(this)" data-question-id="{{ $question->id }}" title="Hapus">
                                                 <i class="ph ph-trash"></i>
                                             </button>
                                         </div>
@@ -357,6 +389,127 @@
 
 @push('scripts')
 <script>
+    let orderChanged = false;
+    const questionPageData = document.getElementById('question-page-data');
+    const reorderUrl = questionPageData?.dataset.reorderUrl || '';
+    const deleteMultipleUrl = questionPageData?.dataset.deleteMultipleUrl || '';
+    const duplicateUrl = questionPageData?.dataset.duplicateUrl || '';
+    const questionBaseUrl = questionPageData?.dataset.questionBaseUrl || '';
+
+    function getQuestionId(source) {
+        const raw = source && typeof source === 'object'
+            ? source.dataset?.questionId
+            : source;
+        const id = Number(raw);
+
+        return Number.isInteger(id) && id > 0 ? id : null;
+    }
+
+    function markOrderChanged() {
+        orderChanged = true;
+        const saveBtn = document.getElementById('saveOrderBtn');
+        if (saveBtn) {
+            saveBtn.style.display = 'inline-flex';
+        }
+    }
+
+    function renumberRows() {
+        const rows = Array.from(document.querySelectorAll('tr.question-row'));
+        rows.forEach((row, index) => {
+            const input = row.querySelector('.question-order-input');
+            if (input) {
+                input.value = index + 1;
+                input.max = rows.length;
+            }
+        });
+    }
+
+    function moveRow(button, direction) {
+        const row = button.closest('tr.question-row');
+        if (!row) return;
+
+        const sibling = direction < 0 ? row.previousElementSibling : row.nextElementSibling;
+        if (!sibling) return;
+
+        const tbody = row.parentNode;
+        if (direction < 0) {
+            tbody.insertBefore(row, sibling);
+        } else {
+            tbody.insertBefore(sibling, row);
+        }
+
+        renumberRows();
+        markOrderChanged();
+    }
+
+    function moveRowTo(input) {
+        const row = input.closest('tr.question-row');
+        if (!row) return;
+
+        const tbody = row.parentNode;
+        const rows = Array.from(tbody.querySelectorAll('tr.question-row'));
+        const currentIndex = rows.indexOf(row);
+
+        let targetPosition = parseInt(input.value, 10);
+        if (Number.isNaN(targetPosition)) {
+            input.value = currentIndex + 1;
+            return;
+        }
+
+        targetPosition = Math.max(1, Math.min(targetPosition, rows.length));
+        const targetIndex = targetPosition - 1;
+
+        if (targetIndex === currentIndex) {
+            input.value = currentIndex + 1;
+            return;
+        }
+
+        tbody.removeChild(row);
+        const updatedRows = Array.from(tbody.querySelectorAll('tr.question-row'));
+        if (targetIndex >= updatedRows.length) {
+            tbody.appendChild(row);
+        } else {
+            tbody.insertBefore(row, updatedRows[targetIndex]);
+        }
+
+        renumberRows();
+        markOrderChanged();
+    }
+
+    async function saveQuestionOrder() {
+        const rows = Array.from(document.querySelectorAll('tr.question-row'));
+        const questions = rows
+            .map((row) => Number(row.dataset.questionId))
+            .filter((id) => Number.isInteger(id) && id > 0);
+
+        if (questions.length === 0) {
+            return;
+        }
+
+        try {
+            const response = await fetch(reorderUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({ questions })
+            });
+
+            const data = await response.json();
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || 'Gagal menyimpan urutan soal.');
+            }
+
+            orderChanged = false;
+            document.getElementById('saveOrderBtn').style.display = 'none';
+            alert(data.message || 'Urutan soal berhasil diperbarui.');
+        } catch (error) {
+            alert(error.message || 'Terjadi kesalahan saat menyimpan urutan soal.');
+        }
+    }
+
     function toggleSelectAll(source) {
         const isChecked = source.checked;
         document.querySelectorAll('.question-checkbox').forEach(checkbox => {
@@ -384,7 +537,7 @@
         if (selected.length === 0) return;
         
         if (confirm(`Apakah Anda yakin ingin menghapus ${selected.length} soal yang dipilih?`)) {
-            fetch('{{ route('teacher.questions.delete-multiple', $exam) }}', {
+            fetch(deleteMultipleUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -403,9 +556,14 @@
         }
     }
 
-    function deleteQuestion(id) {
+    function deleteQuestion(source) {
+        const id = getQuestionId(source);
+        if (!id) {
+            return;
+        }
+
         if (confirm('Apakah Anda yakin ingin menghapus soal ini?')) {
-            fetch(`{{ route('teacher.questions.index', $exam) }}/${id}`, {
+            fetch(`${questionBaseUrl}/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -424,9 +582,14 @@
         }
     }
 
-    function duplicateQuestion(id) {
+    function duplicateQuestion(source) {
+        const id = getQuestionId(source);
+        if (!id) {
+            return;
+        }
+
         if (confirm('Duplikat soal ini?')) {
-            fetch('{{ route('teacher.questions.duplicate', $exam) }}', {
+            fetch(duplicateUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -445,11 +608,16 @@
         }
     }
 
-    function viewQuestion(id) {
+    function viewQuestion(source) {
+        const id = getQuestionId(source);
+        if (!id) {
+            return;
+        }
+
         const modal = new bootstrap.Modal(document.getElementById('questionDetailModal'));
         modal.show();
         
-        fetch(`{{ route('teacher.questions.index', $exam) }}/${id}/detail`)
+        fetch(`${questionBaseUrl}/${id}/detail`)
             .then(response => response.json())
             .then(data => {
                 let html = `
@@ -462,6 +630,14 @@
                         </div>
                         <h5 class="mb-3">${data.question}</h5>
                 `;
+
+                if (data.image_url) {
+                    html += `
+                        <div class="mb-3">
+                            <img src="${data.image_url}" alt="Gambar Soal" class="img-fluid rounded border" style="max-height: 280px;" onerror="this.style.display='none';">
+                        </div>
+                    `;
+                }
                 
                 if (data.type === 'multiple_choice' && data.options) {
                     html += '<div class="list-group mb-3">';

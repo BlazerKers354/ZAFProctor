@@ -261,10 +261,9 @@ Sistem mendeteksi dan mencatat berbagai jenis pelanggaran dengan tingkat severit
 | `browser_lock_enabled` | true | Mengunci browser (fullscreen + deteksi keluar fullscreen) |
 | `tab_switch_detection` | true | Mendeteksi perpindahan tab/window |
 | `block_keyboard_shortcuts` | true | Blokir copy/paste, klik kanan, keyboard shortcut terlarang |
-| `max_tab_switches` | 5 | Batas maksimal perpindahan tab |
+| `max_tab_switches` | 5 | Alias kompatibilitas (legacy), disinkronkan dengan `auto_submit_threshold` |
 | `snapshot_interval` | 30 | Interval snapshot dalam detik |
-| `warning_threshold` | 3 | Jumlah pelanggaran sebelum peringatan intensif |
-| `auto_submit_threshold` | 5 | Jumlah pelanggaran sebelum ujian auto-submit |
+| `auto_submit_threshold` | 5 | Parameter utama batas total pelanggaran sebelum ujian auto-submit |
 | `shuffle_questions` | false | Mengacak urutan soal |
 | `shuffle_options` | false | Mengacak urutan pilihan jawaban |
 | `show_score` | true | Menampilkan skor ke peserta |

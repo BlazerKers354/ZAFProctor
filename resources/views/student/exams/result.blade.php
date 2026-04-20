@@ -11,6 +11,19 @@
         </a>
     </div>
 
+    @if(session('info'))
+        <div class="alert alert-info alert-dismissible fade show mb-4" role="alert">
+            <i class="ph ph-info me-1"></i>{{ session('info') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+    @if(session('warning'))
+        <div class="alert alert-warning alert-dismissible fade show mb-4" role="alert">
+            <i class="ph ph-warning me-1"></i>{{ session('warning') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
     <div class="row justify-content-center">
         <div class="col-lg-10">
             <!-- Result Card -->
@@ -61,12 +74,54 @@
                             </div>
                         </div>
                         <div class="col-6 col-md-3">
+                            @php
+                                $isAutoSubmitted = (bool) $attempt->is_auto_submitted;
+                                $hasCurrentThreshold = $maxViolations !== null;
+                                $hasBoundedThreshold = $hasCurrentThreshold && $maxViolations > 0;
+                                $reachedCurrentThreshold = $hasBoundedThreshold && $attempt->violation_count >= $maxViolations;
+                                $autoSubmitBelowCurrentThreshold = $isAutoSubmitted && $hasBoundedThreshold && !$reachedCurrentThreshold;
+
+                                if ($maxViolations === null) {
+                                    $violationLabel = 'Pelanggaran';
+                                } elseif ($maxViolations > 0) {
+                                    if ($autoSubmitBelowCurrentThreshold) {
+                                        $violationLabel = 'Pelanggaran (' . $attempt->violation_count . '; batas saat ini ' . $maxViolations . ')';
+                                    } else {
+                                        $violationLabel = 'Pelanggaran (' . $attempt->violation_count . '/' . $maxViolations . ')';
+                                    }
+                                } else {
+                                    $violationLabel = 'Pelanggaran (Tanpa Batas)';
+                                }
+                            @endphp
                             <div class="bg-{{ $attempt->violation_count > 0 ? 'danger' : 'light' }} bg-opacity-10 rounded-3 p-3 text-center">
                                 <h4 class="mb-1 {{ $attempt->violation_count > 0 ? 'text-danger' : '' }}">{{ $attempt->violation_count }}</h4>
-                                <small class="text-muted">Pelanggaran</small>
+                                <small class="text-muted">{{ $violationLabel }}</small>
                             </div>
                         </div>
                     </div>
+
+                    @if($maxViolations !== null)
+                        <div class="alert {{ $reachedCurrentThreshold ? 'alert-danger' : ($autoSubmitBelowCurrentThreshold ? 'alert-warning' : 'alert-light') }} mb-4">
+                            <div class="f-14">
+                                @if($maxViolations > 0)
+                                    Batas pelanggaran ujian ini adalah <strong>{{ $maxViolations }}</strong>.
+                                    @if($reachedCurrentThreshold)
+                                        Attempt ini sudah <strong>mencapai batas</strong> pelanggaran.
+                                    @elseif($autoSubmitBelowCurrentThreshold)
+                                        Attempt ini tercatat <strong>auto-submit</strong>. Nilai batas saat ini lebih tinggi dari jumlah pelanggaran pada attempt ini, sehingga kemungkinan batas pelanggaran telah diperbarui setelah attempt selesai atau auto-submit terjadi karena kondisi lain (mis. waktu habis).
+                                    @else
+                                        Attempt ini belum mencapai batas pelanggaran.
+                                    @endif
+                                @else
+                                    Ujian ini mengaktifkan pencatatan pelanggaran <strong>tanpa auto-submit berdasarkan jumlah pelanggaran</strong>.
+
+                                    @if($isAutoSubmitted)
+                                        Attempt ini tetap bisa berstatus auto-submit jika dikumpulkan otomatis karena kondisi lain, misalnya waktu ujian habis.
+                                    @endif
+                                @endif
+                            </div>
+                        </div>
+                    @endif
                     
                     <div class="row g-3">
                         <div class="col-6">

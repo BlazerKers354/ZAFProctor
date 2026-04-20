@@ -117,7 +117,7 @@
                             </div>
                         </div>
 
-                        <div id="schedule-fields" style="display: {{ old('type', $exam->type) === 'scheduled' ? 'block' : 'none' }};">
+                        <div id="schedule-fields" style="display: none;">
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label for="start_time" class="form-label">Waktu Mulai</label>
@@ -218,7 +218,7 @@
                             <div class="col-md-6">
                                 <label for="max_tab_switches" class="form-label">Maks Tab Switch / Pelanggaran</label>
                                 <input type="number" name="max_tab_switches" id="max_tab_switches" 
-                                       value="{{ old('max_tab_switches', $exam->settings?->max_tab_switches ?? 5) }}" 
+                                       value="{{ old('max_tab_switches', $exam->settings?->auto_submit_threshold ?? $exam->settings?->max_tab_switches ?? 5) }}" 
                                        min="0" max="20"
                                        class="form-control">
                                 <small class="text-muted">0 = unlimited. Ujian auto-submit jika melebihi batas</small>
@@ -337,12 +337,10 @@
                         </div>
                         <small class="text-muted">Token yang harus dimasukkan peserta untuk memulai ujian</small>
                         <div class="mt-2">
-                            <form action="{{ route('teacher.exams.regenerate-token', $exam) }}" method="POST" class="d-inline">
-                                @csrf
-                                <button type="submit" class="btn btn-sm btn-outline-warning" onclick="return confirm('Token lama tidak akan bisa digunakan lagi. Lanjutkan?')">
-                                    <i class="ph ph-arrows-clockwise me-1"></i>Regenerate Token
-                                </button>
-                            </form>
+                            <button type="button" class="btn btn-sm btn-outline-warning"
+                                    onclick="if (confirm('Token lama tidak akan bisa digunakan lagi. Lanjutkan?')) document.getElementById('regenerate-token-form').submit();">
+                                <i class="ph ph-arrows-clockwise me-1"></i>Regenerate Token
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -355,11 +353,16 @@
                         </h5>
                     </div>
                     <div class="card-body">
+                        @php($canPublish = $exam->questions()->exists())
                         <div class="mb-3">
                             <label class="form-label">Status Ujian</label>
                             <select name="status" class="form-select">
                                 <option value="draft" {{ old('status', $exam->status) === 'draft' ? 'selected' : '' }}>Draft</option>
-                                <option value="published" {{ old('status', $exam->status) === 'published' ? 'selected' : '' }}>Dipublikasikan</option>
+                                <option value="published"
+                                        {{ old('status', $exam->status) === 'published' ? 'selected' : '' }}
+                                        {{ $canPublish ? '' : 'disabled' }}>
+                                    {{ $canPublish ? 'Dipublikasikan' : 'Dipublikasikan (minimal 1 soal)' }}
+                                </option>
                             </select>
                         </div>
                         
@@ -369,6 +372,14 @@
                                 <strong>Published:</strong> Peserta dapat melihat dan mengikuti ujian
                             </small>
                         </div>
+
+                        @unless($canPublish)
+                            <div class="alert alert-warning mt-3 mb-0">
+                                <small>
+                                    Ujian belum memiliki soal. Tambahkan minimal 1 soal sebelum mengubah status menjadi Dipublikasikan.
+                                </small>
+                            </div>
+                        @endunless
                     </div>
                 </div>
 
@@ -410,6 +421,10 @@
                 </div>
             </div>
         </div>
+    </form>
+
+    <form id="regenerate-token-form" action="{{ route('teacher.exams.regenerate-token', $exam) }}" method="POST" class="d-none">
+        @csrf
     </form>
 @endsection
 

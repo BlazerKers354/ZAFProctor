@@ -159,9 +159,11 @@ class ExamAttempt extends Model
     public function getMaxViolationsAttribute(): int
     {
         $settings = $this->exam->settings;
-        return $settings?->auto_submit_threshold 
-            ?? $settings?->max_tab_switches 
+        $maxViolations = $settings?->auto_submit_threshold
+            ?? $settings?->max_tab_switches
             ?? 5;
+
+        return is_numeric($maxViolations) ? (int) $maxViolations : 5;
     }
 
     /**
@@ -169,6 +171,10 @@ class ExamAttempt extends Model
      */
     public function hasExceededViolations(): bool
     {
+        if ($this->max_violations <= 0) {
+            return false;
+        }
+
         return $this->violation_count >= $this->max_violations;
     }
 

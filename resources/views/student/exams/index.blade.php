@@ -119,6 +119,20 @@
                                 </span>
                             </div>
 
+                            @if($exam->has_proctoring_requirements)
+                                <div class="rounded-3 p-3 mb-4" style="background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.25);">
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <i class="ph ph-shield-warning f-18" style="color: #b45309;"></i>
+                                        <span class="f-13 f-w-600" style="color: #92400e;">Persyaratan Proctoring</span>
+                                    </div>
+                                    <ul class="mb-0 ps-3">
+                                        @foreach($exam->proctoring_requirements as $requirement)
+                                            <li class="f-13 text-muted mb-1">{{ $requirement }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+
                             <!-- Action Button -->
                             @if($exam->user_attempt && $exam->user_attempt->isInProgress())
                                 <a href="{{ route('student.exams.take', $exam->user_attempt) }}" class="btn btn-warning w-100">

@@ -77,13 +77,19 @@
                                 <i class="ph ph-pencil-simple me-2"></i>Edit
                             </a>
                             @if($exam->status === 'draft')
-                                <form action="{{ route('teacher.exams.publish', $exam) }}" method="POST" class="d-inline">
-                                    @csrf
-                                    <button type="submit" class="btn btn-success" 
-                                            onclick="return confirm('Publikasikan ujian ini? Siswa akan dapat melihat ujian ini.')">
+                                @if($exam->questions->isNotEmpty())
+                                    <form action="{{ route('teacher.exams.publish', $exam) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        <button type="submit" class="btn btn-success" 
+                                                onclick="return confirm('Publikasikan ujian ini? Siswa akan dapat melihat ujian ini.')">
+                                            <i class="ph ph-paper-plane-tilt me-2"></i>Publikasikan
+                                        </button>
+                                    </form>
+                                @else
+                                    <button type="button" class="btn btn-secondary" disabled title="Tambahkan minimal 1 soal dulu">
                                         <i class="ph ph-paper-plane-tilt me-2"></i>Publikasikan
                                     </button>
-                                </form>
+                                @endif
                             @endif
                             <form action="{{ route('teacher.exams.duplicate', $exam) }}" method="POST" class="d-inline">
                                 @csrf
@@ -378,7 +384,7 @@
                         </div>
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="text-muted small">Max Tab Switch</span>
-                            <span class="badge bg-light-warning">{{ $exam->settings->max_tab_switches ?? 0 }}x</span>
+                            <span class="badge bg-light-warning">{{ $exam->settings->auto_submit_threshold ?? $exam->settings->max_tab_switches ?? 0 }}x</span>
                         </div>
                     </div>
                 </div>

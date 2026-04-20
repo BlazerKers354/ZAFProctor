@@ -136,15 +136,37 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        // Exams that student hasn't completed yet (only from enrolled courses)
+        // Active exams that the student can still work on (new, retry, or continue)
         $activeExams = Exam::active()
             ->whereIn('course_id', $enrolledCourseIds)
-            ->whereDoesntHave('attempts', function ($query) use ($user) {
-                $query->where('user_id', $user->id)
-                    ->whereIn('status', ['submitted', 'graded']);
+            ->with([
+                'course',
+                'settings',
+                'attempts' => function ($query) use ($user) {
+                    $query->where('user_id', $user->id)->latest('created_at');
+                },
+            ])
+            ->withCount('questions')
+            ->get()
+            ->map(function (Exam $exam) {
+                $attempts = $exam->attempts;
+                $inProgressAttempt = $attempts->first(fn ($attempt) => $attempt->isInProgress());
+                $submittedAttempts = $attempts->filter(fn ($attempt) => $attempt->isSubmitted());
+                $attemptCount = $submittedAttempts->count();
+
+                // 0 means unlimited attempts.
+                $maxAttempts = $exam->settings?->max_attempts ?? 1;
+                $canRetry = $maxAttempts === 0 || $attemptCount < $maxAttempts;
+
+                $exam->in_progress_attempt = $inProgressAttempt;
+                $exam->attempt_count = $attemptCount;
+                $exam->max_attempts = $maxAttempts;
+                $exam->can_retry = $canRetry;
+
+                return $exam;
             })
-            ->with('course')
-            ->get();
+            ->filter(fn (Exam $exam) => $exam->in_progress_attempt !== null || $exam->can_retry)
+            ->values();
 
         $recentResults = ExamAttempt::where('user_id', $user->id)
             ->whereHas('exam') // Only include attempts where exam still exists

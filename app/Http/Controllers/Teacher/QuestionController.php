@@ -210,17 +210,18 @@ class QuestionController extends Controller
         DB::transaction(function () use ($validated, $question, $request) {
             // Handle image upload/removal
             $imagePath = $question->question_image;
+            $normalizedImagePath = $question->normalized_question_image_path;
             
             if ($request->has('remove_image') && $request->remove_image) {
                 // Remove existing image
-                if ($imagePath) {
-                    Storage::disk('public')->delete($imagePath);
+                if ($normalizedImagePath) {
+                    Storage::disk('public')->delete($normalizedImagePath);
                 }
                 $imagePath = null;
             } elseif ($request->hasFile('question_image')) {
                 // Remove old image if exists
-                if ($imagePath) {
-                    Storage::disk('public')->delete($imagePath);
+                if ($normalizedImagePath) {
+                    Storage::disk('public')->delete($normalizedImagePath);
                 }
                 $imagePath = $request->file('question_image')->store('questions', 'public');
             }
@@ -265,7 +266,10 @@ class QuestionController extends Controller
             // Delete associated image if exists
             if ($question->question_image) {
                 try {
-                    Storage::disk('public')->delete($question->question_image);
+                    $normalizedImagePath = $question->normalized_question_image_path;
+                    if ($normalizedImagePath) {
+                        Storage::disk('public')->delete($normalizedImagePath);
+                    }
                 } catch (\Exception $e) {
                     \Illuminate\Support\Facades\Log::warning('Failed to delete question image: ' . $e->getMessage());
                 }
@@ -303,17 +307,46 @@ class QuestionController extends Controller
     /**
      * Reorder questions.
      */
-    public function reorder(Request $request, Exam $exam): RedirectResponse
+    public function reorder(Request $request, Exam $exam): RedirectResponse|JsonResponse
     {
         $this->authorize('manageQuestions', $exam);
 
         $validated = $request->validate([
-            'questions' => ['required', 'array'],
-            'questions.*' => ['integer', 'exists:questions,id'],
+            'questions' => ['required', 'array', 'min:1'],
+            'questions.*' => ['integer', 'distinct'],
         ]);
 
-        foreach ($validated['questions'] as $index => $questionId) {
-            Question::where('id', $questionId)->update(['order' => $index + 1]);
+        $incomingQuestionIds = array_values(array_map('intval', $validated['questions']));
+        $examQuestionIds = $exam->questions()->pluck('id')->map(fn ($id) => (int) $id)->values()->all();
+
+        $incomingSorted = $incomingQuestionIds;
+        sort($incomingSorted);
+
+        $examSorted = $examQuestionIds;
+        sort($examSorted);
+
+        if (count($incomingQuestionIds) !== count($examQuestionIds) || $incomingSorted !== $examSorted) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Daftar soal tidak valid untuk ujian ini.',
+                ], 422);
+            }
+
+            return back()->with('error', 'Urutan soal tidak valid untuk ujian ini.');
+        }
+
+        DB::transaction(function () use ($exam, $incomingQuestionIds) {
+            foreach ($incomingQuestionIds as $index => $questionId) {
+                $exam->questions()->where('id', $questionId)->update(['order' => $index + 1]);
+            }
+        });
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Urutan soal berhasil diperbarui.',
+            ]);
         }
 
         return back()->with('success', 'Urutan soal berhasil diperbarui.');
@@ -332,6 +365,7 @@ class QuestionController extends Controller
             'id' => $question->id,
             'type' => $question->type,
             'question' => $question->question,
+            'image_url' => $question->question_image_url,
             'points' => $question->points,
             'explanation' => $question->explanation,
             'options' => $question->options->map(function ($option) {
@@ -358,10 +392,28 @@ class QuestionController extends Controller
         $originalQuestion = Question::with('options')->findOrFail($validated['question_id']);
 
         DB::transaction(function () use ($originalQuestion, $exam) {
+            $duplicatedImagePath = $originalQuestion->question_image;
+            $originalImagePath = $originalQuestion->normalized_question_image_path;
+
+            if ($originalImagePath && Storage::disk('public')->exists($originalImagePath)) {
+                $extension = pathinfo($originalImagePath, PATHINFO_EXTENSION);
+                $copyFilename = 'questions/' . uniqid('question_copy_', true) . ($extension ? '.' . $extension : '');
+
+                try {
+                    Storage::disk('public')->copy($originalImagePath, $copyFilename);
+                    $duplicatedImagePath = $copyFilename;
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::warning('Failed to copy question image during duplicate: ' . $e->getMessage(), [
+                        'question_id' => $originalQuestion->id,
+                    ]);
+                }
+            }
+
             $newQuestion = Question::create([
                 'exam_id' => $exam->id,
                 'type' => $originalQuestion->type,
                 'question' => $originalQuestion->question . ' (Copy)',
+                'question_image' => $duplicatedImagePath,
                 'points' => $originalQuestion->points,
                 'explanation' => $originalQuestion->explanation,
                 'order' => $exam->questions()->max('order') + 1,

@@ -45,15 +45,16 @@ class ProctoringController extends Controller
 
         // Check if should auto-submit - use settings for threshold
         $settings = $attempt->exam->settings;
-        $maxViolations = $settings?->auto_submit_threshold ?? $settings?->max_tab_switches ?? 5;
-        $shouldAutoSubmit = $attempt->violation_count >= $maxViolations;
+        $maxViolations = $this->resolveMaxViolations($settings);
+        $freshAttempt = $attempt->fresh();
+        $shouldAutoSubmit = $maxViolations > 0 && $freshAttempt->violation_count >= $maxViolations;
 
         return response()->json([
             'success' => true,
             'log_id' => $log->id,
-            'violation_count' => $attempt->fresh()->violation_count,
+            'violation_count' => $freshAttempt->violation_count,
             'should_auto_submit' => $shouldAutoSubmit,
-            'warning_threshold' => $settings?->warning_threshold ?? 3,
+            'max_violations' => $maxViolations,
         ]);
     }
 
@@ -84,6 +85,10 @@ class ProctoringController extends Controller
             $validated['snapshot']
         );
 
+        // Resolve threshold once for consistent response payload.
+        $settings = $attempt->exam->settings;
+        $maxViolations = $this->resolveMaxViolations($settings);
+
         // If there's a violation, log it with the snapshot in a single operation
         $shouldAutoSubmit = false;
         if (!empty($validated['violation_type'])) {
@@ -101,15 +106,17 @@ class ProctoringController extends Controller
             }
 
             // Check if should auto-submit
-            $settings = $attempt->exam->settings;
-            $maxViolations = $settings?->auto_submit_threshold ?? $settings?->max_tab_switches ?? 5;
-            $shouldAutoSubmit = $attempt->fresh()->violation_count >= $maxViolations;
+            $shouldAutoSubmit = $maxViolations > 0 && $attempt->fresh()->violation_count >= $maxViolations;
         }
+
+        $freshAttempt = $attempt->fresh();
 
         return response()->json([
             'success' => true,
             'snapshot_stored' => (bool) $snapshotPath,
             'should_auto_submit' => $shouldAutoSubmit,
+            'violation_count' => $freshAttempt->violation_count,
+            'max_violations' => $maxViolations,
         ]);
     }
 
@@ -157,6 +164,7 @@ class ProctoringController extends Controller
 
         $exam = $attempt->exam;
         $settings = $exam->settings ?? (object) \App\Models\ExamSetting::getDefaults();
+        $maxViolations = $this->resolveMaxViolations($settings);
 
         return response()->json([
             'require_camera' => $settings->webcam_enabled ?? true,
@@ -169,10 +177,19 @@ class ProctoringController extends Controller
             'detect_copy_paste' => $settings->block_keyboard_shortcuts ?? true,
             'detect_right_click' => $settings->block_keyboard_shortcuts ?? true,
             'block_keyboard_shortcuts' => $settings->block_keyboard_shortcuts ?? true,
-            'warning_threshold' => $settings->warning_threshold ?? 3,
-            'auto_submit_threshold' => $settings->auto_submit_threshold ?? $settings->max_tab_switches ?? 5,
-            'max_violations' => $settings->auto_submit_threshold ?? $settings->max_tab_switches ?? 5,
+            'auto_submit_threshold' => $maxViolations,
+            'max_violations' => $maxViolations,
         ]);
+    }
+
+    /**
+     * Resolve max violations from settings (0 means unlimited).
+     */
+    protected function resolveMaxViolations($settings): int
+    {
+        $maxViolations = $settings?->auto_submit_threshold ?? $settings?->max_tab_switches ?? 5;
+
+        return is_numeric($maxViolations) ? (int) $maxViolations : 5;
     }
 
     /**

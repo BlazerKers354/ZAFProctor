@@ -30,7 +30,6 @@ class ExamSetting extends Model
         'grade_method',
         // Additional
         'passing_score',
-        'warning_threshold',
         'auto_submit_threshold',
     ];
 
@@ -46,7 +45,6 @@ class ExamSetting extends Model
         'show_score' => 'boolean',
         'max_attempts' => 'integer',
         'passing_score' => 'integer',
-        'warning_threshold' => 'integer',
         'auto_submit_threshold' => 'integer',
         'block_keyboard_shortcuts' => 'boolean',
     ];
@@ -117,7 +115,6 @@ class ExamSetting extends Model
             'grade_method' => 'highest',
             'passing_score' => 60,
             'block_keyboard_shortcuts' => true,
-            'warning_threshold' => 3,
             'auto_submit_threshold' => 5,
         ];
     }

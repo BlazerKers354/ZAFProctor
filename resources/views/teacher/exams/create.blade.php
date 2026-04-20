@@ -31,6 +31,7 @@
 
     <form action="{{ route('teacher.exams.store') }}" method="POST">
         @csrf
+        <input type="hidden" name="status" value="draft">
         
         <div class="row">
             <div class="col-lg-8">
@@ -117,7 +118,7 @@
                             </small>
                         </div>
 
-                        <div id="schedule-fields" style="display: {{ old('type', 'scheduled') === 'scheduled' ? 'block' : 'none' }};">
+                        <div id="schedule-fields" style="display: none;">
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label for="start_time" class="form-label">Waktu Mulai</label>
@@ -343,13 +344,11 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="d-grid gap-2">
-                            <button type="submit" name="status" value="published"
-                                    class="btn btn-primary btn-lg">
-                                <i class="ph ph-paper-plane-tilt me-2"></i>Publish Ujian
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="ph ph-floppy-disk me-2"></i>Simpan Draft & Lanjut Tambah Soal
                             </button>
-                            <button type="submit" name="status" value="draft"
-                                    class="btn btn-outline-secondary">
-                                <i class="ph ph-floppy-disk me-2"></i>Simpan sebagai Draft
+                            <button type="button" class="btn btn-outline-secondary" disabled>
+                                <i class="ph ph-paper-plane-tilt me-2"></i>Publish tersedia setelah ada soal
                             </button>
                         </div>
                     </div>
@@ -363,7 +362,7 @@
                             <small>
                                 <strong>Draft:</strong> Hanya Anda yang dapat melihat ujian<br>
                                 <strong>Published:</strong> Peserta dapat melihat dan mengikuti ujian<br><br>
-                                Setelah membuat ujian, Anda dapat langsung menambahkan soal-soal ujian.
+                                Ujian baru harus ditambah minimal 1 soal terlebih dahulu sebelum bisa dipublikasikan.
                             </small>
                         </div>
                     </div>

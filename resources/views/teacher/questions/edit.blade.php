@@ -108,10 +108,10 @@
                     </div>
                     <div class="card-body">
                         <!-- Existing Image -->
-                        @if($question->question_image)
+                        @if($question->question_image_url)
                             <div class="mb-3 p-3 bg-light rounded" x-show="!removeExistingImage">
                                 <div class="text-center">
-                                    <img src="{{ Storage::url($question->question_image) }}" class="img-fluid rounded mb-2" style="max-height: 200px;">
+                                    <img src="{{ $question->question_image_url }}" class="img-fluid rounded mb-2" style="max-height: 200px;">
                                     <div>
                                         <button type="button" @click="removeExistingImage = true" class="btn btn-sm btn-outline-danger">
                                             <i class="ph ph-trash me-1"></i>Hapus Gambar
@@ -129,7 +129,7 @@
                              @dragleave.prevent="dragover = false"
                              @drop.prevent="handleDrop($event)"
                              :class="{'border-primary bg-light-primary': dragover}">
-                            <template x-if="!imagePreview">
+                            <div x-show="!imagePreview">
                                 <div>
                                     <i class="ph ph-image mb-2" style="font-size: 48px; color: #ccc;"></i>
                                     <div class="mb-2">
@@ -141,8 +141,8 @@
                                     </div>
                                     <small class="text-muted">PNG, JPG, GIF maksimal 2MB</small>
                                 </div>
-                            </template>
-                            <template x-if="imagePreview">
+                            </div>
+                            <div x-show="imagePreview">
                                 <div>
                                     <img :src="imagePreview" class="img-fluid rounded mb-2" style="max-height: 200px;">
                                     <div>
@@ -151,7 +151,7 @@
                                         </button>
                                     </div>
                                 </div>
-                            </template>
+                            </div>
                         </div>
                         @error('question_image')
                             <div class="text-danger small mt-2">{{ $message }}</div>
@@ -358,20 +358,58 @@
 @endpush
 
 @push('scripts')
+@php
+    $initialOptions = $question->options
+        ->sortBy('order')
+        ->values()
+        ->map(function ($option) {
+            return [
+                'text' => $option->option_text,
+                'is_correct' => (bool) $option->is_correct,
+            ];
+        })
+        ->all();
+@endphp
+<script id="question-edit-initial-data" type="application/json">
+{!! json_encode([
+    'questionType' => $question->type,
+    'options' => $initialOptions,
+    'hasExistingImage' => (bool) $question->question_image_url,
+], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!}
+</script>
 <script>
     function questionForm() {
-        // Find the correct option index
-        const options = @json($question->options->sortBy('order')->values());
-        let correctIndex = 0;
-        options.forEach((opt, idx) => {
-            if (opt.is_correct) correctIndex = idx;
-        });
+        const initialDataEl = document.getElementById('question-edit-initial-data');
+        let initialData = {};
+        if (initialDataEl) {
+            try {
+                initialData = JSON.parse(initialDataEl.textContent || '{}');
+            } catch (error) {
+                initialData = {};
+            }
+        }
+
+        const rawOptions = Array.isArray(initialData.options) ? initialData.options : [];
+        let correctIndex = rawOptions.findIndex((option) => Boolean(option && option.is_correct));
+        if (correctIndex < 0) {
+            correctIndex = 0;
+        }
+
+        const options = rawOptions.map((option) => ({
+            text: option && typeof option.text === 'string' ? option.text : ''
+        }));
+
+        while (options.length < 2) {
+            options.push({ text: '' });
+        }
 
         return {
-            questionType: '{{ $question->type }}',
+            questionType: typeof initialData.questionType === 'string'
+                ? initialData.questionType
+                : 'multiple_choice',
             correctOption: correctIndex,
-            options: options.map(opt => ({ text: opt.option_text })),
-            hasExistingImage: {{ $question->question_image ? 'true' : 'false' }},
+            options,
+            hasExistingImage: Boolean(initialData.hasExistingImage),
             removeExistingImage: false,
             imagePreview: null,
             dragover: false,

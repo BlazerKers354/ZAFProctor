@@ -49,12 +49,15 @@ class ExamController extends Controller
                 // Check if can retry
                 $maxAttempts = $exam->settings?->max_attempts ?? 1;
                 $canRetry = $maxAttempts === 0 || $attemptCount < $maxAttempts;
+                $proctoringRequirements = $this->buildProctoringRequirements($exam->settings);
                 
                 $exam->user_attempt = $inProgressAttempt ?? $bestAttempt;
                 $exam->attempt_count = $attemptCount;
                 $exam->max_attempts = $maxAttempts;
                 $exam->can_retry = $canRetry;
                 $exam->best_attempt = $bestAttempt;
+                $exam->proctoring_requirements = $proctoringRequirements;
+                $exam->has_proctoring_requirements = !empty($proctoringRequirements);
                 
                 return $exam;
             });
@@ -88,7 +91,20 @@ class ExamController extends Controller
         // Get best attempt for display
         $bestAttempt = $submittedAttempts->sortByDesc('percentage')->first();
 
-        return view('student.exams.show', compact('exam', 'attempt', 'attempts', 'attemptCount', 'canRetry', 'maxAttempts', 'bestAttempt'));
+        $proctoringRequirements = $this->buildProctoringRequirements($exam->settings);
+        $hasProctoringRequirements = !empty($proctoringRequirements);
+
+        return view('student.exams.show', compact(
+            'exam',
+            'attempt',
+            'attempts',
+            'attemptCount',
+            'canRetry',
+            'maxAttempts',
+            'bestAttempt',
+            'proctoringRequirements',
+            'hasProctoringRequirements'
+        ));
     }
 
     /**
@@ -232,6 +248,16 @@ class ExamController extends Controller
                 'answer_id' => $answer->id,
             ]);
         } catch (\Exception $e) {
+            $freshAttempt = $attempt->fresh();
+            if ($freshAttempt && $freshAttempt->isSubmitted()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Ujian sudah dikumpulkan. Anda akan diarahkan ke halaman hasil.',
+                    'attempt_submitted' => true,
+                    'redirect' => route('student.exams.result', $freshAttempt),
+                ], 409);
+            }
+
             \Illuminate\Support\Facades\Log::error('Failed to save answer: ' . $e->getMessage(), [
                 'attempt_id' => $attempt->id,
                 'question_id' => $validated['question_id'] ?? null,
@@ -298,8 +324,9 @@ class ExamController extends Controller
         $attempt->load(['exam.course', 'exam.settings', 'answers.question.options', 'answers.selectedOption']);
 
         $showAnswers = $attempt->exam->settings?->show_correct_answers ?? false;
+        $maxViolations = $this->resolveMaxViolationsFromSettings($attempt->exam->settings);
 
-        return view('student.exams.result', compact('attempt', 'showAnswers'));
+        return view('student.exams.result', compact('attempt', 'showAnswers', 'maxViolations'));
     }
 
     /**
@@ -356,5 +383,81 @@ class ExamController extends Controller
                 'remaining' => $attempt->remaining_time ?? 0,
             ]);
         }
+    }
+
+    /**
+     * Build student-facing proctoring requirements dynamically from exam settings.
+     */
+    protected function buildProctoringRequirements($settings): array
+    {
+        if (!$settings) {
+            return [];
+        }
+
+        $requirements = [];
+        $maxViolations = $this->resolveMaxViolationsFromSettings($settings);
+        $hasViolationMonitoring = false;
+
+        if ($settings->webcam_enabled) {
+            $requirements[] = 'Kamera wajib aktif selama ujian berlangsung.';
+            $hasViolationMonitoring = true;
+
+            if (is_numeric($settings->snapshot_interval) && (int) $settings->snapshot_interval > 0) {
+                $requirements[] = 'Snapshot kamera diambil setiap ' . (int) $settings->snapshot_interval . ' detik.';
+            }
+        }
+
+        if ($settings->browser_lock_enabled) {
+            $requirements[] = 'Mode fullscreen wajib selama ujian.';
+            $hasViolationMonitoring = true;
+        }
+
+        if ($settings->tab_switch_detection) {
+            $requirements[] = 'Pindah tab/aplikasi dihitung sebagai pelanggaran.';
+            $hasViolationMonitoring = true;
+        }
+
+        if ($settings->block_keyboard_shortcuts) {
+            $requirements[] = 'Copy/paste, klik kanan, dan shortcut terlarang diblokir.';
+            $hasViolationMonitoring = true;
+        }
+
+        if ($hasViolationMonitoring) {
+            $requirements[] = 'Peringatan pelanggaran ditampilkan sejak pelanggaran pertama.';
+
+            if (is_numeric($maxViolations)) {
+                $maxViolations = (int) $maxViolations;
+
+                if ($maxViolations > 0) {
+                    $requirements[] = 'Batas total pelanggaran adalah ' . $maxViolations . ' sebelum ujian otomatis dikumpulkan.';
+                } else {
+                    $requirements[] = 'Pelanggaran tetap dicatat tanpa auto-submit berdasarkan jumlah pelanggaran.';
+                }
+            }
+        }
+
+        return $requirements;
+    }
+
+    /**
+     * Resolve violation threshold from settings.
+     * Returns null when threshold is not explicitly configured.
+     */
+    protected function resolveMaxViolationsFromSettings($settings): ?int
+    {
+        if (!$settings) {
+            return null;
+        }
+
+        $maxViolations = $settings->auto_submit_threshold;
+        if ($maxViolations === null) {
+            $maxViolations = $settings->max_tab_switches;
+        }
+
+        if (!is_numeric($maxViolations)) {
+            return null;
+        }
+
+        return (int) $maxViolations;
     }
 }
