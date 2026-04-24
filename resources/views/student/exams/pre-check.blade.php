@@ -42,7 +42,7 @@
         border: 1px solid #e2e8f0;
     }
     .camera-panel-header {
-        background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+        background: linear-gradient(135deg, var(--zaf-accent) 0%, var(--zaf-accent-2) 100%);
         padding: 14px 20px;
         display: flex;
         align-items: center;
@@ -117,7 +117,7 @@
         border-top: 1px solid #e2e8f0;
         min-height: 44px;
     }
-    .camera-status-bar.status-pending { background: #eff6ff; color: #3b82f6; }
+    .camera-status-bar.status-pending { background: var(--zaf-accent-soft); color: var(--zaf-accent); }
     .camera-status-bar.status-success { background: #f0fdf4; color: #16a34a; }
     .camera-status-bar.status-error { background: #fef2f2; color: #dc2626; }
     .camera-status-bar.status-warning { background: #fffbeb; color: #d97706; }
@@ -343,8 +343,8 @@
         border-color: #e2e8f0;
     }
     .token-section .form-control:focus {
-        border-color: #6366f1;
-        box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+        border-color: var(--zaf-accent);
+        box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.12);
     }
     .token-section .input-group-text {
         border-radius: 12px 0 0 12px;
@@ -358,12 +358,12 @@
         transition: all 0.3s ease;
     }
     .token-section .btn-start-exam:not(:disabled) {
-        background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+        background: linear-gradient(135deg, var(--zaf-accent) 0%, var(--zaf-accent-2) 100%);
         border: none;
-        box-shadow: 0 4px 12px rgba(79,70,229,0.3);
+        box-shadow: 0 4px 12px rgba(234, 88, 12, 0.28);
     }
     .token-section .btn-start-exam:not(:disabled):hover {
-        box-shadow: 0 6px 20px rgba(79,70,229,0.4);
+        box-shadow: 0 6px 20px rgba(234, 88, 12, 0.36);
         transform: translateY(-1px);
     }
 
@@ -394,17 +394,29 @@
 @endpush
 
 @section('content')
-<!-- Back Button -->
-<div class="mb-3">
-    <a href="{{ route('student.exams.index') }}" class="btn btn-light btn-sm" style="border-radius: 10px;">
-        <i class="ph ph-arrow-left me-1"></i>Kembali
-    </a>
+<div class="card zaf-hero mb-4 zaf-reveal">
+    <div class="card-body p-4" style="position: relative; z-index: 1;">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <p class="hero-kicker mb-2">Pre-Exam Checkpoint</p>
+                <h5 class="hero-title mb-1">Persiapan Ujian</h5>
+                <p class="mb-0" style="color: rgba(248,250,252,0.82);">Pastikan perangkat, kamera, dan verifikasi wajah siap sebelum ujian dimulai.</p>
+            </div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <span class="hero-chip"><i class="ph ph-clock me-1"></i>{{ $exam->duration }} Menit</span>
+                <span class="hero-chip"><i class="ph ph-clipboard-text me-1"></i>{{ $exam->question_count }} Soal</span>
+                <a href="{{ route('student.exams.index') }}" class="btn btn-light btn-sm">
+                    <i class="ph ph-arrow-left me-1"></i>Kembali
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
 
-<div class="precheck-wrapper">
+<div class="precheck-wrapper zaf-reveal">
     {{-- ========== LEFT: Sticky Camera Panel ========== --}}
     <div class="camera-sticky-col">
-        <div class="camera-panel fade-in-up">
+        <div class="camera-panel fade-in-up zaf-reveal">
             <div class="camera-panel-header">
                 <i class="ph ph-camera"></i>
                 <h6>Verifikasi Wajah</h6>
@@ -450,9 +462,9 @@
     {{-- ========== RIGHT: Content ========== --}}
     <div class="right-content-col">
         <!-- Exam Info Bar -->
-        <div class="exam-info-bar fade-in-up">
+        <div class="exam-info-bar fade-in-up zaf-reveal">
             <div class="d-flex align-items-center gap-3 exam-title-section">
-                <div style="width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;background:linear-gradient(135deg,#eef2ff,#e0e7ff);color:#4f46e5;">
+                <div style="width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;background:var(--zaf-accent-soft);color:var(--zaf-accent);">
                     <i class="ph ph-file-text"></i>
                 </div>
                 <div>
@@ -477,7 +489,7 @@
         </div>
 
         <!-- System Checks -->
-        <div class="fade-in-up" style="animation-delay: 0.1s;">
+        <div class="fade-in-up zaf-reveal" style="animation-delay: 0.1s;">
             <h6 class="mb-3 f-w-600" style="font-size: 14px; color: #475569;">
                 <i class="ph ph-check-circle me-1"></i>Pemeriksaan Sistem
             </h6>
@@ -539,7 +551,7 @@
         </div>
 
         <!-- Token Entry Section -->
-        <div id="token-form-container" class="token-section not-ready fade-in-up" style="animation-delay: 0.2s;">
+        <div id="token-form-container" class="token-section not-ready fade-in-up zaf-reveal" style="animation-delay: 0.2s;">
             <div class="token-section-header">
                 <div id="form-icon" class="token-icon-wrap locked">
                     <i class="ph ph-lock"></i>

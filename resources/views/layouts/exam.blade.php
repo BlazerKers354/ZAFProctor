@@ -8,8 +8,9 @@
     <title>{{ config('app.name', 'ZAFProctor') }} - Ujian</title>
 
     <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     
     <!-- Phosphor Icons -->
@@ -31,7 +32,7 @@
         }
 
         * {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Manrope', sans-serif;
         }
 
         /* Prevent text selection */
@@ -145,7 +146,7 @@
 
     @stack('styles')
 </head>
-<body class="font-sans antialiased no-select" style="background: var(--exam-body-bg);" oncontextmenu="return false;">
+<body class="font-sans antialiased no-select zaf-ui role-exam" style="background: var(--exam-body-bg);" oncontextmenu="return false;">
     <div id="exam-container" class="min-h-screen">
         @yield('content')
     </div>

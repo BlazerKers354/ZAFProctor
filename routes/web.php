@@ -40,7 +40,7 @@ Route::get('/panduan-pengguna/download', [GuideController::class, 'download'])->
 // Guest Routes (Auth)
 Route::middleware('guest')->group(function () {
     Route::get('login', [LoginController::class, 'create'])->name('login');
-    Route::post('login', [LoginController::class, 'store']);
+    Route::post('login', [LoginController::class, 'store'])->middleware('throttle:10,1');
     
     // Registration routes - semua registrasi dilakukan di halaman login
     Route::get('register', function() {
@@ -49,11 +49,15 @@ Route::middleware('guest')->group(function () {
     Route::get('register/siswa', function() {
         return redirect()->route('login');
     })->name('register.student.form');
-    Route::post('register/siswa', [RegisterController::class, 'storeStudent'])->name('register.student');
+    Route::post('register/siswa', [RegisterController::class, 'storeStudent'])
+        ->middleware('throttle:5,1')
+        ->name('register.student');
     Route::get('register/guru', function() {
         return redirect()->route('login');
     })->name('register.teacher.form');
-    Route::post('register/guru', [RegisterController::class, 'storeTeacher'])->name('register.teacher');
+    Route::post('register/guru', [RegisterController::class, 'storeTeacher'])
+        ->middleware('throttle:5,1')
+        ->name('register.teacher');
     
     // Forgot password - redirect ke login karena sudah terintegrasi
     Route::get('forgot-password', function() {

@@ -11,6 +11,7 @@ use App\Policies\ExamAttemptPolicy;
 use App\Policies\ExamPolicy;
 use App\Policies\UserPolicy;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -33,5 +34,9 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Course::class, CoursePolicy::class);
         Gate::policy(Exam::class, ExamPolicy::class);
         Gate::policy(ExamAttempt::class, ExamAttemptPolicy::class);
+
+        if ($this->app->environment('production')) {
+            URL::forceScheme('https');
+        }
     }
 }

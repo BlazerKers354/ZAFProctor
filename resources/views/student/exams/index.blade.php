@@ -4,20 +4,23 @@
 @section('page-title', 'Daftar Ujian')
 
 @section('content')
-    <!-- Page Header -->
-    <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 mb-4">
-        <div>
-            <h4 class="mb-1 f-w-600">Ujian Tersedia</h4>
-            <p class="text-muted mb-0 f-14">Pilih ujian yang ingin Anda kerjakan</p>
+    <div class="card zaf-hero mb-4 zaf-reveal">
+        <div class="card-body p-4" style="position: relative; z-index: 1;">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                    <p class="hero-kicker mb-2">Exam Lobby</p>
+                    <h5 class="hero-title mb-1">Ujian Tersedia</h5>
+                    <p class="mb-0" style="color: rgba(248,250,252,0.82);">Pilih ujian yang ingin Anda kerjakan dan pantau progres Anda.</p>
+                </div>
+                <span class="hero-chip">
+                    <i class="ph ph-clipboard-text me-2"></i>{{ $availableExams->count() }} Ujian
+                </span>
+            </div>
         </div>
-        <span class="badge badge-soft-primary px-3 py-2 f-14">
-            <i class="ph ph-clipboard-text me-1"></i>{{ $availableExams->count() }} Ujian
-        </span>
     </div>
 
     @if($availableExams->isEmpty())
-        <!-- Empty State -->
-        <div class="card">
+        <div class="card zaf-reveal">
             <div class="card-body text-center py-5">
                 <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-4" style="width: 96px; height: 96px;">
                     <i class="ph ph-clipboard-text f-48 text-muted"></i>
@@ -31,16 +34,16 @@
         </div>
     @else
         <!-- Exam Cards Grid -->
-        <div class="row g-4">
+        <div class="row g-4 zaf-reveal">
             @foreach($availableExams as $exam)
-                <div class="col-12 col-lg-6">
+                <div class="col-12 col-lg-6 zaf-reveal">
                     <div class="card exam-card h-100">
                         <!-- Card Header with Status -->
                         <div class="card-header py-3">
                             <div class="d-flex align-items-start justify-content-between gap-3">
                                 <div class="d-flex align-items-center gap-3">
                                     <!-- Exam Icon -->
-                                    <div class="exam-icon" style="background: rgba(124, 58, 237, 0.1); color: #7c3aed;">
+                                    <div class="exam-icon" style="background: var(--zaf-accent-soft); color: var(--zaf-accent);">
                                         <i class="ph ph-file-text f-24"></i>
                                     </div>
                                     
@@ -108,9 +111,9 @@
                             </div>
                             
                             <!-- Schedule Info -->
-                            <div class="d-flex align-items-center gap-2 p-3 rounded-3 mb-4" style="background: rgba(124, 58, 237, 0.08);">
-                                <i class="ph ph-calendar-blank f-20" style="color: #6d28d9;"></i>
-                                <span class="f-14" style="color: #6d28d9;">
+                            <div class="d-flex align-items-center gap-2 p-3 rounded-3 mb-4" style="background: var(--zaf-accent-soft);">
+                                <i class="ph ph-calendar-blank f-20" style="color: var(--zaf-accent);"></i>
+                                <span class="f-14" style="color: var(--zaf-accent);">
                                     @if($exam->type === 'scheduled' && $exam->start_time && $exam->end_time)
                                         {{ $exam->start_time->format('d M Y, H:i') }} - {{ $exam->end_time->format('d M Y, H:i') }}
                                     @else

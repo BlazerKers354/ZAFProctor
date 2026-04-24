@@ -4,64 +4,59 @@
 @section('page-title', 'Detail Ujian')
 
 @section('content')
-    <!-- Back Button -->
-    <div class="mb-4">
-        <a href="{{ route('student.exams.index') }}" class="btn btn-light btn-sm">
-            <i class="ph ph-arrow-left me-1"></i>Kembali ke Daftar Ujian
-        </a>
+    <div class="card zaf-hero mb-4 zaf-reveal">
+        <div class="card-body p-4" style="position: relative; z-index: 1;">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                    <p class="hero-kicker mb-2">Exam Brief</p>
+                    <h5 class="hero-title mb-1">{{ $exam->title }}</h5>
+                    <p class="mb-0" style="color: rgba(248,250,252,0.82);">{{ $exam->course?->name ?? 'Ujian Umum' }}</p>
+                </div>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    @if($attempt && in_array($attempt->status, ['submitted', 'graded']))
+                        <span class="hero-chip"><i class="ph ph-check me-1"></i>Sudah Dikerjakan</span>
+                    @elseif($exam->isActive())
+                        <span class="hero-chip"><span class="pulse-dot me-1"></span>Sedang Berlangsung</span>
+                    @elseif(!$exam->hasStarted())
+                        <span class="hero-chip"><i class="ph ph-clock me-1"></i>Belum Dimulai</span>
+                    @else
+                        <span class="hero-chip"><i class="ph ph-x me-1"></i>Sudah Berakhir</span>
+                    @endif
+                    <a href="{{ route('student.exams.index') }}" class="btn btn-light btn-sm">
+                        <i class="ph ph-arrow-left me-1"></i>Kembali ke Daftar Ujian
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Error/Success Messages -->
     @if(session('error'))
-        <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+        <div class="alert alert-danger alert-dismissible fade show mb-4 zaf-reveal" role="alert">
             <i class="ph ph-warning me-2"></i>{{ session('error') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
     @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+        <div class="alert alert-success alert-dismissible fade show mb-4 zaf-reveal" role="alert">
             <i class="ph ph-check-circle me-2"></i>{{ session('success') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
 
-    <div class="row justify-content-center">
+    <div class="row justify-content-center zaf-reveal">
         <div class="col-lg-8">
             <!-- Exam Info Card -->
-            <div class="card">
-                <!-- Header -->
-                <div class="card-header text-white py-4" style="background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="bg-white bg-opacity-25 rounded-3 p-3">
-                            <i class="ph ph-file-text f-28"></i>
+            <div class="card zaf-reveal">
+                <div class="card-body">
+                    <div class="d-flex align-items-center gap-3 mb-4">
+                        <div class="rounded-3 p-3" style="background: var(--zaf-accent-soft); color: var(--zaf-accent);">
+                            <i class="ph ph-file-text f-24"></i>
                         </div>
                         <div>
-                            <h4 class="mb-1 text-white f-w-600">{{ $exam->title }}</h4>
-                            <small class="text-white-50">{{ $exam->course?->name ?? 'Ujian Umum' }}</small>
+                            <h5 class="mb-1 f-w-600">Ringkasan Ujian</h5>
+                            <small class="text-muted">Periksa detail sebelum memulai atau melanjutkan attempt.</small>
                         </div>
-                    </div>
-                </div>
-                
-                <div class="card-body">
-                    <!-- Status Badge -->
-                    <div class="mb-4">
-                        @if($attempt && in_array($attempt->status, ['submitted', 'graded']))
-                            <span class="badge bg-secondary px-3 py-2">
-                                <i class="ph ph-check me-1"></i>Sudah Dikerjakan
-                            </span>
-                        @elseif($exam->isActive())
-                            <span class="badge badge-soft-success px-3 py-2">
-                                <span class="pulse-dot me-1"></span>Sedang Berlangsung
-                            </span>
-                        @elseif(!$exam->hasStarted())
-                            <span class="badge badge-soft-warning px-3 py-2">
-                                <i class="ph ph-clock me-1"></i>Belum Dimulai
-                            </span>
-                        @else
-                            <span class="badge badge-soft-danger px-3 py-2">
-                                <i class="ph ph-x me-1"></i>Sudah Berakhir
-                            </span>
-                        @endif
                     </div>
                     
                     <!-- Exam Details -->

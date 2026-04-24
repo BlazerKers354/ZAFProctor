@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Global web middleware - HTTPS enforcement in production
         $middleware->web(append: [
             \App\Http\Middleware\ForceHttps::class,
+            \App\Http\Middleware\SecureHeaders::class,
         ]);
 
         $middleware->alias([

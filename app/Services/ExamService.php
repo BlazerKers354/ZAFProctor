@@ -7,6 +7,7 @@ use App\Models\AuditLog;
 use App\Models\Exam;
 use App\Models\ExamAttempt;
 use App\Models\Question;
+use App\Models\QuestionOption;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -143,9 +144,36 @@ class ExamService
         }
         
         // Validate question belongs to this exam
-        $questionExists = $attempt->exam->questions()->where('id', $questionId)->exists();
-        if (!$questionExists) {
+        $question = $attempt->exam->questions()->select(['id', 'type'])->find($questionId);
+        if (!$question) {
             throw new \Exception('Soal tidak valid untuk ujian ini.');
+        }
+
+        // Enforce type-specific payload to prevent cross-question option injection.
+        if ($question->isMultipleChoice()) {
+            if ($optionId === null) {
+                throw new \Exception('Pilihan jawaban wajib diisi untuk soal pilihan ganda.');
+            }
+
+            $optionBelongsToQuestion = QuestionOption::where('id', $optionId)
+                ->where('question_id', $questionId)
+                ->exists();
+
+            if (!$optionBelongsToQuestion) {
+                throw new \Exception('Pilihan jawaban tidak valid untuk soal ini.');
+            }
+
+            $essayAnswer = null;
+        }
+
+        if ($question->isEssay()) {
+            $optionId = null;
+            if ($essayAnswer !== null) {
+                $essayAnswer = trim($essayAnswer);
+                if ($essayAnswer === '') {
+                    $essayAnswer = null;
+                }
+            }
         }
         
         try {

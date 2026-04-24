@@ -8,8 +8,7 @@
     <title>{{ $attempt->exam->title }} - {{ config('app.name', 'ZAFProctor') }}</title>
 
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     
     <!-- Phosphor Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
@@ -22,16 +21,19 @@
         :root {
             --pc-sidebar-width: 280px;
             --pc-header-height: 70px;
-            --exam-primary: #7c3aed;
-            --exam-success: #2ca87f;
-            --exam-warning: #e58a00;
+            --exam-primary: #0f766e;
+            --exam-primary-2: #1d4ed8;
+            --exam-success: #16a34a;
+            --exam-warning: #d97706;
             --exam-danger: #dc2626;
-            --exam-dark: #1c232f;
-            --exam-light: #f8f9fa;
+            --exam-dark: #0b1f34;
+            --exam-dark-2: #123658;
+            --exam-light: #f3f7fb;
+            --exam-soft: rgba(15, 118, 110, 0.14);
         }
 
         * {
-            font-family: 'Open Sans', sans-serif;
+            font-family: 'Manrope', 'Segoe UI', sans-serif;
         }
 
         @if($attempt->exam->settings?->detect_copy_paste)
@@ -46,9 +48,24 @@
         @endif
 
         body {
-            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
+            background:
+                radial-gradient(120% 90% at 10% 0%, rgba(29, 78, 216, 0.12) 0%, transparent 56%),
+                radial-gradient(90% 80% at 100% 100%, rgba(15, 118, 110, 0.12) 0%, transparent 52%),
+                linear-gradient(135deg, #f4f7fb 0%, #e6edf5 100%);
             min-height: 100vh;
             overflow: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image: linear-gradient(rgba(15, 23, 42, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(15, 23, 42, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+            mask-image: radial-gradient(circle at 50% 32%, rgba(0, 0, 0, 0.8) 26%, transparent 86%);
+            z-index: 0;
         }
 
         /* Custom Scrollbar */
@@ -58,14 +75,21 @@
 
         /* Header */
         .exam-header {
-            background: linear-gradient(135deg, var(--exam-dark) 0%, #111827 100%);
+            background: linear-gradient(130deg, var(--exam-dark) 0%, var(--exam-dark-2) 68%, #091626 100%);
             height: var(--pc-header-height);
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             z-index: 1030;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            box-shadow: 0 10px 30px rgba(2, 6, 23, 0.28);
+        }
+
+        .exam-header h1,
+        .progress-value,
+        .exam-modal-title {
+            font-family: 'Sora', 'Segoe UI', sans-serif;
+            letter-spacing: -0.02em;
         }
 
         /* Sidebar */
@@ -75,7 +99,7 @@
             top: var(--pc-header-height);
             width: var(--pc-sidebar-width);
             height: calc(100vh - var(--pc-header-height));
-            background: linear-gradient(180deg, var(--exam-dark) 0%, #111827 100%);
+            background: linear-gradient(180deg, #081a2c 0%, #0d2540 58%, #061322 100%);
             border-right: 1px solid rgba(255,255,255,0.05);
             overflow-y: auto;
             z-index: 1020;
@@ -218,7 +242,7 @@
 
         /* Progress Card */
         .progress-card {
-            background: linear-gradient(135deg, var(--exam-primary) 0%, #6d28d9 100%);
+            background: linear-gradient(135deg, var(--exam-primary) 0%, var(--exam-primary-2) 100%);
             border-radius: 16px;
             padding: 20px;
             color: #fff;
@@ -239,12 +263,13 @@
         .question-card {
             background: #fff;
             border-radius: 20px;
-            box-shadow: 0 4px 25px rgba(0,0,0,0.06);
+            border: 1px solid rgba(148, 163, 184, 0.28);
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
             overflow: hidden;
             transition: all 0.3s ease;
         }
         .question-header {
-            background: linear-gradient(135deg, var(--exam-dark) 0%, #1f2937 100%);
+            background: linear-gradient(135deg, var(--exam-dark) 0%, #173a5e 100%);
             padding: 20px 24px;
             color: #fff;
         }
@@ -260,8 +285,8 @@
             font-size: 1.1rem;
         }
         .question-points {
-            background: rgba(70, 128, 255, 0.2);
-            color: #93c5fd;
+            background: rgba(56, 189, 248, 0.18);
+            color: #bae6fd;
             padding: 6px 12px;
             border-radius: 8px;
             font-size: 0.85rem;
@@ -291,12 +316,12 @@
         }
         .option-item:hover {
             border-color: var(--exam-primary);
-            background: linear-gradient(135deg, rgba(70, 128, 255, 0.03) 0%, rgba(99, 102, 241, 0.03) 100%);
+            background: linear-gradient(135deg, rgba(15, 118, 110, 0.06) 0%, rgba(29, 78, 216, 0.06) 100%);
             transform: translateX(4px);
         }
         .option-item.selected {
             border-color: var(--exam-primary);
-            background: linear-gradient(135deg, rgba(70, 128, 255, 0.08) 0%, rgba(99, 102, 241, 0.08) 100%);
+            background: linear-gradient(135deg, rgba(15, 118, 110, 0.12) 0%, rgba(29, 78, 216, 0.1) 100%);
         }
         .option-letter {
             width: 36px;
@@ -342,7 +367,7 @@
         .essay-textarea:focus {
             outline: none;
             border-color: var(--exam-primary);
-            box-shadow: 0 0 0 4px rgba(70, 128, 255, 0.1);
+            box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.12);
         }
 
         /* Navigation Buttons */
@@ -371,13 +396,13 @@
             background: #f9fafb;
         }
         .btn-nav-primary {
-            background: linear-gradient(135deg, var(--exam-primary) 0%, #6d28d9 100%);
+            background: linear-gradient(135deg, var(--exam-primary) 0%, var(--exam-primary-2) 100%);
             border: none;
             color: #fff;
         }
         .btn-nav-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(70, 128, 255, 0.3);
+            box-shadow: 0 6px 20px rgba(15, 118, 110, 0.3);
             color: #fff;
         }
         .btn-nav-success {
@@ -442,7 +467,7 @@
         .exam-modal-header.success { background: linear-gradient(135deg, var(--exam-success) 0%, #22c55e 100%); }
         .exam-modal-header.warning { background: linear-gradient(135deg, var(--exam-warning) 0%, #f59e0b 100%); }
         .exam-modal-header.danger { background: linear-gradient(135deg, var(--exam-danger) 0%, #b91c1c 100%); }
-        .exam-modal-header.primary { background: linear-gradient(135deg, var(--exam-primary) 0%, #6d28d9 100%); }
+        .exam-modal-header.primary { background: linear-gradient(135deg, var(--exam-primary) 0%, var(--exam-primary-2) 100%); }
         .exam-modal-icon {
             width: 70px;
             height: 70px;
@@ -542,13 +567,13 @@
         body.dark-mode .question-text { color: #f0f0f5; }
         body.dark-mode .option-item { background: #252536; border-color: #3a3a50; color: #e8e8f0; }
         body.dark-mode .option-item:hover { background: #2d2d44; border-color: #5b5b7a; }
-        body.dark-mode .option-item.selected { background: rgba(124, 58, 237, 0.18); border-color: var(--exam-primary); }
+        body.dark-mode .option-item.selected { background: rgba(15, 118, 110, 0.22); border-color: var(--exam-primary); }
         body.dark-mode .option-text { color: #e8e8f0; }
         body.dark-mode .option-letter { border-color: #4a4a60; color: #b0b0c8; background: rgba(255,255,255,0.04); }
         body.dark-mode .option-item.selected .option-letter { background: var(--exam-primary); border-color: var(--exam-primary); color: #fff; }
         body.dark-mode .essay-textarea { background: #252536; border-color: #3a3a50; color: #f0f0f5; }
         body.dark-mode .essay-textarea::placeholder { color: #6b6b80; }
-        body.dark-mode .essay-textarea:focus { border-color: var(--exam-primary); box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.15); }
+        body.dark-mode .essay-textarea:focus { border-color: var(--exam-primary); box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.18); }
         body.dark-mode .nav-footer { background: #1a1a2a; border-color: #2a2a3d; }
         body.dark-mode .btn-nav-outline { background: #252536; border-color: #3a3a50; color: #d0d0e0; }
         body.dark-mode .btn-nav-outline:hover { background: #2d2d44; border-color: #505068; color: #f0f0f5; }
@@ -687,7 +712,7 @@
                     <button class="btn btn-link text-white d-lg-none p-0 me-2" onclick="toggleSidebar()">
                         <i class="ph ph-list fs-4"></i>
                     </button>
-                    <div class="d-flex align-items-center justify-content-center rounded-3" style="width: 44px; height: 44px; background: linear-gradient(135deg, var(--exam-primary) 0%, #6d28d9 100%);">
+                    <div class="d-flex align-items-center justify-content-center rounded-3" style="width: 44px; height: 44px; background: linear-gradient(135deg, var(--exam-primary) 0%, var(--exam-primary-2) 100%);">
                         <i class="ph ph-file-text text-white fs-5"></i>
                     </div>
                     <div class="d-none d-sm-block">

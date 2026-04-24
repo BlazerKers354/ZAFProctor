@@ -5,33 +5,31 @@
 
 @section('content')
     <!-- Welcome Banner -->
-    <div class="card mb-4" style="background: linear-gradient(135deg, #082f1a 0%, #065f46 60%, #047857 100%); border: none; overflow: hidden; position: relative;">
+    <div class="card zaf-hero mb-4 zaf-reveal">
         <div class="card-body p-4" style="position: relative; z-index: 1;">
             <div class="row align-items-center">
                 <div class="col-md-8">
                     <div class="d-flex align-items-center gap-3">
-                        <div style="background: linear-gradient(135deg, #10b981, #34d399); border-radius: 14px;" class="p-3">
+                        <div style="background: linear-gradient(135deg, rgba(5, 150, 105, 0.95), rgba(14, 165, 164, 0.86)); border-radius: 14px;" class="p-3 shadow-lg">
                             <i class="ph ph-chalkboard-teacher f-30 text-white"></i>
                         </div>
                         <div>
-                            <p class="mb-1 f-14" style="color: rgba(255,255,255,0.5);">Selamat datang,</p>
-                            <h3 class="mb-0 text-white f-w-600">{{ auth()->user()->name }}</h3>
+                            <p class="hero-kicker mb-2">Selamat datang,</p>
+                            <h3 class="hero-title mb-0 text-white f-w-600">{{ auth()->user()->name }}</h3>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                    <span class="badge px-3 py-2" style="background: rgba(255,255,255,0.08); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.06); color: rgba(255,255,255,0.7);">
+                    <span class="hero-chip">
                         <i class="ph ph-calendar-dots me-1"></i>{{ now()->locale('id')->translatedFormat('l, d M Y') }}
                     </span>
                 </div>
             </div>
         </div>
-        <div style="position: absolute; top: -20px; right: -10px; width: 140px; height: 140px; border-radius: 50%; background: rgba(16,185,129,0.08);"></div>
-        <div style="position: absolute; bottom: -25px; right: 90px; width: 90px; height: 90px; border-radius: 50%; background: rgba(52,211,153,0.06);"></div>
     </div>
 
     <!-- Stats Cards -->
-    <div class="row mb-4">
+    <div class="row mb-4 zaf-reveal">
         <div class="col-md-3">
             <div class="card stats-card" style="border-left: 3px solid #10b981;">
                 <div class="card-body">
@@ -94,7 +92,7 @@
         </div>
     </div>
 
-    <div class="row">
+    <div class="row zaf-reveal">
         <!-- Active Exams with Monitoring -->
         <div class="col-lg-6">
             <div class="card mb-4">
@@ -181,7 +179,7 @@
     </div>
 
     <!-- Courses Overview -->
-    <div class="card">
+    <div class="card zaf-reveal">
         <div class="card-header">
             <h5 class="card-title mb-0">
                 <i class="ph ph-book text-primary me-2"></i>Mata Pelajaran Saya

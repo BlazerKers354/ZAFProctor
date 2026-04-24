@@ -32,9 +32,19 @@ class ProctoringController extends Controller
 
         $validated = $request->validate([
             'violation_type' => ['required', 'string', Rule::in($this->allowedViolationTypes())],
-            'description' => ['nullable', 'string', 'max:500'],
-            'metadata' => ['nullable', 'array'],
+            'description' => ['nullable', 'string', 'max:1000'],
+            'metadata' => ['nullable', 'array', 'max:20'],
         ]);
+
+        if (array_key_exists('metadata', $validated)) {
+            $encodedMetadata = json_encode($validated['metadata']);
+
+            if ($encodedMetadata === false || strlen($encodedMetadata) > 4096) {
+                return response()->json([
+                    'error' => 'Metadata terlalu besar atau tidak valid.',
+                ], 422);
+            }
+        }
 
         $log = $this->proctoringService->logViolation(
             $attempt,
@@ -74,9 +84,9 @@ class ProctoringController extends Controller
         }
 
         $validated = $request->validate([
-            'snapshot' => ['required', 'string'], // Base64 encoded image
+            'snapshot' => ['required', 'string', 'max:7340032'], // Base64 encoded image
             'violation_type' => ['nullable', 'string', Rule::in($this->allowedViolationTypes())],
-            'description' => ['nullable', 'string'],
+            'description' => ['nullable', 'string', 'max:500'],
         ]);
 
         // Store the snapshot
@@ -84,6 +94,13 @@ class ProctoringController extends Controller
             $attempt,
             $validated['snapshot']
         );
+
+        if (!$snapshotPath) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Snapshot tidak valid atau ukuran file terlalu besar.',
+            ], 422);
+        }
 
         // Resolve threshold once for consistent response payload.
         $settings = $attempt->exam->settings;
@@ -189,7 +206,7 @@ class ProctoringController extends Controller
     {
         $maxViolations = $settings?->auto_submit_threshold ?? $settings?->max_tab_switches ?? 5;
 
-        return is_numeric($maxViolations) ? (int) $maxViolations : 5;
+        return is_numeric($maxViolations) ? max(0, (int) $maxViolations) : 5;
     }
 
     /**

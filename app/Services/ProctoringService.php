@@ -12,6 +12,23 @@ use Illuminate\Support\Facades\Storage;
 
 class ProctoringService
 {
+    private const MAX_BASE64_SNAPSHOT_LENGTH = 7 * 1024 * 1024;
+    private const MAX_SNAPSHOT_BYTES = 5 * 1024 * 1024;
+
+    private const ALLOWED_IMAGE_MIME_TYPES = [
+        'image/jpeg',
+        'image/png',
+        'image/gif',
+        'image/webp',
+    ];
+
+    private const MIME_EXTENSION_MAP = [
+        'image/jpeg' => 'jpg',
+        'image/png' => 'png',
+        'image/gif' => 'gif',
+        'image/webp' => 'webp',
+    ];
+
     /**
      * Log a violation
      */
@@ -75,39 +92,46 @@ class ProctoringService
     public function storeSnapshotFromBase64(ExamAttempt $attempt, string $base64Data): ?string
     {
         try {
-            // Validate base64 data size (max 10MB)
-            if (strlen($base64Data) > 10 * 1024 * 1024) {
+            // Guard against excessive payloads before decoding.
+            if (strlen($base64Data) > self::MAX_BASE64_SNAPSHOT_LENGTH) {
                 Log::warning('Base64 snapshot too large for attempt ' . $attempt->id);
                 return null;
             }
 
-            // Remove data URL prefix if present
-            if (preg_match('/^data:image\/(\w+);base64,/', $base64Data, $matches)) {
-                $extension = $matches[1];
-                $base64Data = substr($base64Data, strpos($base64Data, ',') + 1);
-                
-                // Validate extension
-                $allowedExtensions = ['jpeg', 'jpg', 'png', 'gif', 'webp'];
-                if (!in_array(strtolower($extension), $allowedExtensions)) {
-                    Log::warning('Invalid image extension in base64 for attempt ' . $attempt->id);
-                    $extension = 'jpg';
-                }
-            } else {
-                $extension = 'jpg';
+            $base64Payload = $base64Data;
+            if (preg_match('/^data:image\/[a-zA-Z0-9.+-]+;base64,/', $base64Data) === 1) {
+                $base64Payload = substr($base64Data, strpos($base64Data, ',') + 1);
             }
 
-            $imageData = @base64_decode($base64Data, true);
+            $imageData = @base64_decode($base64Payload, true);
             
             if ($imageData === false || empty($imageData)) {
                 Log::warning('Failed to decode base64 snapshot for attempt ' . $attempt->id);
                 return null;
             }
 
+            if (strlen($imageData) > self::MAX_SNAPSHOT_BYTES) {
+                Log::warning('Decoded snapshot exceeds max size for attempt ' . $attempt->id);
+                return null;
+            }
+
+            $imageInfo = @getimagesizefromstring($imageData);
+            $detectedMimeType = is_array($imageInfo) ? ($imageInfo['mime'] ?? null) : null;
+
+            if (!is_string($detectedMimeType) || !in_array($detectedMimeType, self::ALLOWED_IMAGE_MIME_TYPES, true)) {
+                Log::warning('Rejected non-image snapshot payload for attempt ' . $attempt->id, [
+                    'detected_mime' => $detectedMimeType,
+                ]);
+                return null;
+            }
+
+            $extension = self::MIME_EXTENSION_MAP[$detectedMimeType] ?? 'jpg';
+
             $filename = sprintf(
                 'proctoring/%d/%d/%s.%s',
                 $attempt->exam_id,
                 $attempt->user_id,
-                now()->format('Y-m-d_His_') . uniqid(),
+                now()->format('Y-m-d_His_') . bin2hex(random_bytes(8)),
                 $extension
             );
 
@@ -134,14 +158,35 @@ class ProctoringService
     protected function storeSnapshot(ExamAttempt $attempt, UploadedFile $file): ?string
     {
         try {
+            if (!$file->isValid()) {
+                Log::warning('Invalid uploaded snapshot for attempt ' . $attempt->id);
+                return null;
+            }
+
+            $mimeType = $file->getMimeType();
+            if (!is_string($mimeType) || !in_array($mimeType, self::ALLOWED_IMAGE_MIME_TYPES, true)) {
+                Log::warning('Rejected uploaded snapshot with invalid mime type for attempt ' . $attempt->id, [
+                    'mime_type' => $mimeType,
+                ]);
+                return null;
+            }
+
+            if ((int) $file->getSize() > self::MAX_SNAPSHOT_BYTES) {
+                Log::warning('Uploaded snapshot exceeds max size for attempt ' . $attempt->id);
+                return null;
+            }
+
             $path = sprintf(
                 'proctoring/%d/%d',
                 $attempt->exam_id,
                 $attempt->user_id
             );
 
+            $extension = self::MIME_EXTENSION_MAP[$mimeType] ?? 'jpg';
+            $filename = now()->format('Y-m-d_His_') . bin2hex(random_bytes(8)) . '.' . $extension;
+
             // Store in private disk (not publicly accessible)
-            $storedPath = $file->store($path, 'local');
+            $storedPath = $file->storeAs($path, $filename, 'local');
             
             if (!$storedPath) {
                 Log::error('Failed to store uploaded snapshot for attempt ' . $attempt->id);

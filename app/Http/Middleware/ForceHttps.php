@@ -16,7 +16,13 @@ class ForceHttps
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!$request->secure() && app()->environment('production')) {
+        $forwardedProto = strtolower((string) $request->headers->get('X-Forwarded-Proto', ''));
+        $forwardedHeader = strtolower((string) $request->headers->get('Forwarded', ''));
+
+        $isForwardedSecure = str_contains($forwardedProto, 'https')
+            || str_contains($forwardedHeader, 'proto=https');
+
+        if (app()->environment('production') && !$request->secure() && !$isForwardedSecure) {
             return redirect()->secure($request->getRequestUri(), 301);
         }
 

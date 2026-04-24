@@ -173,6 +173,20 @@ Fitur proctoring (webcam) memerlukan browser modern dengan dukungan WebRTC:
    http://localhost:8000
    ```
 
+## 🚀 Deployment Production
+
+Untuk hosting online, gunakan:
+
+- Template environment produksi: `.env.production.example`
+- Panduan deploy lengkap: `docs/deployment-production.md`
+
+Checklist penting sebelum go-live:
+
+- Wajib HTTPS aktif (fitur webcam browser membutuhkan secure context)
+- `APP_DEBUG=false` dan `SESSION_SECURE_COOKIE=true`
+- Queue worker dan scheduler aktif
+- `php artisan config:cache && php artisan route:cache && php artisan view:cache`
+
 ## 👤 Akun Default
 
 | Role | Nama | Email | Password |

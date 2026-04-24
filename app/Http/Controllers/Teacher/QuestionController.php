@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class QuestionController extends Controller
@@ -144,6 +145,7 @@ class QuestionController extends Controller
     public function edit(Exam $exam, Question $question): View
     {
         $this->authorize('manageQuestions', $exam);
+        $this->ensureQuestionBelongsToExam($exam, $question);
 
         $question->load('options');
 
@@ -156,6 +158,7 @@ class QuestionController extends Controller
     public function update(Request $request, Exam $exam, Question $question): RedirectResponse
     {
         $this->authorize('manageQuestions', $exam);
+        $this->ensureQuestionBelongsToExam($exam, $question);
 
         $isMultipleChoice = $question->type === Question::TYPE_MULTIPLE_CHOICE;
         
@@ -261,6 +264,7 @@ class QuestionController extends Controller
     public function destroy(Request $request, Exam $exam, Question $question): RedirectResponse|JsonResponse
     {
         $this->authorize('manageQuestions', $exam);
+        $this->ensureQuestionBelongsToExam($exam, $question);
 
         try {
             // Delete associated image if exists
@@ -358,6 +362,7 @@ class QuestionController extends Controller
     public function detail(Exam $exam, Question $question): JsonResponse
     {
         $this->authorize('manageQuestions', $exam);
+        $this->ensureQuestionBelongsToExam($exam, $question);
 
         $question->load('options');
 
@@ -386,10 +391,16 @@ class QuestionController extends Controller
         $this->authorize('manageQuestions', $exam);
 
         $validated = $request->validate([
-            'question_id' => ['required', 'integer', 'exists:questions,id'],
+            'question_id' => [
+                'required',
+                'integer',
+                Rule::exists('questions', 'id')->where(function ($query) use ($exam) {
+                    $query->where('exam_id', $exam->id);
+                }),
+            ],
         ]);
 
-        $originalQuestion = Question::with('options')->findOrFail($validated['question_id']);
+        $originalQuestion = $exam->questions()->with('options')->findOrFail($validated['question_id']);
 
         DB::transaction(function () use ($originalQuestion, $exam) {
             $duplicatedImagePath = $originalQuestion->question_image;
@@ -444,10 +455,28 @@ class QuestionController extends Controller
 
         $validated = $request->validate([
             'question_ids' => ['required', 'array'],
-            'question_ids.*' => ['integer', 'exists:questions,id'],
+            'question_ids.*' => ['integer', 'distinct', 'exists:questions,id'],
         ]);
 
-        Question::whereIn('id', $validated['question_ids'])->delete();
+        $questionIds = collect($validated['question_ids'])
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values();
+
+        $matchedCount = $exam->questions()
+            ->whereIn('id', $questionIds->all())
+            ->count();
+
+        if ($matchedCount !== $questionIds->count()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Sebagian soal tidak ditemukan pada ujian ini.',
+            ], 422);
+        }
+
+        Question::where('exam_id', $exam->id)
+            ->whereIn('id', $questionIds->all())
+            ->delete();
 
         // Reorder remaining questions
         $exam->questions()->orderBy('order')->get()->each(function ($q, $index) {
@@ -783,6 +812,16 @@ class QuestionController extends Controller
             if ($handle && is_resource($handle)) {
                 @fclose($handle);
             }
+        }
+    }
+
+    /**
+     * Ensure the question belongs to the exam in the route.
+     */
+    protected function ensureQuestionBelongsToExam(Exam $exam, Question $question): void
+    {
+        if ((int) $question->exam_id !== (int) $exam->id) {
+            abort(404, 'Soal tidak ditemukan untuk ujian ini.');
         }
     }
 }

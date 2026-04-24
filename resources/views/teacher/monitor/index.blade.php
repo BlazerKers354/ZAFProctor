@@ -5,38 +5,29 @@
 
 @section('content')
     <!-- Page Header -->
-    <div class="page-header">
-        <div class="page-block">
-            <div class="row align-items-center">
-                <div class="col-md-12">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <div class="page-header-title">
-                                <h5 class="m-b-10">Monitor: {{ $exam->title }}</h5>
-                            </div>
-                            <ul class="breadcrumb">
-                                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="ph ph-house"></i></a></li>
-                                <li class="breadcrumb-item"><a href="{{ route('teacher.exams.index') }}">Ujian</a></li>
-                                <li class="breadcrumb-item active" aria-current="page">Monitor</li>
-                            </ul>
-                        </div>
-                        <div class="d-flex align-items-center gap-3">
-                            <span class="badge bg-success animate-pulse d-flex align-items-center">
-                                <span class="me-2" style="width: 8px; height: 8px; background: #fff; border-radius: 50%; animation: pulse 1.5s infinite;"></span>
-                                Live
-                            </span>
-                            <a href="{{ route('teacher.exams.show', $exam) }}" class="btn btn-outline-secondary">
-                                <i class="ph ph-arrow-left me-2"></i>Kembali
-                            </a>
-                        </div>
-                    </div>
+    <div class="card zaf-hero mb-4 zaf-reveal">
+        <div class="card-body p-4" style="position: relative; z-index: 1;">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                    <p class="hero-kicker mb-2">Invigilation Center</p>
+                    <h5 class="hero-title mb-1">Monitor: {{ $exam->title }}</h5>
+                    <p class="mb-0" style="color: rgba(248,250,252,0.82);">Pantau aktivitas peserta dan pelanggaran secara real-time.</p>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="hero-chip">
+                        <span class="me-2" style="width: 8px; height: 8px; background: #fff; border-radius: 50%; animation: pulse 1.5s infinite;"></span>
+                        Live
+                    </span>
+                    <a href="{{ route('teacher.exams.show', $exam) }}" class="btn btn-light btn-sm">
+                        <i class="ph ph-arrow-left me-2"></i>Kembali
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Stats Summary -->
-    <div class="row mb-4">
+    <div class="row mb-4 zaf-reveal">
         <div class="col-md-3">
             <div class="card stats-card">
                 <div class="card-body">
@@ -100,7 +91,7 @@
     </div>
 
     <!-- Token Display -->
-    <div class="card mb-4 border-warning" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);">
+    <div class="card mb-4 border-warning zaf-reveal" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);">
         <div class="card-body">
             <div class="d-flex align-items-center justify-content-between">
                 <div>
@@ -119,7 +110,7 @@
     </div>
 
     <!-- Active Attempts Grid -->
-    <div class="card mb-4">
+    <div class="card mb-4 zaf-reveal">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="card-title mb-0">
                 <i class="ph ph-user-large text-success me-2"></i>Peserta Aktif

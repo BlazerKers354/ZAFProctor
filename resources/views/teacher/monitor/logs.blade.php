@@ -4,39 +4,29 @@
 @section('page-title', 'Log Pelanggaran')
 
 @section('content')
-    <!-- Page Header -->
-    <div class="page-header">
-        <div class="page-block">
-            <div class="row align-items-center">
-                <div class="col-md-12">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <div class="page-header-title">
-                                <h5 class="m-b-10">Log Pelanggaran: {{ $attempt->user->name }}</h5>
-                            </div>
-                            <ul class="breadcrumb">
-                                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="ph ph-house"></i></a></li>
-                                <li class="breadcrumb-item"><a href="{{ route('teacher.exams.index') }}">Ujian</a></li>
-                                <li class="breadcrumb-item"><a href="{{ route('teacher.monitor.index', $exam) }}">Monitor</a></li>
-                                <li class="breadcrumb-item active" aria-current="page">Log</li>
-                            </ul>
-                        </div>
-                        <div class="d-flex gap-2">
-                            <a href="{{ route('teacher.monitor.attempt', [$exam, $attempt]) }}" class="btn btn-outline-primary">
-                                <i class="ph ph-user me-2"></i>Lihat Detail
-                            </a>
-                            <a href="{{ route('teacher.monitor.index', $exam) }}" class="btn btn-outline-secondary">
-                                <i class="ph ph-arrow-left me-2"></i>Kembali
-                            </a>
-                        </div>
-                    </div>
+    <div class="card zaf-hero mb-4 zaf-reveal">
+        <div class="card-body p-4" style="position: relative; z-index: 1;">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                    <p class="hero-kicker mb-2">Violation Timeline</p>
+                    <h5 class="hero-title mb-1">Log Pelanggaran: {{ $attempt->user->name }}</h5>
+                    <p class="mb-0" style="color: rgba(248,250,252,0.82);">Tinjau jenis pelanggaran, tingkat keparahan, dan bukti snapshot secara berurutan.</p>
+                </div>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <span class="hero-chip"><i class="ph ph-warning me-1"></i>{{ $logs->total() }} Log</span>
+                    <a href="{{ route('teacher.monitor.attempt', [$exam, $attempt]) }}" class="btn btn-light btn-sm">
+                        <i class="ph ph-user me-2"></i>Lihat Detail
+                    </a>
+                    <a href="{{ route('teacher.monitor.index', $exam) }}" class="btn btn-light btn-sm">
+                        <i class="ph ph-arrow-left me-2"></i>Kembali
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Summary Cards -->
-    <div class="row mb-4">
+    <div class="row mb-4 zaf-reveal">
         <div class="col-md-4">
             <div class="card stats-card">
                 <div class="card-body">
@@ -85,7 +75,7 @@
     </div>
 
     <!-- Logs Table -->
-    <div class="card table-card">
+    <div class="card table-card zaf-reveal">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="card-title mb-0">
                 <i class="ph ph-list-dashes me-2"></i>Riwayat Pelanggaran

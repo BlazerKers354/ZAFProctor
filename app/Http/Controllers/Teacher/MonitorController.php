@@ -11,6 +11,7 @@ use App\Services\ProctoringService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class MonitorController extends Controller
@@ -143,6 +144,7 @@ class MonitorController extends Controller
     public function attempt(Exam $exam, ExamAttempt $attempt): View
     {
         $this->authorize('monitor', $exam);
+        $this->ensureAttemptBelongsToExam($exam, $attempt);
 
         $attempt->load(['user', 'answers.question', 'answers.selectedOption']);
         
@@ -165,6 +167,7 @@ class MonitorController extends Controller
     public function logs(Exam $exam, ExamAttempt $attempt): View
     {
         $this->authorize('monitor', $exam);
+        $this->ensureAttemptBelongsToExam($exam, $attempt);
 
         $logs = $attempt->proctoringLogs()
             ->with('reviewer')
@@ -180,10 +183,16 @@ class MonitorController extends Controller
     public function reviewLogs(Request $request, Exam $exam, ExamAttempt $attempt): RedirectResponse
     {
         $this->authorize('monitor', $exam);
+        $this->ensureAttemptBelongsToExam($exam, $attempt);
 
         $validated = $request->validate([
             'log_ids' => ['required', 'array'],
-            'log_ids.*' => ['integer', 'exists:proctoring_logs,id'],
+            'log_ids.*' => [
+                'integer',
+                Rule::exists('proctoring_logs', 'id')->where(function ($query) use ($attempt) {
+                    $query->where('attempt_id', $attempt->id);
+                }),
+            ],
             'notes' => ['nullable', 'string'],
         ]);
 
@@ -202,10 +211,17 @@ class MonitorController extends Controller
     public function gradeEssay(Request $request, Exam $exam, ExamAttempt $attempt): RedirectResponse
     {
         $this->authorize('monitor', $exam);
+        $this->ensureAttemptBelongsToExam($exam, $attempt);
 
         $validated = $request->validate([
             'answers' => ['required', 'array'],
-            'answers.*.id' => ['required', 'integer', 'exists:answers,id'],
+            'answers.*.id' => [
+                'required',
+                'integer',
+                Rule::exists('answers', 'id')->where(function ($query) use ($attempt) {
+                    $query->where('attempt_id', $attempt->id);
+                }),
+            ],
             'answers.*.points' => ['required', 'numeric', 'min:0'],
             'answers.*.feedback' => ['nullable', 'string'],
         ]);
@@ -234,6 +250,7 @@ class MonitorController extends Controller
     public function terminate(Request $request, Exam $exam, ExamAttempt $attempt): RedirectResponse
     {
         $this->authorize('monitor', $exam);
+        $this->ensureAttemptBelongsToExam($exam, $attempt);
 
         if (!$attempt->isInProgress()) {
             return back()->with('error', 'Attempt ini sudah tidak berlangsung.');
@@ -301,5 +318,15 @@ class MonitorController extends Controller
         };
 
         return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Ensure attempt belongs to the exam in the current route.
+     */
+    protected function ensureAttemptBelongsToExam(Exam $exam, ExamAttempt $attempt): void
+    {
+        if ((int) $attempt->exam_id !== (int) $exam->id) {
+            abort(404, 'Attempt tidak ditemukan pada ujian ini.');
+        }
     }
 }

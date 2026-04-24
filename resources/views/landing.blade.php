@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800&display=swap" rel="stylesheet" />
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         /* ===== Base ===== */
         html, body { width: 100%; max-width: 100%; overflow-x: hidden; }

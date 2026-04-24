@@ -15,6 +15,9 @@
     <!-- Phosphor Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
 
+    <!-- App Design System -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
     <style>
         /* Hide browser's default password reveal button */
         input[type="password"]::-ms-reveal,

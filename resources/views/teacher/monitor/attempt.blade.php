@@ -4,41 +4,37 @@
 @section('page-title', 'Detail Peserta')
 
 @section('content')
-    <!-- Page Header -->
-    <div class="page-header">
-        <div class="page-block">
-            <div class="row align-items-center">
-                <div class="col-md-12">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <div class="page-header-title">
-                                <h5 class="m-b-10">Detail Peserta: {{ $attempt->user->name }}</h5>
-                            </div>
-                            <ul class="breadcrumb">
-                                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="ph ph-house"></i></a></li>
-                                <li class="breadcrumb-item"><a href="{{ route('teacher.exams.index') }}">Ujian</a></li>
-                                <li class="breadcrumb-item"><a href="{{ route('teacher.monitor.index', $exam) }}">Monitor</a></li>
-                                <li class="breadcrumb-item active" aria-current="page">{{ Str::limit($attempt->user->name, 20) }}</li>
-                            </ul>
-                        </div>
-                        <div class="d-flex gap-2">
-                            <a href="{{ route('teacher.monitor.logs', [$exam, $attempt]) }}" class="btn btn-outline-primary">
-                                <i class="ph ph-list-checks me-2"></i>Lihat Log
-                            </a>
-                            <a href="{{ route('teacher.monitor.index', $exam) }}" class="btn btn-outline-secondary">
-                                <i class="ph ph-arrow-left me-2"></i>Kembali
-                            </a>
-                        </div>
-                    </div>
+    <div class="card zaf-hero mb-4 zaf-reveal">
+        <div class="card-body p-4" style="position: relative; z-index: 1;">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                    <p class="hero-kicker mb-2">Invigilation Detail</p>
+                    <h5 class="hero-title mb-1">Detail Peserta: {{ $attempt->user->name }}</h5>
+                    <p class="mb-0" style="color: rgba(248,250,252,0.82);">Pantau progres jawaban, snapshot kamera, dan jejak pelanggaran peserta.</p>
+                </div>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    @if($attempt->isSubmitted())
+                        <span class="hero-chip"><i class="ph ph-check-circle me-1"></i>Selesai</span>
+                    @elseif($attempt->isInProgress())
+                        <span class="hero-chip"><i class="ph ph-pencil-simple me-1"></i>Mengerjakan</span>
+                    @else
+                        <span class="hero-chip"><i class="ph ph-hourglass-medium me-1"></i>Belum Mulai</span>
+                    @endif
+                    <a href="{{ route('teacher.monitor.logs', [$exam, $attempt]) }}" class="btn btn-light btn-sm">
+                        <i class="ph ph-list-checks me-2"></i>Lihat Log
+                    </a>
+                    <a href="{{ route('teacher.monitor.index', $exam) }}" class="btn btn-light btn-sm">
+                        <i class="ph ph-arrow-left me-2"></i>Kembali
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="row">
+    <div class="row zaf-reveal">
         <!-- User Info -->
         <div class="col-lg-4">
-            <div class="card">
+            <div class="card mb-4 zaf-reveal">
                 <div class="card-header">
                     <h5 class="card-title mb-0">
                         <i class="ph ph-user me-2"></i>Info Peserta
@@ -63,7 +59,7 @@
             </div>
 
             <!-- Attempt Stats -->
-            <div class="card">
+            <div class="card zaf-reveal">
                 <div class="card-header">
                     <h5 class="card-title mb-0">
                         <i class="ph ph-chart-line-up me-2"></i>Statistik
@@ -111,7 +107,7 @@
         <!-- Main Content -->
         <div class="col-lg-8">
             <!-- Violation Summary -->
-            <div class="card mb-4">
+            <div class="card mb-4 zaf-reveal">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">
                         <i class="ph ph-warning text-danger me-2"></i>Ringkasan Pelanggaran
@@ -125,8 +121,8 @@
                         <div class="row g-3">
                             @foreach($violationSummary['by_type'] as $type => $count)
                                 <div class="col-md-4">
-                                    <div class="border rounded p-3 text-center">
-                                        <h4 class="text-danger mb-1">{{ $count }}</h4>
+                                    <div class="border rounded p-3 text-center" style="background: var(--zaf-accent-soft); border-color: rgba(148, 163, 184, 0.32) !important;">
+                                        <h4 class="mb-1" style="color: var(--zaf-accent);">{{ $count }}</h4>
                                         <small class="text-muted text-capitalize">{{ str_replace('_', ' ', $type) }}</small>
                                     </div>
                                 </div>
@@ -157,7 +153,7 @@
             </div>
 
             <!-- Camera Snapshots -->
-            <div class="card mb-4">
+            <div class="card mb-4 zaf-reveal">
                 <div class="card-header">
                     <h5 class="card-title mb-0">
                         <i class="ph ph-camera me-2"></i>Snapshot Kamera
@@ -189,7 +185,7 @@
             </div>
 
             <!-- Answers Preview -->
-            <div class="card">
+            <div class="card zaf-reveal">
                 <div class="card-header">
                     <h5 class="card-title mb-0">
                         <i class="ph ph-list-numbers me-2"></i>Jawaban Peserta

@@ -162,7 +162,10 @@ class ExamController extends Controller
             'face_verified' => ['sometimes', 'boolean'],
         ]);
 
-        if ($request->access_token !== $exam->access_token) {
+        $providedToken = (string) $request->input('access_token', '');
+        $expectedToken = (string) ($exam->access_token ?? '');
+
+        if (!hash_equals($expectedToken, $providedToken)) {
             // Return back to the pre-check page with error and preserve pre-check state
             return redirect()->route('student.exams.pre-check', $exam)
                 ->withErrors(['access_token' => 'Token akses tidak valid. Silakan coba lagi.'])
@@ -256,6 +259,19 @@ class ExamController extends Controller
                     'attempt_submitted' => true,
                     'redirect' => route('student.exams.result', $freshAttempt),
                 ], 409);
+            }
+
+            $domainValidationMessages = [
+                'Soal tidak valid untuk ujian ini.',
+                'Pilihan jawaban wajib diisi untuk soal pilihan ganda.',
+                'Pilihan jawaban tidak valid untuk soal ini.',
+            ];
+
+            if (in_array($e->getMessage(), $domainValidationMessages, true)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage(),
+                ], 422);
             }
 
             \Illuminate\Support\Facades\Log::error('Failed to save answer: ' . $e->getMessage(), [
