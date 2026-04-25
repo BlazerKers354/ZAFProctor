@@ -4,6 +4,13 @@
 @section('page-title', 'Kelola Ujian')
 
 @section('content')
+    @if(($fromNotification ?? false) && ($pendingGradingOnly ?? false) && $exams->count() === 0)
+        <div class="alert alert-info zaf-reveal" role="alert">
+            <i class="ph ph-info me-2"></i>
+            Tidak ada jawaban essay yang menunggu penilaian saat ini. Data mungkin sudah dinilai atau ujian terkait telah dihapus.
+        </div>
+    @endif
+
     <!-- Page Header -->
     <div class="page-header">
         <div class="page-block">
@@ -130,6 +137,9 @@
                         </select>
                     </div>
                     <div class="col-md-2">
+                        @if($pendingGradingOnly ?? false)
+                            <input type="hidden" name="pending_grading" value="1">
+                        @endif
                         <button type="submit" class="btn btn-primary w-100">
                             <i class="ph ph-funnel me-1"></i>Filter
                         </button>
@@ -145,7 +155,7 @@
             <h5 class="card-title mb-0">
                 <i class="ph ph-list-dashes me-2"></i>Daftar Ujian
             </h5>
-            @if(request()->hasAny(['search', 'course', 'status']))
+            @if(request()->hasAny(['search', 'course', 'status', 'pending_grading']))
                 <a href="{{ route('teacher.exams.index') }}" class="btn btn-sm btn-outline-secondary">
                     <i class="ph ph-x me-1"></i>Reset Filter
                 </a>
@@ -220,6 +230,11 @@
                                             <span class="fw-medium">{{ $exam->attempts_count }}</span>
                                             <span class="text-muted">/ {{ $exam->course->students_count ?? 0 }}</span>
                                         </div>
+                                        @if(($exam->pending_grading_attempts_count ?? 0) > 0)
+                                            <span class="badge bg-warning text-dark">
+                                                <i class="ph ph-pencil-simple me-1"></i>{{ $exam->pending_grading_attempts_count }} menunggu nilai
+                                            </span>
+                                        @endif
                                         @if($exam->isActive())
                                             <a href="{{ route('teacher.monitor.index', $exam) }}" 
                                                class="badge bg-success text-white text-decoration-none">

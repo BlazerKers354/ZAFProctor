@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\ForceHttps::class,
             \App\Http\Middleware\SecureHeaders::class,
+            \App\Http\Middleware\PreventSensitiveDataCaching::class,
         ]);
 
         $middleware->alias([

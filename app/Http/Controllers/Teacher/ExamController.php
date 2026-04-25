@@ -29,10 +29,18 @@ class ExamController extends Controller
     public function index(Request $request): View
     {
         $user = auth()->user();
+        $pendingGradingOnly = $request->boolean('pending_grading');
+        $fromNotification = $request->boolean('from_notification');
 
         $query = Exam::where('created_by', $user->id)
             ->with(['course', 'settings'])
-            ->withCount(['questions', 'attempts']);
+            ->withCount([
+                'questions',
+                'attempts',
+                'attempts as pending_grading_attempts_count' => function ($q) {
+                    $q->where('status', ExamAttempt::STATUS_SUBMITTED);
+                },
+            ]);
 
         // Search by title
         if ($request->filled('search')) {
@@ -50,10 +58,16 @@ class ExamController extends Controller
             $query->where('status', $request->status);
         }
 
+        if ($pendingGradingOnly) {
+            $query->whereHas('attempts', function ($q) {
+                $q->where('status', ExamAttempt::STATUS_SUBMITTED);
+            });
+        }
+
         $exams = $query->latest()->paginate(15)->withQueryString();
         $courses = $user->taughtCourses;
 
-        return view('teacher.exams.index', compact('exams', 'courses'));
+        return view('teacher.exams.index', compact('exams', 'courses', 'pendingGradingOnly', 'fromNotification'));
     }
 
     /**

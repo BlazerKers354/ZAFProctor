@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Log;
 
 class ExamService
 {
+    private const MAX_ESSAY_ANSWER_LENGTH = 10000;
+
     /**
      * Start an exam attempt for a user
      */
@@ -151,6 +153,10 @@ class ExamService
 
         // Enforce type-specific payload to prevent cross-question option injection.
         if ($question->isMultipleChoice()) {
+            if ($essayAnswer !== null && trim($essayAnswer) !== '') {
+                throw new \Exception('Payload jawaban tidak valid untuk soal pilihan ganda.');
+            }
+
             if ($optionId === null) {
                 throw new \Exception('Pilihan jawaban wajib diisi untuk soal pilihan ganda.');
             }
@@ -167,9 +173,18 @@ class ExamService
         }
 
         if ($question->isEssay()) {
+            if ($optionId !== null) {
+                throw new \Exception('Payload jawaban tidak valid untuk soal esai.');
+            }
+
             $optionId = null;
             if ($essayAnswer !== null) {
                 $essayAnswer = trim($essayAnswer);
+
+                if (mb_strlen($essayAnswer) > self::MAX_ESSAY_ANSWER_LENGTH) {
+                    throw new \Exception('Jawaban esai melebihi batas maksimal karakter.');
+                }
+
                 if ($essayAnswer === '') {
                     $essayAnswer = null;
                 }

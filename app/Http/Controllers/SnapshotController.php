@@ -15,12 +15,17 @@ class SnapshotController extends Controller
      */
     public function show(ProctoringLog $log): Response
     {
-        $user = auth()->user();
+        $attempt = $log->attempt;
 
-        // Authorization: admin, or the teacher who created the exam
-        $examCreatorId = $log->attempt?->exam?->created_by;
-        
-        if (!$user->isAdmin() && $user->id !== $examCreatorId) {
+        if (!$attempt) {
+            abort(404, 'Snapshot tidak ditemukan.');
+        }
+
+        if ((int) $log->user_id !== (int) $attempt->user_id) {
+            abort(404, 'Snapshot tidak ditemukan.');
+        }
+
+        if (!auth()->user()->can('reviewProctoring', $attempt)) {
             abort(403, 'Anda tidak memiliki akses untuk melihat snapshot ini.');
         }
 
@@ -40,7 +45,8 @@ class SnapshotController extends Controller
 
             return response($file, 200, [
                 'Content-Type' => $mimeType ?? 'image/jpeg',
-                'Cache-Control' => 'private, max-age=3600',
+                'Cache-Control' => 'private, no-store, no-cache, must-revalidate, max-age=0',
+                'Pragma' => 'no-cache',
             ]);
         } catch (\Exception $e) {
             Log::error('Failed to retrieve snapshot: ' . $e->getMessage(), [

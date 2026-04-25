@@ -11,6 +11,8 @@ use Illuminate\Validation\Rule;
 
 class ProctoringController extends Controller
 {
+    private const MAX_BASE64_SNAPSHOT_LENGTH = 7 * 1024 * 1024;
+
     public function __construct(
         protected ProctoringService $proctoringService
     ) {}
@@ -20,15 +22,7 @@ class ProctoringController extends Controller
      */
     public function logViolation(Request $request, ExamAttempt $attempt): JsonResponse
     {
-        // Validate ownership
-        if ($attempt->user_id !== auth()->id()) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
-
-        // Validate that attempt is in progress
-        if (!$attempt->isInProgress()) {
-            return response()->json(['error' => 'Exam is not in progress'], 400);
-        }
+        $this->authorize('interact', $attempt);
 
         $validated = $request->validate([
             'violation_type' => ['required', 'string', Rule::in($this->allowedViolationTypes())],
@@ -73,18 +67,35 @@ class ProctoringController extends Controller
      */
     public function uploadSnapshot(Request $request, ExamAttempt $attempt): JsonResponse
     {
-        // Validate ownership
-        if ($attempt->user_id !== auth()->id()) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
-
-        // Validate that attempt is in progress
-        if (!$attempt->isInProgress()) {
-            return response()->json(['error' => 'Exam is not in progress'], 400);
-        }
+        $this->authorize('interact', $attempt);
 
         $validated = $request->validate([
-            'snapshot' => ['required', 'string', 'max:7340032'], // Base64 encoded image
+            'snapshot' => [
+                'required',
+                'string',
+                'max:' . self::MAX_BASE64_SNAPSHOT_LENGTH,
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    if (!is_string($value)) {
+                        $fail('Format snapshot tidak valid.');
+                        return;
+                    }
+
+                    $payload = $value;
+                    if (preg_match('/^data:image\/[a-zA-Z0-9.+-]+;base64,/', $value) === 1) {
+                        $payload = substr($value, strpos($value, ',') + 1);
+                    }
+
+                    $payload = preg_replace('/\s+/', '', $payload ?? '');
+                    if (!is_string($payload) || $payload === '') {
+                        $fail('Format snapshot tidak valid.');
+                        return;
+                    }
+
+                    if (!preg_match('/^[A-Za-z0-9+\/=]+$/', $payload)) {
+                        $fail('Format snapshot tidak valid.');
+                    }
+                },
+            ],
             'violation_type' => ['nullable', 'string', Rule::in($this->allowedViolationTypes())],
             'description' => ['nullable', 'string', 'max:500'],
         ]);
@@ -142,14 +153,15 @@ class ProctoringController extends Controller
      */
     public function heartbeat(Request $request, ExamAttempt $attempt): JsonResponse
     {
-        // Validate ownership
-        if ($attempt->user_id !== auth()->id()) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
+        $this->authorize('interact', $attempt);
+
+        $validated = $request->validate([
+            'camera_enabled' => ['required', 'boolean'],
+        ]);
 
         // Update camera status
         $attempt->update([
-            'camera_enabled' => $request->boolean('camera_enabled', false),
+            'camera_enabled' => (bool) $validated['camera_enabled'],
         ]);
 
         // Check if time has expired
@@ -174,10 +186,7 @@ class ProctoringController extends Controller
      */
     public function settings(ExamAttempt $attempt): JsonResponse
     {
-        // Validate ownership
-        if ($attempt->user_id !== auth()->id()) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
+        $this->authorize('interact', $attempt);
 
         $exam = $attempt->exam;
         $settings = $exam->settings ?? (object) \App\Models\ExamSetting::getDefaults();

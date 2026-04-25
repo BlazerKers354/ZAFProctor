@@ -278,7 +278,7 @@ class UserController extends Controller
     /**
      * Display pending approval users.
      */
-    public function pendingApproval(): View
+    public function pendingApproval(Request $request): View
     {
         try {
             $pendingUsers = User::with('role')
@@ -286,11 +286,18 @@ class UserController extends Controller
                 ->latest()
                 ->paginate(15);
 
-            return view('admin.users.pending', compact('pendingUsers'));
+            $fromNotification = $request->boolean('from_notification');
+
+            return view('admin.users.pending', compact('pendingUsers', 'fromNotification'));
         } catch (\Exception $e) {
             Log::error('Failed to load pending users: ' . $e->getMessage());
-            
-            return view('admin.users.pending', ['pendingUsers' => collect()])
+
+            $pendingUsers = User::query()->whereRaw('1 = 0')->paginate(15);
+
+            return view('admin.users.pending', [
+                'pendingUsers' => $pendingUsers,
+                'fromNotification' => $request->boolean('from_notification'),
+            ])
                 ->with('error', 'Gagal memuat daftar pengguna pending.');
         }
     }

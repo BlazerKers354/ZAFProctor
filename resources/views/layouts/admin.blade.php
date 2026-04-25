@@ -1001,7 +1001,7 @@
                                 <h6 class="mb-0">Notifikasi</h6>
                             </div>
                             @if($pendingUsers > 0)
-                                <a class="dropdown-item py-3" href="{{ route('admin.users.pending') }}">
+                                <a class="dropdown-item py-3" href="{{ route('admin.users.pending', ['from_notification' => 1]) }}">
                                     <div class="d-flex align-items-center">
                                         <div class="flex-shrink-0">
                                             <span class="badge bg-warning p-2 rounded">

@@ -11,6 +11,17 @@ class ExamAttemptPolicy
     use HandlesAuthorization;
 
     /**
+     * Determine whether the user can interact with an active attempt
+     * (save answer, submit, sync time, and proctoring actions).
+     */
+    public function interact(User $user, ExamAttempt $attempt): bool
+    {
+        return $user->isStudent()
+            && $attempt->user_id === $user->id
+            && $attempt->isInProgress();
+    }
+
+    /**
      * Determine whether the user can view the attempt.
      */
     public function view(User $user, ExamAttempt $attempt): bool

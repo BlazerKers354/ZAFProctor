@@ -215,6 +215,8 @@ class ExamController extends Controller
      */
     public function take(ExamAttempt $attempt): View
     {
+        $this->authorize('interact', $attempt);
+
         // Middleware already checks if attempt is valid and in progress
         $attempt->load(['exam.settings', 'answers']);
         
@@ -231,10 +233,12 @@ class ExamController extends Controller
      */
     public function saveAnswer(Request $request, ExamAttempt $attempt): JsonResponse
     {
+        $this->authorize('interact', $attempt);
+
         $validated = $request->validate([
             'question_id' => ['required', 'integer', 'exists:questions,id'],
             'option_id' => ['nullable', 'integer', 'exists:question_options,id'],
-            'essay_answer' => ['nullable', 'string'],
+            'essay_answer' => ['nullable', 'string', 'max:10000'],
         ]);
 
         try {
@@ -265,6 +269,9 @@ class ExamController extends Controller
                 'Soal tidak valid untuk ujian ini.',
                 'Pilihan jawaban wajib diisi untuk soal pilihan ganda.',
                 'Pilihan jawaban tidak valid untuk soal ini.',
+                'Payload jawaban tidak valid untuk soal pilihan ganda.',
+                'Payload jawaban tidak valid untuk soal esai.',
+                'Jawaban esai melebihi batas maksimal karakter.',
             ];
 
             if (in_array($e->getMessage(), $domainValidationMessages, true)) {
@@ -291,6 +298,8 @@ class ExamController extends Controller
      */
     public function submit(Request $request, ExamAttempt $attempt): RedirectResponse
     {
+        $this->authorize('interact', $attempt);
+
         try {
             $attempt = $this->examService->submitExam($attempt, false);
 
@@ -310,6 +319,8 @@ class ExamController extends Controller
      */
     public function autoSubmit(ExamAttempt $attempt): JsonResponse
     {
+        $this->authorize('interact', $attempt);
+
         try {
             $attempt = $this->examService->submitExam($attempt, true);
 
@@ -350,6 +361,8 @@ class ExamController extends Controller
      */
     public function timeRemaining(ExamAttempt $attempt): JsonResponse
     {
+        $this->authorize('interact', $attempt);
+
         try {
             return response()->json([
                 'remaining' => $attempt->remaining_time ?? 0,
@@ -368,9 +381,15 @@ class ExamController extends Controller
      */
     public function syncTime(Request $request, ExamAttempt $attempt): JsonResponse
     {
+        $this->authorize('interact', $attempt);
+
+        $validated = $request->validate([
+            'client_time' => ['nullable', 'integer', 'min:0', 'max:4102444800'],
+        ]);
+
         try {
             $serverTime = now()->timestamp;
-            $clientTime = $request->input('client_time');
+            $clientTime = $validated['client_time'] ?? null;
             
             // Calculate time drift
             $drift = abs($serverTime - ($clientTime ?? $serverTime));

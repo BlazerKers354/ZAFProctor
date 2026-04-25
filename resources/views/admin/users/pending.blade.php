@@ -4,6 +4,13 @@
 @section('page-title', 'Approval User')
 
 @section('content')
+    @if(($fromNotification ?? false) && $pendingUsers->count() === 0)
+        <div class="alert alert-info" role="alert">
+            <i class="ph ph-info me-2"></i>
+            Tidak ada user yang menunggu approval saat ini. Notifikasi mungkin sudah terselesaikan.
+        </div>
+    @endif
+
     <!-- Page Header -->
     <div class="page-header">
         <div class="page-block">

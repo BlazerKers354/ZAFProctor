@@ -1003,7 +1003,10 @@
                         <a class="pc-head-link dropdown-toggle arrow-none position-relative" data-bs-toggle="dropdown" href="#" role="button">
                             <i class="ph ph-bell"></i>
                             @php
-                                $pendingGrading = \App\Models\ExamAttempt::whereHas('exam', fn($q) => $q->where('created_by', auth()->id()))->where('status', 'submitted')->count();
+                                $pendingGrading = \App\Models\ExamAttempt::query()
+                                    ->where('status', \App\Models\ExamAttempt::STATUS_SUBMITTED)
+                                    ->whereHas('exam', fn($q) => $q->where('created_by', auth()->id()))
+                                    ->count();
                             @endphp
                             @if($pendingGrading > 0)
                                 <span class="badge bg-danger rounded-circle position-absolute" style="top: 2px; right: 2px; font-size: 10px; padding: 4px 6px;">{{ $pendingGrading }}</span>
@@ -1014,7 +1017,7 @@
                                 <h6 class="mb-0">Notifikasi</h6>
                             </div>
                             @if($pendingGrading > 0)
-                                <a class="dropdown-item py-3" href="{{ route('teacher.exams.index') }}">
+                                <a class="dropdown-item py-3" href="{{ route('teacher.exams.index', ['pending_grading' => 1, 'from_notification' => 1]) }}">
                                     <div class="d-flex align-items-center">
                                         <div class="flex-shrink-0">
                                             <span class="badge bg-warning p-2 rounded">
