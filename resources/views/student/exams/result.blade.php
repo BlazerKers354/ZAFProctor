@@ -31,14 +31,14 @@
                 @php
                     $bgClass = $attempt->is_passed ? 'bg-success' : 'bg-danger';
                 @endphp
-                <div class="card-header {{ $bgClass }} text-white text-center py-5">
-                    <div class="score-circle bg-white bg-opacity-25 rounded-4 d-inline-flex align-items-center justify-content-center mx-auto mb-3" style="width: 96px; height: 96px;">
+                <div class="card-header {{ $bgClass }} bg-opacity-100 bg-gradient text-white text-center py-5">
+                    <div class="score-circle bg-white bg-opacity-15 border border-white border-opacity-25 rounded-4 d-inline-flex align-items-center justify-content-center mx-auto mb-3" style="width: 96px; height: 96px;">
                         <span class="f-36 f-w-600 text-white">{{ number_format($attempt->percentage, 0) }}%</span>
                     </div>
                     <h4 class="text-white mb-2">
                         {{ $attempt->is_passed ? '🎉 Selamat! Anda Lulus' : '😔 Maaf, Anda Tidak Lulus' }}
                     </h4>
-                    <p class="text-white-50 mb-0">
+                    <p class="text-white-75 mb-0">
                         Skor: {{ number_format($attempt->score, 2) }} / {{ $attempt->exam->total_points }}
                     </p>
                 </div>
@@ -134,7 +134,7 @@
                         </div>
                         <div class="col-6">
                             <small class="text-muted">Durasi Pengerjaan:</small><br>
-                            <span class="f-w-500">{{ $attempt->started_at->diffForHumans($attempt->submitted_at, true) }}</span>
+                            <span class="f-w-500">{{ $attempt->exam->duration }} menit</span>
                         </div>
                         <div class="col-6">
                             <small class="text-muted">Metode Submit:</small><br>

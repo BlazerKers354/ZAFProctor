@@ -208,14 +208,14 @@
         }
 
         /* User Card in Sidebar */
-        .pc-user-card {
+        .pc-sidebar .pc-user-card {
             margin: 16px;
-            background: rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.12) !important;
             border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.12);
         }
 
-        .pc-user-card .user-avatar {
+        .pc-sidebar .pc-user-card .user-avatar {
             width: 45px;
             height: 45px;
             border-radius: 12px;
