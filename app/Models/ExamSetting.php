@@ -83,9 +83,35 @@ class ExamSetting extends Model
         return Attribute::get(fn () => $this->block_keyboard_shortcuts ?? true);
     }
 
-    protected function screenCaptureEnabled(): Attribute
+    /**
+     * Resolve the violation limit from settings.
+     * Returns null when unlimited (0 or not configured), positive int otherwise.
+     * This is the SINGLE SOURCE OF TRUTH for violation threshold resolution.
+     */
+    public function resolveViolationLimit(): ?int
     {
-        return Attribute::get(fn () => false); // Feature not implemented
+        $threshold = $this->auto_submit_threshold;
+
+        if ($threshold === null) {
+            $threshold = $this->max_tab_switches;
+        }
+
+        if (!is_numeric($threshold)) {
+            return null;
+        }
+
+        $value = (int) $threshold;
+
+        // 0 means unlimited → represented as null
+        return $value > 0 ? $value : null;
+    }
+
+    /**
+     * Check if violations are unlimited (no auto-submit threshold).
+     */
+    public function isViolationLimitUnlimited(): bool
+    {
+        return $this->resolveViolationLimit() === null;
     }
 
     /**

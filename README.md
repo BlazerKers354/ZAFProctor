@@ -65,7 +65,7 @@ ZAFProctor adalah sistem ujian online yang dirancang untuk institusi pendidikan 
 - **Blokir Keyboard Shortcut**: Mencegah shortcut keyboard terlarang (Ctrl, Alt, Meta, Function keys, PrintScreen)
 - **Deteksi DevTools**: Mendeteksi pembukaan developer tools (3 metode: debugger timing, window size, console access)
 - **Console Disable**: Menonaktifkan semua console method browser untuk mencegah manipulasi via console
-- **Anti-Tampering**: Integrity check berkala memastikan fungsi anti-cheat tidak dimodifikasi atau dihapus
+- **Integrity Monitor**: Integrity check berkala memastikan fungsi pemantauan tidak dimodifikasi atau dihapus
 - **Print Blocking**: Mencegah aksi cetak halaman (beforeprint event + window.print override)
 - **Picture-in-Picture Blocking**: Mencegah video PiP
 - **Window.open Blocking**: Mencegah pembukaan window/tab baru via script
@@ -286,6 +286,23 @@ Sistem mendeteksi dan mencatat berbagai jenis pelanggaran dengan tingkat severit
 | `max_attempts` | 1 | Batas percobaan ujian (0 = unlimited) |
 | `grade_method` | highest | Metode penilaian (highest/latest/average) |
 
+## ⚠️ Batasan Sistem
+
+Sebagai sistem pemantauan ujian berbasis browser (browser-based proctoring), ZAFProctor memiliki keterbatasan yang perlu dipahami:
+
+| Batasan | Penjelasan |
+|---------|------------|
+| **Perangkat kedua** | Tidak dapat mendeteksi jika peserta menggunakan perangkat lain (HP, tablet) untuk mencari jawaban |
+| **Virtual camera** | Tidak dapat mendeteksi penggunaan virtual camera atau software manipulasi webcam |
+| **Screen mirroring** | Tidak dapat mendeteksi jika layar di-mirror ke perangkat lain |
+| **Layar fisik lain** | Tidak dapat mendeteksi konten di monitor/layar fisik kedua |
+| **OS-level keylogger** | Tidak dapat mendeteksi keylogger atau software monitoring di level sistem operasi |
+| **Browser extension** | Deteksi terbatas pada extension yang memodifikasi DOM; extension read-only mungkin tidak terdeteksi |
+
+> **Catatan Penting**: face-api.js (TinyFaceDetector) melakukan **deteksi keberadaan wajah** (face presence detection), **bukan pengenalan identitas wajah** (face recognition/identification). Sistem ini tidak memverifikasi apakah wajah yang terdeteksi adalah wajah peserta yang terdaftar.
+
+> **Terminologi yang Tepat**: Sistem ini adalah "pemantauan ujian online" (online exam monitoring) atau "browser-based proctoring assistant", bukan "anti-cheat system" atau "AI proctoring".
+
 ## 📁 Struktur Project
 
 ```
@@ -366,7 +383,6 @@ zafproctor/
 │       ├── layouts/
 │       │   ├── admin.blade.php              # Layout panel admin
 │       │   ├── app.blade.php                # Layout base
-│       │   ├── exam.blade.php               # Layout pengerjaan ujian
 │       │   ├── guest.blade.php              # Layout halaman tamu
 │       │   ├── navigation.blade.php
 │       │   ├── student.blade.php            # Layout panel siswa

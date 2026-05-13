@@ -24,7 +24,7 @@ class SecureHeaders
         $response->headers->set('Cross-Origin-Resource-Policy', 'same-origin');
         $response->headers->set(
             'Permissions-Policy',
-            'camera=(self), microphone=(), geolocation=(), payment=(), usb=(), fullscreen=(self)'
+            'camera=(self), microphone=(), geolocation=(), payment=(), usb=(), fullscreen=(self), display-capture=(), picture-in-picture=()'
         );
 
         if ($request->isSecure()) {

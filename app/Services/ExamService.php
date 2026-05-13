@@ -193,6 +193,17 @@ class ExamService
         
         try {
             $answer = DB::transaction(function () use ($attempt, $questionId, $optionId, $essayAnswer) {
+                // Lock attempt row to prevent race with concurrent submitExam
+                $lockedAttempt = ExamAttempt::where('id', $attempt->id)->lockForUpdate()->first();
+
+                if (!$lockedAttempt || !$lockedAttempt->isInProgress()) {
+                    throw new \Exception('Ujian sudah selesai. Tidak dapat menyimpan jawaban.');
+                }
+
+                if ($lockedAttempt->hasExceededViolations()) {
+                    throw new \Exception('Ujian telah dikumpulkan otomatis karena pelanggaran mencapai batas.');
+                }
+
                 return Answer::updateOrCreate(
                     [
                         'attempt_id' => $attempt->id,
@@ -259,18 +270,36 @@ class ExamService
     }
 
     /**
-     * Grade multiple choice answers
+     * Grade multiple choice answers using batch lookup
      */
     protected function gradeMultipleChoiceAnswers(ExamAttempt $attempt): void
     {
-        $answers = $attempt->answers()
-            ->whereHas('question', function ($query) {
-                $query->where('type', Question::TYPE_MULTIPLE_CHOICE);
-            })
-            ->get();
+        // Load all answers with their questions and options in one query
+        $attempt->load(['answers.question.options']);
 
-        foreach ($answers as $answer) {
-            $answer->grade();
+        // Build lookup: question_id => correct_option_id
+        $correctOptionMap = [];
+        $pointsMap = [];
+        foreach ($attempt->answers as $answer) {
+            $question = $answer->question;
+            if ($question && $question->isMultipleChoice() && !isset($correctOptionMap[$question->id])) {
+                $correctOption = $question->options->first(fn($o) => $o->is_correct);
+                $correctOptionMap[$question->id] = $correctOption?->id;
+                $pointsMap[$question->id] = $question->points;
+            }
+        }
+
+        // Grade each MC answer in memory, then persist
+        foreach ($attempt->answers as $answer) {
+            if (!isset($correctOptionMap[$answer->question_id])) {
+                continue; // Not a multiple choice question
+            }
+
+            $correctOptionId = $correctOptionMap[$answer->question_id];
+            $isCorrect = $answer->selected_option_id === $correctOptionId;
+            $answer->is_correct = $isCorrect;
+            $answer->points_earned = $isCorrect ? ($pointsMap[$answer->question_id] ?? 0) : 0;
+            $answer->save();
         }
     }
 
@@ -292,13 +321,10 @@ class ExamService
      */
     public function shouldAutoSubmitDueToViolations(ExamAttempt $attempt): bool
     {
-        $settings = $attempt->exam->settings;
-        $maxViolations = $settings?->auto_submit_threshold
-            ?? $settings?->max_tab_switches
-            ?? 5;
+        $maxViolations = $attempt->exam->settings?->resolveViolationLimit();
 
-        $maxViolations = is_numeric($maxViolations) ? (int) $maxViolations : 5;
-        if ($maxViolations <= 0) {
+        // null = unlimited, no auto-submit
+        if ($maxViolations === null) {
             return false;
         }
 

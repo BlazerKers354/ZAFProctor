@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="ZAFProctor adalah platform CBT dengan AI proctoring untuk ujian online yang aman, terpantau, dan terukur.">
+    <meta name="description" content="ZAFProctor adalah platform CBT dengan pemantauan ujian online untuk pelaksanaan ujian yang aman, terpantau, dan terukur.">
     <meta name="theme-color" content="#020617">
     <title>ZAFProctor - Sistem Ujian Online dengan Pengawasan Kamera</title>
     <!-- Bootstrap 5.3.2 CSS -->
@@ -592,12 +592,12 @@
                     <h1 class="hero-title text-4xl text-md-5xl text-lg-6xl fw-bolder leading-tight mb-4">
                         Ujian Online<br>
                         <span class="gradient-text">Aman &amp; Terpercaya</span><br>
-                        dengan AI Proctoring
+                        dengan Pengawasan Kamera
                     </h1>
 
                     <p class="text-lg text-slate-400 leading-relaxed mb-4" style="max-width:36rem;">
                         Platform Computer Based Test (CBT) dengan pengawasan kamera real-time,
-                        deteksi kecurangan otomatis, dan penilaian instan untuk menjamin
+                        deteksi indikasi pelanggaran secara otomatis, dan penilaian instan untuk menjaga
                         integritas setiap ujian online.
                     </p>
 

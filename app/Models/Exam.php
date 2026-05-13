@@ -50,40 +50,58 @@ class Exam extends Model
 
         static::creating(function ($exam) {
             if (empty($exam->access_token)) {
-                $exam->access_token = Str::random(32);
+                $exam->access_token = self::generateAccessToken();
             }
         });
 
-        // Cascade soft deletes to related models
+        // Cascade soft deletes to related models using bulk updates
         static::deleting(function ($exam) {
             if ($exam->isForceDeleting()) {
                 return; // Let DB cascade handle hard deletes
             }
-            // Soft delete children — they now all support SoftDeletes
-            $exam->questions()->each(function ($question) {
-                $question->options()->delete(); // QuestionOption has no SoftDeletes (disposable)
-                $question->answers()->delete(); // Soft delete answers tied to this question
-                $question->delete();            // Soft delete question
-            });
-            $exam->attempts()->each(function ($attempt) {
-                $attempt->answers()->delete();        // Soft delete answers
-                $attempt->proctoringLogs()->delete();  // Hard delete logs (disposable)
-                $attempt->delete();                    // Soft delete attempt
-            });
+
+            $now = now();
+            $questionIds = $exam->questions()->pluck('id');
+            $attemptIds = $exam->attempts()->pluck('id');
+
+            // Soft delete questions and their children
+            if ($questionIds->isNotEmpty()) {
+                // QuestionOption has no SoftDeletes (disposable) — hard delete
+                \App\Models\QuestionOption::whereIn('question_id', $questionIds)->delete();
+                // Soft delete answers tied to these questions
+                \App\Models\Answer::whereIn('question_id', $questionIds)->update(['deleted_at' => $now]);
+                // Soft delete questions
+                $exam->questions()->update(['deleted_at' => $now]);
+            }
+
+            // Soft delete attempts and their children
+            if ($attemptIds->isNotEmpty()) {
+                // Soft delete answers tied to attempts
+                \App\Models\Answer::whereIn('attempt_id', $attemptIds)->update(['deleted_at' => $now]);
+                // Hard delete proctoring logs (disposable)
+                \App\Models\ProctoringLog::whereIn('attempt_id', $attemptIds)->delete();
+                // Soft delete attempts
+                $exam->attempts()->update(['deleted_at' => $now]);
+            }
             // Keep settings so restored exams retain their original configuration.
         });
 
         // Restore cascaded records when exam is restored
         static::restoring(function ($exam) {
-            // Cascade restore children that were soft-deleted with the exam
-            $exam->questions()->onlyTrashed()->each(function ($question) {
-                $question->restore();
-                $question->answers()->onlyTrashed()->restore();
-            });
-            $exam->attempts()->onlyTrashed()->each(function ($attempt) {
-                $attempt->restore();
-                $attempt->answers()->onlyTrashed()->restore();
-            });
+            $questionIds = $exam->questions()->onlyTrashed()->pluck('id');
+            $attemptIds = $exam->attempts()->onlyTrashed()->pluck('id');
+
+            // Restore questions and their answers
+            if ($questionIds->isNotEmpty()) {
+                $exam->questions()->onlyTrashed()->update(['deleted_at' => null]);
+                \App\Models\Answer::onlyTrashed()->whereIn('question_id', $questionIds)->update(['deleted_at' => null]);
+            }
+
+            // Restore attempts and their answers
+            if ($attemptIds->isNotEmpty()) {
+                $exam->attempts()->onlyTrashed()->update(['deleted_at' => null]);
+                \App\Models\Answer::onlyTrashed()->whereIn('attempt_id', $attemptIds)->update(['deleted_at' => null]);
+            }
         });
     }
 
@@ -226,11 +244,20 @@ class Exam extends Model
     }
 
     /**
-     * Generate new access token
+     * Generate a new access token.
+     * Centralized helper to ensure consistent format across all callers.
+     */
+    public static function generateAccessToken(): string
+    {
+        return strtoupper(Str::random(8));
+    }
+
+    /**
+     * Regenerate access token for this exam.
      */
     public function regenerateToken(): string
     {
-        $this->access_token = Str::random(32);
+        $this->access_token = self::generateAccessToken();
         $this->save();
         return $this->access_token;
     }

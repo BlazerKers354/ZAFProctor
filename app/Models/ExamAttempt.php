@@ -154,16 +154,12 @@ class ExamAttempt extends Model
     }
 
     /**
-     * Get max violations allowed for this attempt
+     * Get max violations allowed for this attempt.
+     * Returns 0 when unlimited.
      */
     public function getMaxViolationsAttribute(): int
     {
-        $settings = $this->exam->settings;
-        $maxViolations = $settings?->auto_submit_threshold
-            ?? $settings?->max_tab_switches
-            ?? 5;
-
-        return is_numeric($maxViolations) ? (int) $maxViolations : 5;
+        return $this->exam->settings?->resolveViolationLimit() ?? 0;
     }
 
     /**

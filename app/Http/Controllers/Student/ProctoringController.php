@@ -24,11 +24,35 @@ class ProctoringController extends Controller
     {
         $this->authorize('interact', $attempt);
 
+        $settings = $attempt->exam->settings;
+
+        // Map violation types to their required settings
+        $featureGuards = [
+            'tab_switch' => $settings?->tab_switch_detection ?? true,
+            'window_blur' => $settings?->tab_switch_detection ?? true,
+            'fullscreen_exit' => $settings?->browser_lock_enabled ?? true,
+            'camera_disabled' => $settings?->webcam_enabled ?? true,
+            'no_face_detected' => $settings?->webcam_enabled ?? true,
+            'multiple_faces' => $settings?->webcam_enabled ?? true,
+            'copy_paste' => $settings?->block_keyboard_shortcuts ?? true,
+            'right_click' => $settings?->block_keyboard_shortcuts ?? true,
+            'keyboard_shortcut' => $settings?->block_keyboard_shortcuts ?? true,
+        ];
+
         $validated = $request->validate([
             'violation_type' => ['required', 'string', Rule::in($this->allowedViolationTypes())],
             'description' => ['nullable', 'string', 'max:1000'],
             'metadata' => ['nullable', 'array', 'max:20'],
         ]);
+
+        // Short-circuit if the monitoring feature for this violation type is disabled
+        $violationType = $validated['violation_type'];
+        if (isset($featureGuards[$violationType]) && !$featureGuards[$violationType]) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Fitur pemantauan terkait tidak aktif untuk ujian ini.',
+            ], 422);
+        }
 
         if (array_key_exists('metadata', $validated)) {
             $encodedMetadata = json_encode($validated['metadata']);
@@ -68,6 +92,14 @@ class ProctoringController extends Controller
     public function uploadSnapshot(Request $request, ExamAttempt $attempt): JsonResponse
     {
         $this->authorize('interact', $attempt);
+
+        // Short-circuit if webcam is not enabled for this exam
+        if (!($attempt->exam->settings?->webcam_enabled ?? true)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Fitur webcam tidak aktif untuk ujian ini.',
+            ], 422);
+        }
 
         $validated = $request->validate([
             'snapshot' => [
@@ -209,13 +241,12 @@ class ProctoringController extends Controller
     }
 
     /**
-     * Resolve max violations from settings (0 means unlimited).
+     * Resolve max violations from settings.
+     * Returns 0 when unlimited (for backward-compatible JSON response format).
      */
     protected function resolveMaxViolations($settings): int
     {
-        $maxViolations = $settings?->auto_submit_threshold ?? $settings?->max_tab_switches ?? 5;
-
-        return is_numeric($maxViolations) ? max(0, (int) $maxViolations) : 5;
+        return $settings?->resolveViolationLimit() ?? 0;
     }
 
     /**

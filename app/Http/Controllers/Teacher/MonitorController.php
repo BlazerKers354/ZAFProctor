@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Teacher;
 
 use App\Http\Controllers\Controller;
-use App\Models\Answer;
 use App\Models\Exam;
 use App\Models\ExamAttempt;
 use App\Services\ExamService;
@@ -11,7 +10,6 @@ use App\Services\ProctoringService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class MonitorController extends Controller
@@ -206,45 +204,6 @@ class MonitorController extends Controller
     }
 
     /**
-     * Grade essay answers for an attempt.
-     */
-    public function gradeEssay(Request $request, Exam $exam, ExamAttempt $attempt): RedirectResponse
-    {
-        $this->authorize('monitor', $exam);
-        $this->ensureAttemptBelongsToExam($exam, $attempt);
-
-        $validated = $request->validate([
-            'answers' => ['required', 'array'],
-            'answers.*.id' => [
-                'required',
-                'integer',
-                Rule::exists('answers', 'id')->where(function ($query) use ($attempt) {
-                    $query->where('attempt_id', $attempt->id);
-                }),
-            ],
-            'answers.*.points' => ['required', 'numeric', 'min:0'],
-            'answers.*.feedback' => ['nullable', 'string'],
-        ]);
-
-        foreach ($validated['answers'] as $answerData) {
-            $answer = Answer::find($answerData['id']);
-            
-            if ($answer && $answer->attempt_id === $attempt->id) {
-                $this->examService->gradeEssayAnswer(
-                    $answer,
-                    $answerData['points'],
-                    $answerData['feedback'] ?? null
-                );
-            }
-        }
-
-        // Update attempt status to graded
-        $attempt->update(['status' => ExamAttempt::STATUS_GRADED]);
-
-        return back()->with('success', 'Penilaian esai berhasil disimpan.');
-    }
-
-    /**
      * Terminate a student's exam attempt.
      */
     public function terminate(Request $request, Exam $exam, ExamAttempt $attempt): RedirectResponse
@@ -260,64 +219,6 @@ class MonitorController extends Controller
         $this->examService->submitExam($attempt, true);
 
         return back()->with('success', 'Ujian peserta berhasil dihentikan.');
-    }
-
-    /**
-     * Export results to CSV.
-     */
-    public function exportResults(Exam $exam)
-    {
-        $this->authorize('monitor', $exam);
-
-        $attempts = ExamAttempt::where('exam_id', $exam->id)
-            ->submitted()
-            ->with('user')
-            ->get();
-
-        $filename = "hasil_ujian_{$exam->id}_" . now()->format('Y-m-d_His') . '.csv';
-
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
-        ];
-
-        $callback = function () use ($attempts) {
-            $file = fopen('php://output', 'w');
-            
-            // Header
-            fputcsv($file, [
-                'No',
-                'NIM',
-                'Nama',
-                'Mulai',
-                'Selesai',
-                'Skor',
-                'Persentase',
-                'Status Lulus',
-                'Jumlah Pelanggaran',
-                'Auto Submit',
-            ]);
-
-            // Data
-            foreach ($attempts as $index => $attempt) {
-                fputcsv($file, [
-                    $index + 1,
-                    $attempt->user->student_id,
-                    $attempt->user->name,
-                    $attempt->started_at?->format('Y-m-d H:i:s'),
-                    $attempt->submitted_at?->format('Y-m-d H:i:s'),
-                    $attempt->score,
-                    $attempt->percentage . '%',
-                    $attempt->is_passed ? 'Lulus' : 'Tidak Lulus',
-                    $attempt->violation_count,
-                    $attempt->is_auto_submitted ? 'Ya' : 'Tidak',
-                ]);
-            }
-
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
     }
 
     /**

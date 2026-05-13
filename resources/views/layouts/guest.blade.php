@@ -40,7 +40,7 @@
         </div>
         <h1 class="text-center text-3xl font-bold" style="background: linear-gradient(135deg, #fff, rgba(255,255,255,0.8)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.3px;">ZAFProctor</h1>
         <p class="mt-2 text-center text-sm" style="color: rgba(255,255,255,0.5);">
-            Sistem Ujian Online dengan AI Proctoring
+            Sistem Pemantauan Ujian Online
         </p>
     </div>
 

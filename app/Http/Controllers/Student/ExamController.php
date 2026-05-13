@@ -30,11 +30,11 @@ class ExamController extends Controller
 
         $availableExams = Exam::whereIn('course_id', $enrolledCourseIds)
             ->where('status', Exam::STATUS_PUBLISHED)
-            ->with(['course', 'settings'])
+            ->with(['course', 'settings', 'attempts' => fn($q) => $q->where('user_id', $user->id)])
             ->orderBy('start_time')
             ->get()
             ->map(function ($exam) use ($user) {
-                $attempts = $exam->attempts()->where('user_id', $user->id)->get();
+                $attempts = $exam->attempts;
                 
                 // Get in-progress attempt
                 $inProgressAttempt = $attempts->first(fn($a) => $a->isInProgress());
@@ -75,7 +75,8 @@ class ExamController extends Controller
         $user = auth()->user();
         
         // Get all attempts for this user
-        $attempts = $exam->attempts()->where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
+        $exam->load(['settings', 'attempts' => fn($q) => $q->where('user_id', $user->id)->orderBy('created_at', 'desc')]);
+        $attempts = $exam->attempts;
         
         // Get active attempt (in progress) or null
         $attempt = $attempts->first(fn($a) => $a->isInProgress());
@@ -476,7 +477,7 @@ class ExamController extends Controller
 
     /**
      * Resolve violation threshold from settings.
-     * Returns null when threshold is not explicitly configured.
+     * Returns null when threshold is not explicitly configured or is unlimited (0).
      */
     protected function resolveMaxViolationsFromSettings($settings): ?int
     {
@@ -484,15 +485,6 @@ class ExamController extends Controller
             return null;
         }
 
-        $maxViolations = $settings->auto_submit_threshold;
-        if ($maxViolations === null) {
-            $maxViolations = $settings->max_tab_switches;
-        }
-
-        if (!is_numeric($maxViolations)) {
-            return null;
-        }
-
-        return (int) $maxViolations;
+        return $settings->resolveViolationLimit();
     }
 }

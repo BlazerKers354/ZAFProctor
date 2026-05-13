@@ -146,7 +146,7 @@ class ExamController extends Controller
                 'duration' => $validated['duration'],
                 'status' => $finalStatus,
                 'created_by' => auth()->id(),
-                'access_token' => $validated['access_token'] ?? strtoupper(Str::random(8)),
+                'access_token' => $validated['access_token'] ?? Exam::generateAccessToken(),
             ]);
 
             // Create exam settings
@@ -357,7 +357,7 @@ class ExamController extends Controller
     {
         $this->authorize('update', $exam);
 
-        $exam->update(['access_token' => strtoupper(Str::random(8))]);
+        $exam->update(['access_token' => Exam::generateAccessToken()]);
 
         return back()->with('success', 'Token akses berhasil diperbarui.');
     }
@@ -376,7 +376,7 @@ class ExamController extends Controller
             $newExam = $exam->replicate();
             $newExam->title = $exam->title . ' (Salinan)';
             $newExam->status = Exam::STATUS_DRAFT;
-            $newExam->access_token = strtoupper(Str::random(8));
+            $newExam->access_token = Exam::generateAccessToken();
             $newExam->created_by = auth()->id();
             $newExam->save();
 

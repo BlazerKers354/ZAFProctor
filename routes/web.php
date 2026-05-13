@@ -40,7 +40,7 @@ Route::get('/panduan-pengguna/download', [GuideController::class, 'download'])->
 // Guest Routes (Auth)
 Route::middleware('guest')->group(function () {
     Route::get('login', [LoginController::class, 'create'])->name('login');
-    Route::post('login', [LoginController::class, 'store'])->middleware('throttle:10,1');
+    Route::post('login', [LoginController::class, 'store']);
     
     // Registration routes - semua registrasi dilakukan di halaman login
     Route::get('register', function() {

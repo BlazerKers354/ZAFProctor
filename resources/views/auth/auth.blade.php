@@ -1111,7 +1111,7 @@
         <div class="brand-text">
             <h1>ZAFProctor</h1>
             <div class="brand-sub">
-                <p>Sistem Ujian Online dengan AI Proctoring</p>
+                <p>Sistem Pemantauan Ujian Online</p>
                 <span class="brand-dot"></span>
                 <div class="brand-badge">
                     <i class="ph ph-circle"></i> Secure &bull; Reliable &bull; Smart
@@ -1359,7 +1359,7 @@
                     <h1>Halo, Teman!</h1>
                     <p>Bergabung dan rasakan pengalaman ujian online yang aman</p>
                     <ul class="toggle-features">
-                        <li><i class="ph ph-check-circle"></i> AI Proctoring otomatis</li>
+                        <li><i class="ph ph-check-circle"></i> Pemantauan ujian otomatis</li>
                         <li><i class="ph ph-check-circle"></i> Ujian aman & terpercaya</li>
                         <li><i class="ph ph-check-circle"></i> Gratis untuk siswa & guru</li>
                     </ul>
