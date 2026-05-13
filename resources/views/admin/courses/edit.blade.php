@@ -132,7 +132,7 @@
             </div>
             
             <div class="card border-danger">
-                <div class="card-header bg-danger text-white">
+                <div class="card-header bg-light-danger">
                     <h5 class="card-title mb-0">
                         <i class="ph ph-warning me-2"></i>Zona Berbahaya
                     </h5>

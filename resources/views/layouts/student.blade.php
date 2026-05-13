@@ -317,7 +317,6 @@
             margin: 0;
             font-size: 16px;
             font-weight: 600;
-            color: #212529;
         }
 
         .card-body {

@@ -466,8 +466,8 @@
 
             <!-- Access Token -->
             <div class="card mb-4">
-                <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-                    <h5 class="mb-0 text-white"><i class="ph ph-key me-2"></i>Token Akses Ujian</h5>
+                <div class="card-header bg-light-success">
+                    <h5 class="mb-0"><i class="ph ph-key me-2"></i>Token Akses Ujian</h5>
                 </div>
                 <div class="card-body">
                     <p class="text-muted small mb-3">Bagikan token ini kepada siswa untuk mengakses ujian.</p>
@@ -495,7 +495,7 @@
 
             <!-- Danger Zone -->
             <div class="card border-danger">
-                <div class="card-header bg-danger text-white">
+                <div class="card-header bg-light-danger">
                     <h5 class="mb-0"><i class="ph ph-warning me-2"></i>Zona Berbahaya</h5>
                 </div>
                 <div class="card-body">

@@ -189,7 +189,7 @@
     <!-- Recent Violations -->
     @if($recentViolations->isNotEmpty())
         <div class="card border-danger">
-            <div class="card-header bg-danger bg-opacity-10">
+            <div class="card-header bg-light-danger">
                 <h5 class="card-title mb-0 text-danger">
                     <i class="ph ph-warning me-2"></i>Pelanggaran Terbaru
                 </h5>

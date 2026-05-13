@@ -360,7 +360,6 @@
         .card-header .card-title {
             font-size: 16px;
             font-weight: 600;
-            color: #1e293b;
         }
 
         .card-body {
