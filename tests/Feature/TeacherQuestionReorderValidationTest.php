@@ -7,12 +7,12 @@ use App\Models\Exam;
 use App\Models\Question;
 use App\Models\Role;
 use App\Models\User;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class TeacherQuestionReorderValidationTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     /** @test */
     public function reorder_rejects_duplicate_question_ids(): void

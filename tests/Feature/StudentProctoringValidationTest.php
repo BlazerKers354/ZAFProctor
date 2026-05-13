@@ -7,12 +7,12 @@ use App\Models\Exam;
 use App\Models\ExamAttempt;
 use App\Models\Role;
 use App\Models\User;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class StudentProctoringValidationTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     /** @test */
     public function snapshot_rejects_invalid_base64_payload(): void
@@ -58,6 +58,57 @@ class StudentProctoringValidationTest extends TestCase
                 'violation_type' => 'tab_switch',
             ])
             ->assertStatus(403);
+    }
+
+    /** @test */
+    public function sync_time_logs_large_client_drift_and_returns_remaining_time(): void
+    {
+        [$student, $attempt] = $this->createStudentAttempt();
+
+        $this->actingAs($student)
+            ->postJson(route('student.exams.sync-time', $attempt), [
+                'client_time' => now()->subMinutes(2)->timestamp,
+            ])
+            ->assertOk()
+            ->assertJsonStructure([
+                'server_time',
+                'remaining_time',
+                'remaining',
+            ]);
+
+        $this->assertDatabaseHas('proctoring_logs', [
+            'attempt_id' => $attempt->id,
+            'user_id' => $student->id,
+            'violation_type' => 'other',
+        ]);
+
+        $this->assertSame(1, $attempt->fresh()->violation_count);
+    }
+
+    /** @test */
+    public function snapshot_upload_with_violation_type_does_not_increment_violation_count(): void
+    {
+        [$student, $attempt] = $this->createStudentAttempt();
+
+        $snapshot = 'data:image/png;base64,' .
+            'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=';
+
+        $this->actingAs($student)
+            ->postJson(route('student.proctoring.snapshot', $attempt), [
+                'snapshot' => $snapshot,
+                'violation_type' => 'tab_switch',
+                'description' => 'Evidence only snapshot',
+            ])
+            ->assertOk()
+            ->assertJson([
+                'success' => true,
+                'snapshot_stored' => true,
+                'should_auto_submit' => false,
+                'violation_count' => 0,
+            ]);
+
+        $this->assertSame(0, $attempt->fresh()->violation_count);
+        $this->assertDatabaseCount('proctoring_logs', 0);
     }
 
     /**

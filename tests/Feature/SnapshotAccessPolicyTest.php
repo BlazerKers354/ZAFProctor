@@ -8,13 +8,13 @@ use App\Models\ExamAttempt;
 use App\Models\ProctoringLog;
 use App\Models\Role;
 use App\Models\User;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class SnapshotAccessPolicyTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     /** @test */
     public function exam_owner_teacher_can_view_snapshot(): void

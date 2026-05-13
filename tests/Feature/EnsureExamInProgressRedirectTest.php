@@ -7,12 +7,12 @@ use App\Models\Exam;
 use App\Models\ExamAttempt;
 use App\Models\Role;
 use App\Models\User;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class EnsureExamInProgressRedirectTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     /** @test */
     public function non_json_request_on_submitted_attempt_redirects_to_result_page(): void

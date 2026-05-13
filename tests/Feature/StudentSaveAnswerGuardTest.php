@@ -9,12 +9,12 @@ use App\Models\Question;
 use App\Models\QuestionOption;
 use App\Models\Role;
 use App\Models\User;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class StudentSaveAnswerGuardTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     /** @test */
     public function save_answer_returns_json_conflict_when_attempt_is_already_submitted(): void

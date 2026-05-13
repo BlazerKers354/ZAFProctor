@@ -3,18 +3,16 @@
 namespace App\Http\Controllers\Teacher;
 
 use App\Http\Controllers\Controller;
-use App\Models\Course;
 use App\Models\Exam;
 use App\Models\ExamAttempt;
 use App\Models\ExamSetting;
-use App\Models\Question;
-use App\Models\QuestionOption;
 use App\Services\ExamService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class ExamController extends Controller
@@ -92,7 +90,7 @@ class ExamController extends Controller
             'description' => ['nullable', 'string'],
             'type' => ['required', 'in:scheduled,flexible'],
             'duration' => ['required', 'integer', 'min:5', 'max:480'],
-            'access_token' => ['nullable', 'string', 'max:50'],
+            'access_token' => ['nullable', 'string', 'max:32', Rule::unique('exams', 'access_token')],
             'status' => ['nullable', 'in:draft,published'],
             // Settings validation
             'max_attempts' => ['nullable', 'integer', 'min:0', 'max:10'],
@@ -130,9 +128,7 @@ class ExamController extends Controller
             : $requestedStatus;
 
         $exam = null;
-        $maxViolationsInput = $request->filled('max_tab_switches')
-            ? (int) $request->input('max_tab_switches')
-            : 5;
+        $maxViolationsInput = $this->resolveMaxViolationsInput($request);
         
         DB::transaction(function () use ($validated, $request, &$exam, $isScheduled, $maxViolationsInput, $finalStatus) {
             // Create exam
@@ -152,27 +148,7 @@ class ExamController extends Controller
             // Create exam settings
             ExamSetting::create([
                 'exam_id' => $exam->id,
-                // Proctoring settings
-                'webcam_enabled' => $request->boolean('webcam_enabled', true),
-                'browser_lock_enabled' => $request->boolean('browser_lock_enabled', true),
-                'tab_switch_detection' => $request->boolean('tab_switch_detection', true),
-                'max_tab_switches' => $maxViolationsInput,
-                'auto_submit_threshold' => $maxViolationsInput,
-                'block_keyboard_shortcuts' => $request->boolean('block_keyboard_shortcuts', true),
-                
-                // Display settings
-                'shuffle_questions' => $request->boolean('shuffle_questions', false),
-                'shuffle_options' => $request->boolean('shuffle_options', false),
-                'show_correct_answers' => $request->boolean('show_correct_answers', false),
-                'show_score' => $request->boolean('show_score', true),
-                
-                // Attempt settings - 0 means unlimited
-                'max_attempts' => $request->filled('max_attempts') ? (int) $request->input('max_attempts') : 1,
-                'grade_method' => $request->input('grade_method', 'highest'),
-                
-                // Passing score
-                'passing_score' => $request->input('passing_score', 60),
-            ]);
+            ] + $this->buildExamSettingsPayload($request, $maxViolationsInput, true));
         });
 
         $redirect = redirect()->route('teacher.questions.index', $exam)
@@ -264,9 +240,7 @@ class ExamController extends Controller
             ])->withInput();
         }
 
-        $maxViolationsInput = $request->filled('max_tab_switches')
-            ? (int) $request->input('max_tab_switches')
-            : 5;
+        $maxViolationsInput = $this->resolveMaxViolationsInput($request);
 
         DB::transaction(function () use ($validated, $request, $exam, $isScheduled, $maxViolationsInput, $requestedStatus) {
             // Update exam basic info
@@ -284,28 +258,7 @@ class ExamController extends Controller
             // Update or create exam settings
             $exam->settings()->updateOrCreate(
                 ['exam_id' => $exam->id],
-                [
-                    // Proctoring settings
-                    'webcam_enabled' => $request->boolean('webcam_enabled'),
-                    'browser_lock_enabled' => $request->boolean('browser_lock_enabled'),
-                    'tab_switch_detection' => $request->boolean('tab_switch_detection'),
-                    'max_tab_switches' => $maxViolationsInput,
-                    'auto_submit_threshold' => $maxViolationsInput,
-                    'block_keyboard_shortcuts' => $request->boolean('block_keyboard_shortcuts'),
-                    
-                    // Display settings
-                    'shuffle_questions' => $request->boolean('shuffle_questions'),
-                    'shuffle_options' => $request->boolean('shuffle_options'),
-                    'show_correct_answers' => $request->boolean('show_correct_answers'),
-                    'show_score' => $request->boolean('show_score'),
-                    
-                    // Attempt settings - 0 means unlimited
-                    'max_attempts' => $request->filled('max_attempts') ? (int) $request->input('max_attempts') : 1,
-                    'grade_method' => $request->input('grade_method', 'highest'),
-                    
-                    // Passing score
-                    'passing_score' => $request->input('passing_score', 60),
-                ]
+                $this->buildExamSettingsPayload($request, $maxViolationsInput, false)
             );
         });
 
@@ -357,7 +310,7 @@ class ExamController extends Controller
     {
         $this->authorize('update', $exam);
 
-        $exam->update(['access_token' => Exam::generateAccessToken()]);
+        $exam->regenerateToken();
 
         return back()->with('success', 'Token akses berhasil diperbarui.');
     }
@@ -598,5 +551,31 @@ class ExamController extends Controller
         );
 
         return back()->with('success', 'Pengaturan proctoring berhasil diperbarui.');
+    }
+
+    protected function resolveMaxViolationsInput(Request $request): int
+    {
+        return $request->filled('max_tab_switches')
+            ? (int) $request->input('max_tab_switches')
+            : 5;
+    }
+
+    protected function buildExamSettingsPayload(Request $request, int $maxViolationsInput, bool $creating): array
+    {
+        return [
+            'webcam_enabled' => $request->boolean('webcam_enabled', $creating),
+            'browser_lock_enabled' => $request->boolean('browser_lock_enabled', $creating),
+            'tab_switch_detection' => $request->boolean('tab_switch_detection', $creating),
+            'max_tab_switches' => $maxViolationsInput,
+            'auto_submit_threshold' => $maxViolationsInput,
+            'block_keyboard_shortcuts' => $request->boolean('block_keyboard_shortcuts', $creating),
+            'shuffle_questions' => $request->boolean('shuffle_questions', false),
+            'shuffle_options' => $request->boolean('shuffle_options', false),
+            'show_correct_answers' => $request->boolean('show_correct_answers', false),
+            'show_score' => $request->boolean('show_score', $creating),
+            'max_attempts' => $request->filled('max_attempts') ? (int) $request->input('max_attempts') : 1,
+            'grade_method' => $request->input('grade_method', 'highest'),
+            'passing_score' => $request->input('passing_score', 60),
+        ];
     }
 }

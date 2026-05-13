@@ -304,19 +304,6 @@ class ExamService
     }
 
     /**
-     * Grade an essay answer
-     */
-    public function gradeEssayAnswer(Answer $answer, float $points, ?string $feedback = null): Answer
-    {
-        $answer->gradeEssay($points, $feedback);
-        
-        // Recalculate attempt score
-        $answer->attempt->calculateScore();
-
-        return $answer;
-    }
-
-    /**
      * Check if exam should be auto-submitted due to violations
      */
     public function shouldAutoSubmitDueToViolations(ExamAttempt $attempt): bool

@@ -680,7 +680,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     await loadFaceApiModels();
 
     if ((hasTokenError || hasAnyError) && (previousPreCheckPassed || previousCameraVerified)) {
-        console.log('Returning from error, auto-starting camera...');
         setTimeout(() => { requestCameraAccess(); }, 500);
     }
 });
@@ -690,7 +689,6 @@ async function loadFaceApiModels() {
     try {
         updateCheckStatus('face', 'pending', 'Memuat model deteksi wajah...');
         await faceapi.nets.tinyFaceDetector.loadFromUri(CONFIG.modelPath);
-        console.log('Face-api models loaded successfully');
         updateCheckStatus('face', 'pending', 'Model siap. Menunggu kamera aktif...');
     } catch (error) {
         console.error('Error loading face-api models:', error);

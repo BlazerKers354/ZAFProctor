@@ -8,12 +8,12 @@ use App\Models\ExamAttempt;
 use App\Models\ExamSetting;
 use App\Models\Role;
 use App\Models\User;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class StudentDashboardRetakeTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     /** @test */
     public function dashboard_shows_retry_when_max_attempts_is_changed_to_unlimited(): void

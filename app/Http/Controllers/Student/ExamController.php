@@ -358,26 +358,6 @@ class ExamController extends Controller
     }
 
     /**
-     * Get remaining time (AJAX).
-     */
-    public function timeRemaining(ExamAttempt $attempt): JsonResponse
-    {
-        $this->authorize('interact', $attempt);
-
-        try {
-            return response()->json([
-                'remaining' => $attempt->remaining_time ?? 0,
-                'expired' => $attempt->hasTimeExpired(),
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'remaining' => 0,
-                'expired' => true,
-            ]);
-        }
-    }
-
-    /**
      * Sync time with server (AJAX) - for time manipulation prevention.
      */
     public function syncTime(Request $request, ExamAttempt $attempt): JsonResponse
@@ -407,6 +387,7 @@ class ExamController extends Controller
 
             return response()->json([
                 'server_time' => $serverTime,
+                'remaining_time' => $attempt->remaining_time ?? 0,
                 'remaining' => $attempt->remaining_time ?? 0,
             ]);
         } catch (\Exception $e) {
@@ -416,6 +397,7 @@ class ExamController extends Controller
             
             return response()->json([
                 'server_time' => now()->timestamp,
+                'remaining_time' => $attempt->remaining_time ?? 0,
                 'remaining' => $attempt->remaining_time ?? 0,
             ]);
         }

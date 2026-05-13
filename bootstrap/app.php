@@ -22,7 +22,6 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \App\Http\Middleware\RoleMiddleware::class,
             'check.active' => \App\Http\Middleware\CheckActiveUser::class,
             'exam.in-progress' => \App\Http\Middleware\EnsureExamInProgress::class,
-            'log.activity' => \App\Http\Middleware\LogActivity::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

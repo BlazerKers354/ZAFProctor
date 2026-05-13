@@ -8,12 +8,12 @@ use App\Models\ExamAttempt;
 use App\Models\ProctoringLog;
 use App\Models\Role;
 use App\Models\User;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class TeacherMonitorAttemptScopeTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     /** @test */
     public function attempt_page_returns_not_found_for_attempt_outside_exam(): void

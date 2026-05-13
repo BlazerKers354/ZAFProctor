@@ -1131,6 +1131,7 @@
                 logViolation: '{{ route("student.proctoring.violation", $attempt) }}',
                 uploadSnapshot: '{{ route("student.proctoring.snapshot", $attempt) }}',
                 heartbeat: '{{ route("student.proctoring.heartbeat", $attempt) }}',
+                syncTime: '{{ route("student.exams.sync-time", $attempt) }}',
                 autoSubmit: '{{ route("student.exams.auto-submit", $attempt) }}',
             })
         });
@@ -1783,14 +1784,13 @@
                 if (!isOnline) return;
                 
                 try {
-                    const response = await fetch(config.endpoints.heartbeat, {
+                    const response = await fetch(config.endpoints.syncTime, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': config.csrfToken,
                         },
                         body: JSON.stringify({ 
-                            camera_enabled: stream !== null,
                             client_time: Math.floor(Date.now() / 1000)
                         })
                     });

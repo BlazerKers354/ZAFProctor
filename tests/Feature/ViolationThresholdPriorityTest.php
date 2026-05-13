@@ -9,12 +9,12 @@ use App\Models\ExamSetting;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\ExamService;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class ViolationThresholdPriorityTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     /** @test */
     public function max_violations_prefers_auto_submit_threshold_when_fields_diverge(): void

@@ -145,36 +145,16 @@ class ProctoringController extends Controller
             ], 422);
         }
 
-        // Resolve threshold once for consistent response payload.
+        // Snapshot uploads are evidence-only. Violation counting must go through
+        // logViolation so one client event cannot be counted twice.
         $settings = $attempt->exam->settings;
         $maxViolations = $this->resolveMaxViolations($settings);
-
-        // If there's a violation, log it with the snapshot in a single operation
-        $shouldAutoSubmit = false;
-        if (!empty($validated['violation_type'])) {
-            $log = $this->proctoringService->logViolation(
-                $attempt,
-                $validated['violation_type'],
-                $validated['description'] ?? null,
-                null,
-                null
-            );
-
-            // Immediately set snapshot path on the log
-            if ($snapshotPath) {
-                $log->update(['snapshot_path' => $snapshotPath]);
-            }
-
-            // Check if should auto-submit
-            $shouldAutoSubmit = $maxViolations > 0 && $attempt->fresh()->violation_count >= $maxViolations;
-        }
-
         $freshAttempt = $attempt->fresh();
 
         return response()->json([
             'success' => true,
             'snapshot_stored' => (bool) $snapshotPath,
-            'should_auto_submit' => $shouldAutoSubmit,
+            'should_auto_submit' => false,
             'violation_count' => $freshAttempt->violation_count,
             'max_violations' => $maxViolations,
         ]);
