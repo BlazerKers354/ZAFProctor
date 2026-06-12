@@ -52,13 +52,13 @@ php artisan event:cache
 
 ## 5. Queue dan Scheduler
 
-Jalankan worker queue secara daemon (contoh systemd/supervisor):
+Jika `QUEUE_CONNECTION` memakai driver asynchronous seperti `database` atau `redis`, jalankan worker queue secara daemon (contoh systemd/supervisor):
 
 ```bash
 php artisan queue:work --queue=default --sleep=1 --tries=3 --timeout=90
 ```
 
-Jalankan scheduler setiap menit di crontab:
+Jika ada scheduled command production yang digunakan, jalankan scheduler setiap menit di crontab:
 
 ```bash
 * * * * * php /path/to/project/artisan schedule:run >> /dev/null 2>&1
@@ -91,7 +91,7 @@ Tambahan hardening aplikasi:
 - Siswa dapat pre-check kamera dan masuk ujian via HTTPS.
 - Snapshot proctoring tersimpan dan bisa diakses guru/admin.
 - Autosave jawaban dan auto-submit berjalan saat threshold/time expired.
-- Queue worker aktif tanpa backlog panjang.
+- Jika `QUEUE_CONNECTION` bukan `sync`, queue worker aktif tanpa backlog panjang.
 
 ## 9. Rollback Plan
 
