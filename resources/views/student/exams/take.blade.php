@@ -2754,9 +2754,17 @@
             if (e.ctrlKey || e.metaKey) {
                 const key = e.key.toLowerCase();
 
-                // Ctrl+Shift combos (DevTools, inspect, console, task manager)
+                // Block Ctrl+Tab and Ctrl+Shift+Tab (browser tab switching)
+                if (key === 'tab' || e.key === 'Tab') {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    logViolation('keyboard_shortcut', 'Blocked Ctrl+Tab');
+                    return false;
+                }
+
+                // Ctrl+Shift combos (DevTools, inspect, console, task manager, reopen tab, extensions)
                 if (e.shiftKey) {
-                    const blockedShift = ['i', 'j', 'c', 'k', 'm', 'b', 'n', 's', 'delete'];
+                    const blockedShift = ['i', 'j', 'c', 'k', 'm', 'b', 'n', 's', 'delete', 't', 'a', 'e', 'r', 'w', 'q', 'o', 'p', 'l', 'h', 'g', 'f', 'd', 'u', 'y', 'x', 'v', 'z'];
                     if (blockedShift.includes(key)) {
                         e.preventDefault();
                         e.stopImmediatePropagation();
@@ -2801,14 +2809,12 @@
 
             // ── Alt + key ────────────────────────────────
             if (e.altKey) {
-                // Block all Alt combinations that could switch windows/tabs
-                const blockedAlt = ['F4', 'Tab', 'd', 'D', 'Home', 'Left', 'Right', 'ArrowLeft', 'ArrowRight', 'F5', 'F6', 'Escape'];
-                if (blockedAlt.includes(e.key)) {
-                    e.preventDefault();
-                    e.stopImmediatePropagation();
-                    logViolation('keyboard_shortcut', `Blocked Alt+${e.key}`);
-                    return false;
-                }
+                // Block ALL Alt combinations — blanket block for any Alt+key press
+                // This covers Alt+Tab, Alt+Shift+Tab, Alt+F4, Alt+D, etc.
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                logViolation('keyboard_shortcut', `Blocked Alt+${e.key}`);
+                return false;
             }
 
             // ── Windows key / Meta key alone ─────────────
