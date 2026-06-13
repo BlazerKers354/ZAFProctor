@@ -73,4 +73,21 @@ return [
         public_path('storage') => storage_path('app/public'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Snapshot Auto-Cleanup
+    |--------------------------------------------------------------------------
+    |
+    | When disk usage exceeds max_usage_percent, the oldest proctoring snapshot
+    | files are deleted (violation log records are preserved). Cleanup stops
+    | once usage drops to target_usage_percent.
+    |
+    */
+
+    'snapshot_cleanup' => [
+        'max_usage_percent' => env('SNAPSHOT_CLEANUP_MAX', 80),
+        'target_usage_percent' => env('SNAPSHOT_CLEANUP_TARGET', 70),
+        'batch_size' => 50,
+    ],
+
 ];

@@ -142,6 +142,9 @@ class ProctoringService
                 return null;
             }
 
+            // Check disk usage and cleanup old snapshots if needed
+            $this->cleanupOldestSnapshotsIfNeeded();
+
             return $filename;
         } catch (\Exception $e) {
             Log::error('Snapshot storage error: ' . $e->getMessage(), [
@@ -191,6 +194,9 @@ class ProctoringService
                 Log::error('Failed to store uploaded snapshot for attempt ' . $attempt->id);
                 return null;
             }
+
+            // Check disk usage and cleanup old snapshots if needed
+            $this->cleanupOldestSnapshotsIfNeeded();
             
             return $storedPath;
         } catch (\Exception $e) {
@@ -354,6 +360,74 @@ class ProctoringService
                 'expected_snapshots' => 0,
                 'snapshot_coverage' => 0,
             ];
+        }
+    }
+
+    /**
+     * Check disk usage and delete oldest snapshots if storage is getting full.
+     * Preserves violation log records — only deletes the snapshot image files.
+     */
+    public function cleanupOldestSnapshotsIfNeeded(): void
+    {
+        try {
+            $storagePath = Storage::disk('local')->path('');
+            $totalSpace = @disk_total_space($storagePath);
+            $freeSpace = @disk_free_space($storagePath);
+
+            if ($totalSpace === false || $freeSpace === false || $totalSpace <= 0) {
+                return;
+            }
+
+            $usedPercent = (($totalSpace - $freeSpace) / $totalSpace) * 100;
+            $config = config('filesystems.snapshot_cleanup', []);
+            $maxUsage = $config['max_usage_percent'] ?? 80;
+            $targetUsage = $config['target_usage_percent'] ?? 70;
+            $batchSize = $config['batch_size'] ?? 50;
+
+            if ($usedPercent < $maxUsage) {
+                return;
+            }
+
+            Log::info("Snapshot cleanup triggered: disk usage at " . round($usedPercent, 1) . "% (threshold: {$maxUsage}%)");
+
+            $totalDeleted = 0;
+
+            do {
+                $oldestLogs = ProctoringLog::whereNotNull('snapshot_path')
+                    ->orderBy('created_at', 'asc')
+                    ->limit($batchSize)
+                    ->get();
+
+                if ($oldestLogs->isEmpty()) {
+                    break;
+                }
+
+                foreach ($oldestLogs as $log) {
+                    try {
+                        Storage::disk('local')->delete($log->snapshot_path);
+                    } catch (\Exception $e) {
+                        // File may already be deleted, continue
+                    }
+
+                    $log->update(['snapshot_path' => null]);
+                    $totalDeleted++;
+                }
+
+                // Re-check disk usage
+                clearstatcache(true, $storagePath);
+                $freeSpace = @disk_free_space($storagePath);
+                if ($freeSpace === false) {
+                    break;
+                }
+                $usedPercent = (($totalSpace - $freeSpace) / $totalSpace) * 100;
+
+            } while ($usedPercent > $targetUsage);
+
+            if ($totalDeleted > 0) {
+                Log::info("Snapshot cleanup complete: deleted {$totalDeleted} snapshot files. Disk usage now at " . round($usedPercent, 1) . "%");
+            }
+        } catch (\Exception $e) {
+            Log::warning('Snapshot cleanup failed: ' . $e->getMessage());
         }
     }
 }
