@@ -2301,10 +2301,10 @@
                             try {
                                 document.documentElement.requestFullscreen().then(function() {
                                     document.getElementById('fullscreen-modal').classList.remove('show');
-                                    // Re-lock keyboard after re-entering fullscreen
+                                    // Re-lock ALL keyboard keys after re-entering fullscreen
                                     try {
                                         if (navigator.keyboard && navigator.keyboard.lock) {
-                                            navigator.keyboard.lock(['Escape', 'Alt+Tab', 'Alt+F4', 'Meta', 'OS']).catch(function() {});
+                                            navigator.keyboard.lock().catch(function() {});
                                         }
                                     } catch(x) {}
                                 }).catch(function() {});
@@ -2340,16 +2340,11 @@
         function enterFullscreen() {
             document.documentElement.requestFullscreen().then(() => {
                 document.getElementById('fullscreen-modal').classList.remove('show');
-                // Lock keyboard to prevent Alt+Tab, Alt+F4, Escape from exiting
+                // Lock ALL keyboard keys to prevent Alt+Tab, Alt+F4, Meta, etc.
+                // Empty array = lock everything. Browser provides 2-sec Escape hold as safety exit.
                 try {
                     if (navigator.keyboard && navigator.keyboard.lock) {
-                        navigator.keyboard.lock([
-                            'Escape',
-                            'Alt+Tab',
-                            'Alt+F4',
-                            'Meta',
-                            'OS'
-                        ]).catch(function() {});
+                        navigator.keyboard.lock().catch(function() {});
                     }
                 } catch(x) {}
             }).catch(err => { if (window._origConsoleError) window._origConsoleError('Fullscreen error:', err); });
@@ -2604,10 +2599,10 @@
             // Re-request fullscreen if configured
             if (config.requireFullscreen && !document.fullscreenElement) {
                 document.documentElement.requestFullscreen().then(function() {
-                    // Re-lock keyboard after re-entering fullscreen
+                    // Re-lock ALL keyboard keys after re-entering fullscreen
                     try {
                         if (navigator.keyboard && navigator.keyboard.lock) {
-                            navigator.keyboard.lock(['Escape', 'Alt+Tab', 'Alt+F4', 'Meta', 'OS']).catch(function() {});
+                            navigator.keyboard.lock().catch(function() {});
                         }
                     } catch(x) {}
                 }).catch(function() {});
