@@ -37,13 +37,12 @@ class ProctoringService
         string $violationType,
         ?string $description = null,
         ?array $metadata = null,
-        ?UploadedFile $snapshot = null
+        ?UploadedFile $snapshot = null,
+        ?string $snapshotPath = null
     ): ProctoringLog {
         try {
-            $snapshotPath = null;
-
-            // Store snapshot if provided
-            if ($snapshot) {
+            // Store snapshot from uploaded file if provided (legacy path)
+            if ($snapshot && !$snapshotPath) {
                 $snapshotPath = $this->storeSnapshot($attempt, $snapshot);
             }
 

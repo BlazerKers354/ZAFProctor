@@ -2500,8 +2500,35 @@
             return true;
         }
 
-        async function persistViolation(type, description) {
+        /**
+         * Capture a base64 snapshot from the webcam video element (no upload).
+         */
+        function captureSnapshotBase64() {
+            const video = document.getElementById('camera-preview');
+            if (!video || !stream) return null;
+
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth || 320;
+            canvas.height = video.videoHeight || 240;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Timestamp overlay
+            ctx.fillStyle = 'rgba(0,0,0,0.6)';
+            ctx.fillRect(0, canvas.height - 20, canvas.width, 20);
+            ctx.fillStyle = '#fff';
+            ctx.font = '11px Arial';
+            ctx.fillText(new Date().toLocaleString('id-ID'), 4, canvas.height - 6);
+
+            return canvas.toDataURL('image/jpeg', 0.7);
+        }
+
+        async function persistViolation(type, description, snapshot = null) {
             try {
+                const payload = { violation_type: type, description: description };
+                if (snapshot) {
+                    payload.snapshot = snapshot;
+                }
                 const response = await fetch(config.endpoints.logViolation, {
                     method: 'POST',
                     headers: {
@@ -2509,7 +2536,7 @@
                         'Accept': 'application/json',
                         'X-CSRF-TOKEN': config.csrfToken,
                     },
-                    body: JSON.stringify({ violation_type: type, description: description })
+                    body: JSON.stringify(payload)
                 });
 
                 if (response.redirected) {
@@ -2541,11 +2568,17 @@
             updateViolationCounter();
             showWarning(description);
 
-            // Violation count must always come from the dedicated log endpoint.
-            const data = await persistViolation(type, description);
-
-            // Snapshot is best-effort evidence only and must not affect violation counting.
+            // Capture snapshot first (best-effort) to attach as evidence to the violation.
+            let violationSnapshot = null;
             if (stream && canCaptureViolationSnapshot()) {
+                violationSnapshot = captureSnapshotBase64();
+            }
+
+            // Violation count must always come from the dedicated log endpoint.
+            const data = await persistViolation(type, description, violationSnapshot);
+
+            // Also upload snapshot to the periodic snapshot endpoint for camera coverage.
+            if (stream && violationSnapshot) {
                 captureAndUploadSnapshot(null, `Violation snapshot: ${type}`);
             }
 

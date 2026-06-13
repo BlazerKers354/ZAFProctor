@@ -43,6 +43,7 @@ class ProctoringController extends Controller
             'violation_type' => ['required', 'string', Rule::in($this->allowedViolationTypes())],
             'description' => ['nullable', 'string', 'max:1000'],
             'metadata' => ['nullable', 'array', 'max:20'],
+            'snapshot' => ['nullable', 'string', 'max:' . self::MAX_BASE64_SNAPSHOT_LENGTH],
         ]);
 
         // Short-circuit if the monitoring feature for this violation type is disabled
@@ -64,11 +65,22 @@ class ProctoringController extends Controller
             }
         }
 
+        // Store snapshot alongside the violation if provided
+        $snapshotPath = null;
+        if (!empty($validated['snapshot'])) {
+            $snapshotPath = $this->proctoringService->storeSnapshotFromBase64(
+                $attempt,
+                $validated['snapshot']
+            );
+        }
+
         $log = $this->proctoringService->logViolation(
             $attempt,
             $validated['violation_type'],
             $validated['description'] ?? null,
-            $validated['metadata'] ?? null
+            $validated['metadata'] ?? null,
+            null,
+            $snapshotPath
         );
 
         // Check if should auto-submit - use settings for threshold
