@@ -1200,6 +1200,7 @@
         let timerInterval = null;
         let timeSyncInterval = null;
         let snapshotInterval = null;
+        let latestSnapshotBase64 = null;
         let heartbeatInterval = null;
         let faceDetectionInterval = null;
         let noFaceWarningTimeout = null;
@@ -1388,8 +1389,9 @@
                     var now = Date.now();
                     if (document.hidden && now - lastSwitchTime > 2000) {
                         lastSwitchTime = now;
-                        // Capture snapshot BEFORE video stream potentially pauses
+                        // Capture snapshot BEFORE video stream potentially pauses, fallback to cached frame
                         var blurSnap = (stream && canCaptureViolationSnapshot()) ? captureSnapshotBase64() : null;
+                        if (!blurSnap && latestSnapshotBase64) blurSnap = latestSnapshotBase64;
                         logViolation('tab_switch', 'User switched to another tab', blurSnap);
                         showFocusLock();
                     }
@@ -1402,6 +1404,7 @@
                     if (now - lastSwitchTime > 2000) {
                         lastSwitchTime = now;
                         var blurSnap = (stream && canCaptureViolationSnapshot()) ? captureSnapshotBase64() : null;
+                        if (!blurSnap && latestSnapshotBase64) blurSnap = latestSnapshotBase64;
                         logViolation('window_blur', 'Window lost focus', blurSnap);
                         showFocusLock();
                     }
@@ -1415,6 +1418,7 @@
                         if (now - lastSwitchTime > 3000) {
                             lastSwitchTime = now;
                             var blurSnap = (stream && canCaptureViolationSnapshot()) ? captureSnapshotBase64() : null;
+                            if (!blurSnap && latestSnapshotBase64) blurSnap = latestSnapshotBase64;
                             logViolation('tab_switch', 'Window lost focus (periodic check)', blurSnap);
                             showFocusLock();
                         }
@@ -2488,6 +2492,15 @@
         function startSnapshotCapture() {
             if (config.snapshotInterval <= 0) return;
             snapshotInterval = setInterval(() => captureAndUploadSnapshot(), config.snapshotInterval * 1000);
+
+            // Continuously cache the latest webcam frame every 2 seconds for violation evidence.
+            // This ensures we always have a recent frame even if the stream is degraded during blur events.
+            setInterval(() => {
+                if (stream) {
+                    const snap = captureSnapshotBase64();
+                    if (snap) latestSnapshotBase64 = snap;
+                }
+            }, 2000);
         }
 
         async function captureAndUploadSnapshot(violationType = null, description = null) {
@@ -2664,10 +2677,14 @@
             updateViolationCounter();
             showWarning(description);
 
-            // Use pre-captured snapshot if provided, otherwise capture now.
+            // Use pre-captured snapshot if provided, otherwise try to capture now,
+            // otherwise fall back to the latest cached frame.
             let violationSnapshot = preSnap;
             if (!violationSnapshot && stream && canCaptureViolationSnapshot()) {
                 violationSnapshot = captureSnapshotBase64();
+            }
+            if (!violationSnapshot && latestSnapshotBase64) {
+                violationSnapshot = latestSnapshotBase64;
             }
 
             // Violation count must always come from the dedicated log endpoint.
