@@ -193,6 +193,45 @@
         }
         .violation-badge.show { display: flex; }
 
+        /* Focus-Lock Overlay */
+        #focus-lock-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            cursor: pointer;
+        }
+        #focus-lock-overlay.active { display: flex; }
+        .focus-lock-card {
+            background: #1e293b;
+            border: 2px solid #ef4444;
+            border-radius: 16px;
+            padding: 40px 32px;
+            text-align: center;
+            max-width: 420px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+        }
+        .focus-lock-card .icon-wrap {
+            width: 72px; height: 72px;
+            border-radius: 50%;
+            background: rgba(239, 68, 68, 0.15);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 20px;
+        }
+        .focus-lock-card h3 { color: #f87171; font-size: 1.25rem; margin-bottom: 8px; }
+        .focus-lock-card p { color: #94a3b8; font-size: 0.9rem; margin-bottom: 20px; }
+        .focus-lock-card .btn-return {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: #fff; border: none; border-radius: 10px;
+            padding: 12px 32px; font-weight: 600; font-size: 1rem;
+            cursor: pointer; transition: transform 0.2s;
+        }
+        .focus-lock-card .btn-return:hover { transform: scale(1.05); }
+
         /* Question Navigation */
         .question-nav-grid {
             display: grid;
@@ -702,6 +741,18 @@
     ondragstart="return false;"
     @endif
 >
+
+    <!-- Focus-Lock Overlay -->
+    <div id="focus-lock-overlay" onclick="dismissFocusLock()">
+        <div class="focus-lock-card" onclick="event.stopPropagation(); dismissFocusLock();">
+            <div class="icon-wrap">
+                <i class="ph ph-warning-circle" style="font-size: 2.5rem; color: #ef4444;"></i>
+            </div>
+            <h3>Peringatan!</h3>
+            <p>Anda meninggalkan halaman ujian. Tindakan ini tercatat sebagai pelanggaran. Klik tombol di bawah untuk kembali ke ujian.</p>
+            <button class="btn-return">Kembali ke Ujian</button>
+        </div>
+    </div>
 
     <!-- Header -->
     <header class="exam-header">
@@ -1337,7 +1388,10 @@
                     var now = Date.now();
                     if (document.hidden && now - lastSwitchTime > 2000) {
                         lastSwitchTime = now;
-                        logViolation('tab_switch', 'User switched to another tab');
+                        // Capture snapshot BEFORE video stream potentially pauses
+                        var blurSnap = (stream && canCaptureViolationSnapshot()) ? captureSnapshotBase64() : null;
+                        logViolation('tab_switch', 'User switched to another tab', blurSnap);
+                        showFocusLock();
                     }
                 });
 
@@ -1347,7 +1401,9 @@
                     var now = Date.now();
                     if (now - lastSwitchTime > 2000) {
                         lastSwitchTime = now;
-                        logViolation('window_blur', 'Window lost focus');
+                        var blurSnap = (stream && canCaptureViolationSnapshot()) ? captureSnapshotBase64() : null;
+                        logViolation('window_blur', 'Window lost focus', blurSnap);
+                        showFocusLock();
                     }
                 });
 
@@ -1358,7 +1414,9 @@
                         var now = Date.now();
                         if (now - lastSwitchTime > 3000) {
                             lastSwitchTime = now;
-                            logViolation('tab_switch', 'Window lost focus (periodic check)');
+                            var blurSnap = (stream && canCaptureViolationSnapshot()) ? captureSnapshotBase64() : null;
+                            logViolation('tab_switch', 'Window lost focus (periodic check)', blurSnap);
+                            showFocusLock();
                         }
                     }
                 }, 2000);
@@ -2523,6 +2581,30 @@
             return canvas.toDataURL('image/jpeg', 0.7);
         }
 
+        function showFocusLock() {
+            var overlay = document.getElementById('focus-lock-overlay');
+            if (overlay) overlay.classList.add('active');
+        }
+
+        function dismissFocusLock() {
+            var overlay = document.getElementById('focus-lock-overlay');
+            if (overlay) overlay.classList.remove('active');
+            // Re-request fullscreen if configured
+            if (config.requireFullscreen && !document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(function() {});
+            }
+            // Refocus the window
+            window.focus();
+        }
+
+        // Auto-dismiss overlay when window regains focus
+        window.addEventListener('focus', function() {
+            var overlay = document.getElementById('focus-lock-overlay');
+            if (overlay && overlay.classList.contains('active')) {
+                dismissFocusLock();
+            }
+        });
+
         async function persistViolation(type, description, snapshot = null) {
             try {
                 const payload = { violation_type: type, description: description };
@@ -2561,16 +2643,16 @@
             }
         }
 
-        async function logViolation(type, description) {
+        async function logViolation(type, description, preSnap = null) {
             if (isSubmitting) return;
             
             violationCount++;
             updateViolationCounter();
             showWarning(description);
 
-            // Capture snapshot first (best-effort) to attach as evidence to the violation.
-            let violationSnapshot = null;
-            if (stream && canCaptureViolationSnapshot()) {
+            // Use pre-captured snapshot if provided, otherwise capture now.
+            let violationSnapshot = preSnap;
+            if (!violationSnapshot && stream && canCaptureViolationSnapshot()) {
                 violationSnapshot = captureSnapshotBase64();
             }
 
