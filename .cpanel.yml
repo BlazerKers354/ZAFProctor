@@ -14,3 +14,5 @@ deployment:
     - chmod -R 775 storage bootstrap/cache
     - rm -rf /home/zafproct/public_html
     - ln -s /home/zafproct/repositories/ZAFProctor/public /home/zafproct/public_html
+    - git checkout -- storage/ bootstrap/ 2>/dev/null || true
+    - git clean -fd storage/ bootstrap/ 2>/dev/null || true
