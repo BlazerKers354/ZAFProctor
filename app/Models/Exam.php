@@ -31,6 +31,7 @@ class Exam extends Model
         'start_time' => 'datetime',
         'end_time' => 'datetime',
         'created_by' => 'integer',
+        'duration' => 'integer',
     ];
 
     /**

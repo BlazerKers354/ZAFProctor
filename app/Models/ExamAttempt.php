@@ -136,7 +136,7 @@ class ExamAttempt extends Model
             return 0;
         }
 
-        $endTime = $this->started_at->addMinutes($this->exam->duration);
+        $endTime = $this->started_at->addMinutes((int) $this->exam->duration);
         $remaining = now()->diffInSeconds($endTime, false);
 
         return max(0, $remaining);
@@ -151,7 +151,7 @@ class ExamAttempt extends Model
             return false;
         }
 
-        $endTime = $this->started_at->addMinutes($this->exam->duration);
+        $endTime = $this->started_at->addMinutes((int) $this->exam->duration);
         return now()->gte($endTime);
     }
 
