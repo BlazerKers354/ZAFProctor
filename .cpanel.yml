@@ -3,16 +3,13 @@ deployment:
   tasks:
     - export COMPOSER_HOME=/home/zafproct/.composer
     - /usr/local/bin/composer install --no-dev --optimize-autoloader --no-interaction --ignore-platform-reqs
+    - cp .env.cpanel .env
     - /usr/local/bin/php artisan optimize:clear
-    - /usr/local/bin/php artisan filament:clear-cached-components
     - /usr/local/bin/php artisan migrate --force
     - /usr/local/bin/php artisan config:cache
     - /usr/local/bin/php artisan route:cache
     - /usr/local/bin/php artisan view:cache
-    - /usr/local/bin/php artisan filament:cache-components
     - /usr/local/bin/php artisan storage:link
     - chmod -R 775 storage bootstrap/cache
     - rm -rf /home/zafproct/public_html
     - ln -s /home/zafproct/repositories/ZAFProctor/public /home/zafproct/public_html
-    - git checkout -- storage/ bootstrap/ 2>/dev/null || true
-    - git clean -fd storage/ bootstrap/ 2>/dev/null || true
