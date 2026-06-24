@@ -4,6 +4,7 @@ deployment:
     - export COMPOSER_HOME=/home/zafproct/.composer
     - /usr/local/bin/composer install --no-dev --optimize-autoloader --no-interaction --ignore-platform-reqs
     - cp .env.cpanel .env
+    - grep -q '^APP_KEY=$' .env && /usr/local/bin/php artisan key:generate --force || true
     - mkdir -p storage/framework/views storage/framework/cache storage/framework/sessions storage/framework/testing storage/logs storage/app/public bootstrap/cache
     - /usr/local/bin/php artisan optimize:clear
     - /usr/local/bin/php artisan migrate --force
