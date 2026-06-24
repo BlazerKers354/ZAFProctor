@@ -30,7 +30,13 @@ class ExamController extends Controller
         $pendingGradingOnly = $request->boolean('pending_grading');
         $fromNotification = $request->boolean('from_notification');
 
-        $query = Exam::where('created_by', $user->id)
+        // Show exams the teacher created OR exams in courses they teach
+        $teacherCourseIds = $user->taughtCourses()->pluck('id');
+
+        $query = Exam::where(function ($q) use ($user, $teacherCourseIds) {
+                $q->where('created_by', $user->id)
+                  ->orWhereIn('course_id', $teacherCourseIds);
+            })
             ->with(['course', 'settings'])
             ->withCount([
                 'questions',
@@ -73,6 +79,8 @@ class ExamController extends Controller
      */
     public function create(): View
     {
+        $this->authorize('create', Exam::class);
+
         $courses = auth()->user()->taughtCourses;
         return view('teacher.exams.create', compact('courses'));
     }
@@ -82,10 +90,16 @@ class ExamController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        $this->authorize('create', Exam::class);
+
         $isScheduled = $request->input('type', 'scheduled') === 'scheduled';
 
         $rules = [
-            'course_id' => ['required', 'exists:courses,id'],
+            'course_id' => [
+                'required',
+                'exists:courses,id',
+                Rule::in(auth()->user()->taughtCourses()->pluck('id')->toArray()),
+            ],
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'type' => ['required', 'in:scheduled,flexible'],

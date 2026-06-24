@@ -16,6 +16,13 @@ class User extends Authenticatable implements MustVerifyEmail
     use HasFactory, Notifiable;
 
     /**
+     * Always eager-load the role relationship to ensure
+     * isAdmin(), isTeacher(), isStudent() work reliably.
+     */
+    protected $with = ['role'];
+
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>

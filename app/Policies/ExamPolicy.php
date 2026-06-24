@@ -11,6 +11,43 @@ class ExamPolicy
     use HandlesAuthorization;
 
     /**
+     * Perform pre-authorization checks.
+     * Admin gets full access to all exam actions.
+     */
+    public function before(User $user, string $ability): ?bool
+    {
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        return null; // Fall through to specific policy methods
+    }
+
+    /**
+     * Check if the teacher is authorized for this exam.
+     * A teacher is authorized if they created the exam OR if they are
+     * assigned as the teacher of the exam's course.
+     */
+    protected function isTeacherOfExam(User $user, Exam $exam): bool
+    {
+        if (!$user->isTeacher()) {
+            return false;
+        }
+
+        // Teacher created this exam
+        if ((int) $exam->created_by === (int) $user->id) {
+            return true;
+        }
+
+        // Teacher is assigned to the exam's course
+        if ($exam->course && (int) $exam->course->teacher_id === (int) $user->id) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Determine whether the user can view any exams.
      */
     public function viewAny(User $user): bool
@@ -23,8 +60,8 @@ class ExamPolicy
      */
     public function view(User $user, Exam $exam): bool
     {
-        // Teacher can view their own exams
-        if ($user->isTeacher() && (int) $exam->created_by === (int) $user->id) {
+        // Teacher can view exams they created or belong to their course
+        if ($this->isTeacherOfExam($user, $exam)) {
             return true;
         }
 
@@ -50,9 +87,8 @@ class ExamPolicy
      */
     public function update(User $user, Exam $exam): bool
     {
-        // Only teacher can update their own exams that are not completed
-        return $user->isTeacher() 
-            && (int) $exam->created_by === (int) $user->id 
+        // Teacher can update exams they own/are assigned to, if not completed
+        return $this->isTeacherOfExam($user, $exam)
             && $exam->status !== Exam::STATUS_COMPLETED;
     }
 
@@ -61,8 +97,8 @@ class ExamPolicy
      */
     public function delete(User $user, Exam $exam): bool
     {
-        // Only teacher can delete their own exams
-        return $user->isTeacher() && (int) $exam->created_by === (int) $user->id;
+        // Teacher can delete exams they own or are assigned to
+        return $this->isTeacherOfExam($user, $exam);
     }
 
     /**
@@ -131,8 +167,8 @@ class ExamPolicy
      */
     public function viewResults(User $user, Exam $exam): bool
     {
-        // Teacher can view results of their exams
-        if ($user->isTeacher() && (int) $exam->created_by === (int) $user->id) {
+        // Teacher can view results of exams they own/are assigned to
+        if ($this->isTeacherOfExam($user, $exam)) {
             return true;
         }
 
@@ -149,7 +185,7 @@ class ExamPolicy
      */
     public function monitor(User $user, Exam $exam): bool
     {
-        // Only teacher can monitor their own exams
-        return $user->isTeacher() && (int) $exam->created_by === (int) $user->id;
+        // Teacher can monitor exams they own or are assigned to
+        return $this->isTeacherOfExam($user, $exam);
     }
 }
