@@ -23,6 +23,8 @@ class AuditLog extends Model
     ];
 
     protected $casts = [
+        'user_id' => 'integer',
+        'model_id' => 'integer',
         'old_values' => 'array',
         'new_values' => 'array',
     ];

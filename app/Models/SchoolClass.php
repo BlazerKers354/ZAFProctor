@@ -23,6 +23,7 @@ class SchoolClass extends Model
     ];
 
     protected $casts = [
+        'homeroom_teacher_id' => 'integer',
         'is_active' => 'boolean',
     ];
 

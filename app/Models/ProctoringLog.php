@@ -28,6 +28,7 @@ class ProctoringLog extends Model
     protected $casts = [
         'attempt_id' => 'integer',
         'user_id' => 'integer',
+        'reviewed_by' => 'integer',
         'metadata' => 'array',
         'is_reviewed' => 'boolean',
         'reviewed_at' => 'datetime',

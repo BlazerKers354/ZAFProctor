@@ -28,6 +28,7 @@ class Exam extends Model
     ];
 
     protected $casts = [
+        'course_id' => 'integer',
         'start_time' => 'datetime',
         'end_time' => 'datetime',
         'created_by' => 'integer',

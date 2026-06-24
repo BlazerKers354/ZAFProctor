@@ -62,6 +62,9 @@ class User extends Authenticatable implements MustVerifyEmail
     protected function casts(): array
     {
         return [
+            'role_id' => 'integer',
+            'class_id' => 'integer',
+            'approved_by' => 'integer',
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',

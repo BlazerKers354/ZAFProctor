@@ -42,6 +42,10 @@ class ExamAttempt extends Model
         'camera_enabled' => 'boolean',
         'score' => 'decimal:2',
         'percentage' => 'decimal:2',
+        'violation_count' => 'integer',
+        'tab_switch_count' => 'integer',
+        'fullscreen_exit_count' => 'integer',
+        'time_remaining' => 'integer',
     ];
 
     /**
