@@ -12,5 +12,5 @@ deployment:
     - /usr/local/bin/php artisan storage:link
     - chmod -R 775 storage bootstrap/cache
     - rm -rf /home/zafproct/public_html
-    - ln -s /home/zafproct/repositories/ZAFProctor/public /home/zafproct/public_html
+    - cp -r /home/zafproct/repositories/ZAFProctor/public /home/zafproct/public_html
     - git checkout -- . 2>/dev/null; git clean -fd 2>/dev/null || true
