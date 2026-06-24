@@ -40,7 +40,7 @@
                         <div>
                             <h4 class="mb-2">{{ $exam->title }}</h4>
                             <p class="text-muted mb-2">
-                                <i class="ph ph-book me-2"></i>{{ $exam->course->name }}
+                                <i class="ph ph-book me-2"></i>{{ $exam->course?->name ?? '-' }}
                             </p>
                             <div class="d-flex gap-2 align-items-center">
                                 @if($exam->status === 'draft')
@@ -232,7 +232,7 @@
                     <div class="row mb-3">
                         <div class="col-md-4">
                             <label class="text-muted small">Mata Pelajaran</label>
-                            <p class="mb-0 fw-semibold">{{ $exam->course->name }}</p>
+                            <p class="mb-0 fw-semibold">{{ $exam->course?->name ?? '-' }}</p>
                         </div>
                         <div class="col-md-4">
                             <label class="text-muted small">Tipe Ujian</label>

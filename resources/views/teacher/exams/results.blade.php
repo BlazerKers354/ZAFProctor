@@ -42,7 +42,7 @@
                 <div class="col-md-8">
                     <h4 class="mb-1">{{ $exam->title }}</h4>
                     <p class="text-muted mb-0">
-                        <i class="ph ph-book me-1"></i>{{ $exam->course->name }}
+                        <i class="ph ph-book me-1"></i>{{ $exam->course?->name ?? '-' }}
                         <span class="mx-2">|</span>
                         <i class="ph ph-clock me-1"></i>{{ $exam->duration }} menit
                         <span class="mx-2">|</span>

@@ -279,11 +279,11 @@
                                         <td>
                                             <div>
                                                 <h6 class="mb-0 f-14">{{ Str::limit($exam->title, 25) }}</h6>
-                                                <small class="text-muted">{{ $exam->course->name }}</small>
+                                                <small class="text-muted">{{ $exam->course?->name ?? '-' }}</small>
                                             </div>
                                         </td>
                                         <td>
-                                            <small class="text-muted">{{ $exam->creator->name }}</small>
+                                            <small class="text-muted">{{ $exam->creator?->name ?? '-' }}</small>
                                         </td>
                                         <td>
                                             @if($exam->status === 'draft')

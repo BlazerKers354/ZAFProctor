@@ -187,7 +187,7 @@
                                             <div>
                                                 <h6 class="mb-0">{{ $exam->title }}</h6>
                                                 <small class="text-muted">
-                                                    <i class="ph ph-book-open me-1"></i>{{ $exam->course->name }}
+                                                    <i class="ph ph-book-open me-1"></i>{{ $exam->course?->name ?? '-' }}
                                                 </small>
                                             </div>
                                         </div>
