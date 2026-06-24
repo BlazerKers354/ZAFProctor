@@ -30,6 +30,7 @@ class Exam extends Model
     protected $casts = [
         'start_time' => 'datetime',
         'end_time' => 'datetime',
+        'created_by' => 'integer',
     ];
 
     /**

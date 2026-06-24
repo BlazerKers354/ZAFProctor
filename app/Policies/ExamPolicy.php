@@ -24,7 +24,7 @@ class ExamPolicy
     public function view(User $user, Exam $exam): bool
     {
         // Teacher can view their own exams
-        if ($user->isTeacher() && $exam->created_by === $user->id) {
+        if ($user->isTeacher() && (int) $exam->created_by === (int) $user->id) {
             return true;
         }
 
@@ -52,7 +52,7 @@ class ExamPolicy
     {
         // Only teacher can update their own exams that are not completed
         return $user->isTeacher() 
-            && $exam->created_by === $user->id 
+            && (int) $exam->created_by === (int) $user->id 
             && $exam->status !== Exam::STATUS_COMPLETED;
     }
 
@@ -62,7 +62,7 @@ class ExamPolicy
     public function delete(User $user, Exam $exam): bool
     {
         // Only teacher can delete their own exams
-        return $user->isTeacher() && $exam->created_by === $user->id;
+        return $user->isTeacher() && (int) $exam->created_by === (int) $user->id;
     }
 
     /**
@@ -132,7 +132,7 @@ class ExamPolicy
     public function viewResults(User $user, Exam $exam): bool
     {
         // Teacher can view results of their exams
-        if ($user->isTeacher() && $exam->created_by === $user->id) {
+        if ($user->isTeacher() && (int) $exam->created_by === (int) $user->id) {
             return true;
         }
 
@@ -150,6 +150,6 @@ class ExamPolicy
     public function monitor(User $user, Exam $exam): bool
     {
         // Only teacher can monitor their own exams
-        return $user->isTeacher() && $exam->created_by === $user->id;
+        return $user->isTeacher() && (int) $exam->created_by === (int) $user->id;
     }
 }
