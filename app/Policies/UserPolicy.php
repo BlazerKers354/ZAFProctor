@@ -28,7 +28,7 @@ class UserPolicy
         }
 
         // Users can view themselves
-        if ($user->id === $model->id) {
+        if ((int) $user->id === (int) $model->id) {
             return true;
         }
 
@@ -62,7 +62,7 @@ class UserPolicy
         }
 
         // Users can update themselves
-        return $user->id === $model->id;
+        return (int) $user->id === (int) $model->id;
     }
 
     /**
@@ -76,7 +76,7 @@ class UserPolicy
         }
 
         // Cannot delete self
-        return $user->id !== $model->id;
+        return (int) $user->id !== (int) $model->id;
     }
 
     /**
@@ -84,6 +84,6 @@ class UserPolicy
      */
     public function changeRole(User $user, User $model): bool
     {
-        return $user->isAdmin() && $user->id !== $model->id;
+        return $user->isAdmin() && (int) $user->id !== (int) $model->id;
     }
 }

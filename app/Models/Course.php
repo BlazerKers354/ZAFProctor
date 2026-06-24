@@ -21,6 +21,7 @@ class Course extends Model
     ];
 
     protected $casts = [
+        'teacher_id' => 'integer',
         'is_active' => 'boolean',
     ];
 

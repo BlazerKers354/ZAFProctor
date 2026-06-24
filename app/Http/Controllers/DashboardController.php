@@ -78,22 +78,28 @@ class DashboardController extends Controller
             ->withCount('students', 'exams')
             ->get();
 
-        $myExams = Exam::where('created_by', $user->id)
+        $teacherCourseIds = $courses->pluck('id');
+
+        // Show exams the teacher created OR from courses they teach
+        $examScope = function ($query) use ($user, $teacherCourseIds) {
+            $query->where('created_by', $user->id)
+                  ->orWhereIn('course_id', $teacherCourseIds);
+        };
+
+        $myExams = Exam::where($examScope)
             ->with('course')
             ->withCount('attempts')
             ->latest()
             ->take(10)
             ->get();
 
-        $activeExams = Exam::where('created_by', $user->id)
+        $activeExams = Exam::where($examScope)
             ->active()
             ->with('course')
             ->withCount('attempts')
             ->get();
 
-        $recentAttempts = ExamAttempt::whereHas('exam', function ($query) use ($user) {
-                $query->where('created_by', $user->id);
-            })
+        $recentAttempts = ExamAttempt::whereHas('exam', $examScope)
             ->with(['user', 'exam'])
             ->latest()
             ->take(10)
@@ -102,11 +108,10 @@ class DashboardController extends Controller
         $stats = [
             'total_courses' => $courses->count(),
             'total_students' => $courses->sum('students_count'),
-            'total_exams' => Exam::where('created_by', $user->id)->count(),
+            'total_exams' => Exam::where($examScope)->count(),
             'active_exams' => $activeExams->count(),
-            'pending_grading' => ExamAttempt::whereHas('exam', function ($q) use ($user) {
-                $q->where('created_by', $user->id);
-            })->where('status', 'submitted')->count(),
+            'pending_grading' => ExamAttempt::whereHas('exam', $examScope)
+                ->where('status', 'submitted')->count(),
         ];
 
         return view('teacher.dashboard', compact('courses', 'myExams', 'activeExams', 'recentAttempts', 'stats'));

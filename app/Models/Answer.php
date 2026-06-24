@@ -23,6 +23,9 @@ class Answer extends Model
     ];
 
     protected $casts = [
+        'attempt_id' => 'integer',
+        'question_id' => 'integer',
+        'selected_option_id' => 'integer',
         'is_correct' => 'boolean',
         'points_earned' => 'decimal:2',
         'answered_at' => 'datetime',
@@ -59,7 +62,7 @@ class Answer extends Model
     {
         if ($this->question->isMultipleChoice()) {
             $correctOption = $this->question->getCorrectOption();
-            $this->is_correct = $this->selected_option_id === $correctOption?->id;
+            $this->is_correct = $correctOption && (int) $this->selected_option_id === (int) $correctOption->id;
             $this->points_earned = $this->is_correct ? $this->question->points : 0;
             $this->save();
         }

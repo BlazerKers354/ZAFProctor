@@ -20,6 +20,7 @@ class QuestionOption extends Model
     ];
 
     protected $casts = [
+        'question_id' => 'integer',
         'is_correct' => 'boolean',
     ];
 

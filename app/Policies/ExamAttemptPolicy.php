@@ -17,7 +17,7 @@ class ExamAttemptPolicy
     public function interact(User $user, ExamAttempt $attempt): bool
     {
         return $user->isStudent()
-            && $attempt->user_id === $user->id
+            && (int) $attempt->user_id === (int) $user->id
             && $attempt->isInProgress();
     }
 
@@ -32,12 +32,12 @@ class ExamAttemptPolicy
         }
 
         // Owner can view their attempt
-        if ($attempt->user_id === $user->id) {
+        if ((int) $attempt->user_id === (int) $user->id) {
             return true;
         }
 
         // Teacher can view attempts for their exams
-        return $user->isTeacher() && $attempt->exam->created_by === $user->id;
+        return $user->isTeacher() && (int) $attempt->exam->created_by === (int) $user->id;
     }
 
     /**
@@ -51,7 +51,7 @@ class ExamAttemptPolicy
         }
 
         // Teacher can grade attempts for their exams
-        return $user->isTeacher() && $attempt->exam->created_by === $user->id;
+        return $user->isTeacher() && (int) $attempt->exam->created_by === (int) $user->id;
     }
 
     /**

@@ -22,6 +22,12 @@ class Question extends Model
         'explanation',
     ];
 
+    protected $casts = [
+        'exam_id' => 'integer',
+        'points' => 'integer',
+        'order' => 'integer',
+    ];
+
     /**
      * Normalize image path before saving.
      */

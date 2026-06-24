@@ -33,6 +33,8 @@ class ExamAttempt extends Model
     ];
 
     protected $casts = [
+        'exam_id' => 'integer',
+        'user_id' => 'integer',
         'started_at' => 'datetime',
         'submitted_at' => 'datetime',
         'is_auto_submitted' => 'boolean',

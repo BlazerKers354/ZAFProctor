@@ -36,7 +36,7 @@ class EnsureExamInProgress
         }
 
         // Check ownership
-        if ($attempt->user_id !== $request->user()->id) {
+        if ((int) $attempt->user_id !== (int) $request->user()->id) {
             abort(403, 'Unauthorized access to exam attempt.');
         }
 

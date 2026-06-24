@@ -219,6 +219,23 @@ class ExamService
 
             return $answer;
         } catch (\Exception $e) {
+            // Re-throw domain validation & status errors so the controller
+            // can return the specific message to the student.
+            $domainPrefixes = [
+                'Ujian sudah selesai',
+                'Soal tidak valid',
+                'Pilihan jawaban wajib',
+                'Pilihan jawaban tidak valid',
+                'Payload jawaban tidak valid',
+                'Jawaban esai melebihi',
+                'Ujian telah dikumpulkan',
+            ];
+            foreach ($domainPrefixes as $prefix) {
+                if (str_starts_with($e->getMessage(), $prefix)) {
+                    throw $e;
+                }
+            }
+
             Log::error('Failed to save answer: ' . $e->getMessage(), [
                 'attempt_id' => $attempt->id,
                 'question_id' => $questionId,
@@ -296,7 +313,7 @@ class ExamService
             }
 
             $correctOptionId = $correctOptionMap[$answer->question_id];
-            $isCorrect = $answer->selected_option_id === $correctOptionId;
+            $isCorrect = $correctOptionId !== null && (int) $answer->selected_option_id === (int) $correctOptionId;
             $answer->is_correct = $isCorrect;
             $answer->points_earned = $isCorrect ? ($pointsMap[$answer->question_id] ?? 0) : 0;
             $answer->save();

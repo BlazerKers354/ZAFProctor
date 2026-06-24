@@ -29,7 +29,7 @@ class CoursePolicy
         }
 
         // Teacher can view their own courses
-        if ($user->isTeacher() && $course->teacher_id === $user->id) {
+        if ($user->isTeacher() && (int) $course->teacher_id === (int) $user->id) {
             return true;
         }
 
@@ -60,7 +60,7 @@ class CoursePolicy
         }
 
         // Teacher can update their own courses
-        return $user->isTeacher() && $course->teacher_id === $user->id;
+        return $user->isTeacher() && (int) $course->teacher_id === (int) $user->id;
     }
 
     /**
@@ -82,6 +82,6 @@ class CoursePolicy
         }
 
         // Teacher can manage their own courses
-        return $user->isTeacher() && $course->teacher_id === $user->id;
+        return $user->isTeacher() && (int) $course->teacher_id === (int) $user->id;
     }
 }

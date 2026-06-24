@@ -34,6 +34,7 @@ class ExamSetting extends Model
     ];
 
     protected $casts = [
+        'exam_id' => 'integer',
         'webcam_enabled' => 'boolean',
         'browser_lock_enabled' => 'boolean',
         'tab_switch_detection' => 'boolean',
